@@ -129,32 +129,39 @@ final class AnnouncementsServiceProvider extends ModuleServiceProvider
     {
         return [
             new PermissionDTO(
-                name: 'view',
+                name: 'announcements.view_any',
+                label: __('announcements::announcements.permissions.view_any'),
+                group: __('announcements::announcements.navigation'),
+                module: 'announcements',
+                roles: ['editor'],
+            ),
+            new PermissionDTO(
+                name: 'announcements.view',
                 label: __('announcements::announcements.permissions.view'),
                 group: __('announcements::announcements.navigation'),
                 module: 'announcements',
-                roles: ['admin', 'editor', 'member'],
+                roles: ['editor'],
             ),
             new PermissionDTO(
-                name: 'create',
+                name: 'announcements.create',
                 label: __('announcements::announcements.permissions.create'),
                 group: __('announcements::announcements.navigation'),
                 module: 'announcements',
-                roles: ['admin', 'editor'],
+                roles: ['editor'],
             ),
             new PermissionDTO(
-                name: 'update',
+                name: 'announcements.update',
                 label: __('announcements::announcements.permissions.update'),
                 group: __('announcements::announcements.navigation'),
                 module: 'announcements',
-                roles: ['admin', 'editor'],
+                roles: ['editor'],
             ),
             new PermissionDTO(
-                name: 'delete',
+                name: 'announcements.delete',
                 label: __('announcements::announcements.permissions.delete'),
                 group: __('announcements::announcements.navigation'),
                 module: 'announcements',
-                roles: ['admin'],
+                roles: [],
             ),
         ];
     }
@@ -171,7 +178,7 @@ final class AnnouncementsServiceProvider extends ModuleServiceProvider
                 icon: 'heroicon-o-megaphone',
                 group: __('announcements::announcements.navigation_group'),
                 sort: 1,
-                permissions: ['announcements.view'],
+                permissions: ['announcements:announcements.view_any'],
                 module: 'announcements',
             ),
         ];

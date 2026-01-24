@@ -79,7 +79,8 @@ return [
 
     // Permissions
     'permissions' => [
-        'view' => 'Ver anuncios',
+        'view_any' => 'Ver listado de anuncios',
+        'view' => 'Ver detalle de anuncio',
         'create' => 'Crear anuncios',
         'update' => 'Editar anuncios',
         'delete' => 'Eliminar anuncios',
