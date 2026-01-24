@@ -22,7 +22,7 @@ final class AnnouncementControllerTest extends TestCase
         $this->app->register(AnnouncementsServiceProvider::class);
 
         // Create the announcements table if it doesn't exist
-        if (!Schema::hasTable('announcements_announcements')) {
+        if (! Schema::hasTable('announcements_announcements')) {
             Schema::create('announcements_announcements', function ($table) {
                 $table->uuid('id')->primary();
                 $table->string('title');

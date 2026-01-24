@@ -101,7 +101,7 @@ final class AnnouncementVisibilityTest extends TestCase
 
     private function createUser(bool $isMember = false): object
     {
-        $user = new stdClass();
+        $user = new stdClass;
         $user->id = 1;
         $user->is_member = $isMember;
 

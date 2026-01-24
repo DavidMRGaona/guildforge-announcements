@@ -59,7 +59,7 @@ final class AnnouncementsServiceProvider extends ModuleServiceProvider
         // Share announcements with Inertia if available
         if (class_exists(Inertia::class)) {
             Inertia::share('announcements', function () {
-                if (!$this->app->bound(AnnouncementServiceInterface::class)) {
+                if (! $this->app->bound(AnnouncementServiceInterface::class)) {
                     return [];
                 }
 

@@ -23,8 +23,7 @@ final readonly class AnnouncementResponseDTO
         public bool $isDismissible,
         public ?string $createdAt,
         public ?string $updatedAt,
-    ) {
-    }
+    ) {}
 
     public static function fromEntity(Announcement $announcement): self
     {

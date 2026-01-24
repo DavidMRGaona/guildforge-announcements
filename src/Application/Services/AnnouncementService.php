@@ -8,8 +8,6 @@ use Modules\Announcements\Application\DTOs\AnnouncementResponseDTO;
 use Modules\Announcements\Application\DTOs\CreateAnnouncementDTO;
 use Modules\Announcements\Application\DTOs\UpdateAnnouncementDTO;
 use Modules\Announcements\Domain\Entities\Announcement;
-use Modules\Announcements\Domain\Enums\AnnouncementVisibility;
-use Modules\Announcements\Domain\Exceptions\AnnouncementNotFoundException;
 use Modules\Announcements\Domain\Repositories\AnnouncementRepositoryInterface;
 use Modules\Announcements\Domain\ValueObjects\AnnouncementId;
 use Modules\Announcements\Domain\ValueObjects\AnnouncementPriority;
@@ -18,8 +16,7 @@ final readonly class AnnouncementService implements AnnouncementServiceInterface
 {
     public function __construct(
         private AnnouncementRepositoryInterface $repository,
-    ) {
-    }
+    ) {}
 
     public function create(CreateAnnouncementDTO $dto): AnnouncementResponseDTO
     {

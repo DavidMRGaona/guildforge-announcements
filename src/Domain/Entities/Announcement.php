@@ -27,8 +27,7 @@ final class Announcement
         private bool $isDismissible = true,
         private readonly ?DateTimeImmutable $createdAt = null,
         private readonly ?DateTimeImmutable $updatedAt = null,
-    ) {
-    }
+    ) {}
 
     public function id(): AnnouncementId
     {
@@ -112,11 +111,11 @@ final class Announcement
 
     public function isCurrentlyValid(?DateTimeImmutable $now = null): bool
     {
-        if (!$this->isActive) {
+        if (! $this->isActive) {
             return false;
         }
 
-        $now = $now ?? new DateTimeImmutable();
+        $now = $now ?? new DateTimeImmutable;
 
         if ($this->startsAt !== null && $now < $this->startsAt) {
             return false;

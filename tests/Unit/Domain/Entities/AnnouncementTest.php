@@ -123,7 +123,7 @@ final class AnnouncementTest extends TestCase
 
     public function test_it_is_valid_when_within_date_range(): void
     {
-        $now = new DateTimeImmutable();
+        $now = new DateTimeImmutable;
         $announcement = $this->createAnnouncement(
             isActive: true,
             startsAt: $now->modify('-1 day'),
@@ -135,7 +135,7 @@ final class AnnouncementTest extends TestCase
 
     public function test_it_is_not_valid_when_before_start_date(): void
     {
-        $now = new DateTimeImmutable();
+        $now = new DateTimeImmutable;
         $announcement = $this->createAnnouncement(
             isActive: true,
             startsAt: $now->modify('+1 day'),
@@ -147,7 +147,7 @@ final class AnnouncementTest extends TestCase
 
     public function test_it_is_not_valid_when_after_end_date(): void
     {
-        $now = new DateTimeImmutable();
+        $now = new DateTimeImmutable;
         $announcement = $this->createAnnouncement(
             isActive: true,
             startsAt: $now->modify('-7 days'),
@@ -159,7 +159,7 @@ final class AnnouncementTest extends TestCase
 
     public function test_it_is_valid_when_only_start_date_set_and_passed(): void
     {
-        $now = new DateTimeImmutable();
+        $now = new DateTimeImmutable;
         $announcement = $this->createAnnouncement(
             isActive: true,
             startsAt: $now->modify('-1 day'),
@@ -171,7 +171,7 @@ final class AnnouncementTest extends TestCase
 
     public function test_it_is_valid_when_only_end_date_set_and_not_passed(): void
     {
-        $now = new DateTimeImmutable();
+        $now = new DateTimeImmutable;
         $announcement = $this->createAnnouncement(
             isActive: true,
             startsAt: null,
@@ -283,7 +283,7 @@ final class AnnouncementTest extends TestCase
 
     private function createUser(bool $isMember = false): object
     {
-        $user = new stdClass();
+        $user = new stdClass;
         $user->id = 1;
         $user->is_member = $isMember;
 

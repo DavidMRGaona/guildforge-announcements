@@ -1,7 +1,7 @@
 <?php
 
-return array (
-  'show_banner' => true,
-  'banner_position' => 'top',
-  'auto_rotate' => false,
-);
+return [
+    'show_banner' => true,
+    'banner_position' => 'top',
+    'auto_rotate' => false,
+];

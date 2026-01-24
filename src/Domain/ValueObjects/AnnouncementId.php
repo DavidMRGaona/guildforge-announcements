@@ -6,6 +6,4 @@ namespace Modules\Announcements\Domain\ValueObjects;
 
 use App\Domain\ValueObjects\EntityId;
 
-final readonly class AnnouncementId extends EntityId
-{
-}
+final readonly class AnnouncementId extends EntityId {}

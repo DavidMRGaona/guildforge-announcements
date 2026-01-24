@@ -9,7 +9,9 @@ use InvalidArgumentException;
 final readonly class AnnouncementPriority
 {
     private const int MIN_PRIORITY = 1;
+
     private const int MAX_PRIORITY = 10;
+
     private const int DEFAULT_PRIORITY = 5;
 
     public function __construct(

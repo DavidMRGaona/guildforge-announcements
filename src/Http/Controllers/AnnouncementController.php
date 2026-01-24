@@ -13,8 +13,7 @@ final class AnnouncementController extends Controller
 {
     public function __construct(
         private readonly AnnouncementServiceInterface $announcementService,
-    ) {
-    }
+    ) {}
 
     /**
      * Get active announcements for the current user.
