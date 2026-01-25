@@ -5,38 +5,12 @@ declare(strict_types=1);
 namespace Modules\Announcements\Tests\Feature\Http;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Schema;
-use Modules\Announcements\AnnouncementsServiceProvider;
 use Modules\Announcements\Infrastructure\Persistence\Eloquent\Models\AnnouncementModel;
 use Tests\TestCase;
 
 final class AnnouncementControllerTest extends TestCase
 {
     use RefreshDatabase;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        // Register the module's service provider for tests
-        $this->app->register(AnnouncementsServiceProvider::class);
-
-        // Create the announcements table if it doesn't exist
-        if (! Schema::hasTable('announcements_announcements')) {
-            Schema::create('announcements_announcements', function ($table) {
-                $table->uuid('id')->primary();
-                $table->string('title');
-                $table->text('content');
-                $table->string('visibility')->default('public');
-                $table->unsignedTinyInteger('priority')->default(5);
-                $table->timestamp('starts_at')->nullable();
-                $table->timestamp('ends_at')->nullable();
-                $table->boolean('is_active')->default(true);
-                $table->timestamps();
-                $table->index(['is_active', 'starts_at', 'ends_at']);
-            });
-        }
-    }
 
     public function test_it_returns_empty_list_when_no_announcements(): void
     {
