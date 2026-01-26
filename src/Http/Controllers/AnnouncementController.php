@@ -6,8 +6,8 @@ namespace Modules\Announcements\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Modules\Announcements\Application\Services\AnnouncementServiceInterface;
+use Modules\Announcements\Http\Requests\GetAnnouncementsRequest;
 
 final class AnnouncementController extends Controller
 {
@@ -18,7 +18,7 @@ final class AnnouncementController extends Controller
     /**
      * Get active announcements for the current user.
      */
-    public function index(Request $request): JsonResponse
+    public function index(GetAnnouncementsRequest $request): JsonResponse
     {
         $user = $request->user();
         $announcements = $this->announcementService->getActiveForUser($user);
