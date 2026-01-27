@@ -12,7 +12,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
-use Filament\Resources\Resource;
+use App\Filament\Resources\BaseResource;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\DeleteBulkAction;
@@ -28,7 +28,7 @@ use Modules\Announcements\Domain\Enums\AnnouncementVisibility;
 use Modules\Announcements\Filament\Resources\AnnouncementResource\Pages;
 use Modules\Announcements\Infrastructure\Persistence\Eloquent\Models\AnnouncementModel;
 
-class AnnouncementResource extends Resource
+class AnnouncementResource extends BaseResource
 {
     protected static ?string $model = AnnouncementModel::class;
 
