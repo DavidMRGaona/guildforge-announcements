@@ -3,18 +3,25 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
+use Modules\Announcements\Http\Controllers\AnnouncementController;
 
 /*
 |--------------------------------------------------------------------------
 | Announcements Web Routes
 |--------------------------------------------------------------------------
 |
-| Web routes for the Announcements module.
+| Routes for the Announcements module using web middleware for
+| session-based functionality with Inertia.js frontend.
 |
 */
 
-Route::prefix('announcements')
+Route::prefix('anuncios')
     ->name('announcements.')
     ->group(function (): void {
-        // Define your web routes here
+        Route::get('/', [AnnouncementController::class, 'index'])
+            ->name('index');
+
+        Route::get('/{id}', [AnnouncementController::class, 'show'])
+            ->name('show')
+            ->whereUuid('id');
     });
