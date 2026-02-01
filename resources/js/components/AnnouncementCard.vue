@@ -15,15 +15,15 @@ const emit = defineEmits<{
 }>();
 
 function getPriorityColor(priority: number): string {
-    if (priority >= 8) return 'bg-red-100 dark:bg-red-900/30 border-red-300 dark:border-red-700';
-    if (priority >= 5) return 'bg-amber-100 dark:bg-amber-900/30 border-amber-300 dark:border-amber-700';
-    return 'bg-blue-100 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700';
+    if (priority >= 8) return 'bg-error-light border-error';
+    if (priority >= 5) return 'bg-warning-light border-warning';
+    return 'bg-info-light border-info';
 }
 
 function getPriorityTextColor(priority: number): string {
-    if (priority >= 8) return 'text-red-800 dark:text-red-200';
-    if (priority >= 5) return 'text-amber-800 dark:text-amber-200';
-    return 'text-blue-800 dark:text-blue-200';
+    if (priority >= 8) return 'text-error';
+    if (priority >= 5) return 'text-warning';
+    return 'text-info';
 }
 
 function handleClose(): void {

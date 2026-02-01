@@ -151,9 +151,10 @@ function resetRotation(): void {
 }
 
 function getPriorityClasses(priority: number): string {
-    if (priority >= 8) return 'bg-red-600 dark:bg-red-700 text-white';
-    if (priority >= 5) return 'bg-amber-500 dark:bg-amber-600 text-white';
-    return 'bg-blue-600 dark:bg-blue-700 text-white';
+    // Banners use solid colors for high visibility
+    if (priority >= 8) return 'bg-error text-white';
+    if (priority >= 5) return 'bg-warning text-white';
+    return 'bg-info text-white';
 }
 
 function getAnnouncementStyle(announcement: Announcement | null): Record<string, string> {
