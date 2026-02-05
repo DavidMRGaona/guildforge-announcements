@@ -1,27 +1,29 @@
 {
-    "name": "announcements",
-    "displayName": "Anuncios",
-    "version": "1.0.0",
-    "namespace": "Modules\\Announcements",
-    "provider": "AnnouncementsServiceProvider",
-    "description": "Sistema de anuncios para la asociación",
-    "author": "GuildForge",
-    "requires": {
-        "php": ">=8.2",
-        "laravel": ">=12.0"
-    },
-    "dependencies": [],
-    "provides": {
-        "permissions": [
-            "announcements.view_any",
-            "announcements.view",
-            "announcements.create",
-            "announcements.update",
-            "announcements.delete"
-        ],
-        "routes": ["api"],
-        "filament": true,
-        "frontend": true,
-        "inertia_share": true
-    }
+  "name": "announcements",
+  "displayName": "Anuncios",
+  "version": "1.0.0-beta",
+  "namespace": "Modules\\Announcements",
+  "provider": "AnnouncementsServiceProvider",
+  "description": "Sistema de anuncios para la asociación",
+  "author": "GuildForge",
+  "requires": {
+    "php": ">=8.2",
+    "laravel": ">=12.0"
+  },
+  "dependencies": [],
+  "provides": {
+    "permissions": [
+      "announcements.view_any",
+      "announcements.view",
+      "announcements.create",
+      "announcements.update",
+      "announcements.delete"
+    ],
+    "routes": [
+      "api"
+    ],
+    "filament": true,
+    "frontend": true,
+    "inertia_share": true
+  }
 }
