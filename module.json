@@ -1,7 +1,7 @@
 {
   "name": "announcements",
   "displayName": "Anuncios",
-  "version": "1.0.2-beta",
+  "version": "1.0.3-beta",
   "namespace": "Modules\\Announcements",
   "provider": "AnnouncementsServiceProvider",
   "description": "Sistema de anuncios para la asociación",
