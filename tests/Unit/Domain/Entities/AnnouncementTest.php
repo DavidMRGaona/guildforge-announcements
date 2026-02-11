@@ -6,6 +6,7 @@ namespace Modules\Announcements\Tests\Unit\Domain\Entities;
 
 use DateTimeImmutable;
 use Modules\Announcements\Domain\Entities\Announcement;
+use Modules\Announcements\Domain\Enums\AnnouncementPosition;
 use Modules\Announcements\Domain\Enums\AnnouncementVisibility;
 use Modules\Announcements\Domain\ValueObjects\AnnouncementId;
 use Modules\Announcements\Domain\ValueObjects\AnnouncementPriority;
@@ -27,6 +28,7 @@ final class AnnouncementTest extends TestCase
             title: $title,
             content: $content,
             visibility: $visibility,
+            position: AnnouncementPosition::BeforeHeader,
             priority: $priority,
         );
 
@@ -34,6 +36,7 @@ final class AnnouncementTest extends TestCase
         $this->assertEquals($title, $announcement->title());
         $this->assertEquals($content, $announcement->content());
         $this->assertEquals($visibility, $announcement->visibility());
+        $this->assertEquals(AnnouncementPosition::BeforeHeader, $announcement->position());
         $this->assertEquals($priority, $announcement->priority());
         $this->assertTrue($announcement->isActive());
         $this->assertNull($announcement->startsAt());
@@ -53,11 +56,14 @@ final class AnnouncementTest extends TestCase
         $createdAt = new DateTimeImmutable('2024-12-01 10:00:00');
         $updatedAt = new DateTimeImmutable('2024-12-15 15:30:00');
 
+        $position = AnnouncementPosition::AfterHeader;
+
         $announcement = new Announcement(
             id: $id,
             title: $title,
             content: $content,
             visibility: $visibility,
+            position: $position,
             priority: $priority,
             startsAt: $startsAt,
             endsAt: $endsAt,
@@ -70,6 +76,7 @@ final class AnnouncementTest extends TestCase
         $this->assertEquals($title, $announcement->title());
         $this->assertEquals($content, $announcement->content());
         $this->assertEquals($visibility, $announcement->visibility());
+        $this->assertEquals($position, $announcement->position());
         $this->assertEquals($priority, $announcement->priority());
         $this->assertEquals($startsAt, $announcement->startsAt());
         $this->assertEquals($endsAt, $announcement->endsAt());
@@ -246,10 +253,13 @@ final class AnnouncementTest extends TestCase
         $newStartsAt = new DateTimeImmutable('+1 day');
         $newEndsAt = new DateTimeImmutable('+7 days');
 
+        $newPosition = AnnouncementPosition::AfterContent;
+
         $announcement->update(
             title: $newTitle,
             content: $newContent,
             visibility: $newVisibility,
+            position: $newPosition,
             priority: $newPriority,
             startsAt: $newStartsAt,
             endsAt: $newEndsAt,
@@ -258,6 +268,7 @@ final class AnnouncementTest extends TestCase
         $this->assertEquals($newTitle, $announcement->title());
         $this->assertEquals($newContent, $announcement->content());
         $this->assertEquals($newVisibility, $announcement->visibility());
+        $this->assertEquals($newPosition, $announcement->position());
         $this->assertEquals($newPriority, $announcement->priority());
         $this->assertEquals($newStartsAt, $announcement->startsAt());
         $this->assertEquals($newEndsAt, $announcement->endsAt());
@@ -265,6 +276,7 @@ final class AnnouncementTest extends TestCase
 
     private function createAnnouncement(
         ?AnnouncementVisibility $visibility = null,
+        ?AnnouncementPosition $position = null,
         bool $isActive = true,
         ?DateTimeImmutable $startsAt = null,
         ?DateTimeImmutable $endsAt = null,
@@ -274,6 +286,7 @@ final class AnnouncementTest extends TestCase
             title: 'Test Announcement',
             content: '<p>Test content.</p>',
             visibility: $visibility ?? AnnouncementVisibility::Public,
+            position: $position ?? AnnouncementPosition::BeforeHeader,
             priority: AnnouncementPriority::default(),
             startsAt: $startsAt,
             endsAt: $endsAt,

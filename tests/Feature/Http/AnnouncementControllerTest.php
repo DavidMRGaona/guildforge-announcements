@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Modules\Announcements\Tests\Feature\Http;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Modules\Announcements\Infrastructure\Persistence\Eloquent\Models\AnnouncementModel;
-use Tests\TestCase;
+use Tests\Support\Modules\ModuleTestCase;
 
-final class AnnouncementControllerTest extends TestCase
+final class AnnouncementControllerTest extends ModuleTestCase
 {
-    use RefreshDatabase;
+    protected ?string $moduleName = 'announcements';
+    protected bool $autoEnableModule = true;
 
     public function test_it_returns_empty_list_when_no_announcements(): void
     {
-        $response = $this->getJson('/api/announcements');
+        $response = $this->getJson('/anuncios');
 
         $response->assertOk()
             ->assertJson(['data' => []]);
@@ -30,7 +30,7 @@ final class AnnouncementControllerTest extends TestCase
             'is_active' => true,
         ]);
 
-        $response = $this->getJson('/api/announcements');
+        $response = $this->getJson('/anuncios');
 
         $response->assertOk()
             ->assertJsonCount(1, 'data')
@@ -47,7 +47,7 @@ final class AnnouncementControllerTest extends TestCase
             'is_active' => false,
         ]);
 
-        $response = $this->getJson('/api/announcements');
+        $response = $this->getJson('/anuncios');
 
         $response->assertOk()
             ->assertJsonCount(0, 'data');
@@ -88,7 +88,7 @@ final class AnnouncementControllerTest extends TestCase
             'ends_at' => now()->addWeek(),
         ]);
 
-        $response = $this->getJson('/api/announcements');
+        $response = $this->getJson('/anuncios');
 
         $response->assertOk()
             ->assertJsonCount(1, 'data')
@@ -121,7 +121,7 @@ final class AnnouncementControllerTest extends TestCase
             'is_active' => true,
         ]);
 
-        $response = $this->getJson('/api/announcements');
+        $response = $this->getJson('/anuncios');
 
         $response->assertOk()
             ->assertJsonCount(3, 'data')
