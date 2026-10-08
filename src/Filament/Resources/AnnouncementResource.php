@@ -4,19 +4,22 @@ declare(strict_types=1);
 
 namespace Modules\Announcements\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Modules\Announcements\Filament\Resources\AnnouncementResource\Pages\ListAnnouncements;
+use Modules\Announcements\Filament\Resources\AnnouncementResource\Pages\CreateAnnouncement;
+use Modules\Announcements\Filament\Resources\AnnouncementResource\Pages\EditAnnouncement;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
 use App\Filament\Resources\BaseResource;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -32,7 +35,7 @@ class AnnouncementResource extends BaseResource
 {
     protected static ?string $model = AnnouncementModel::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-megaphone';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-megaphone';
 
     protected static ?int $navigationSort = 1;
 
@@ -56,10 +59,10 @@ class AnnouncementResource extends BaseResource
         return __('announcements::announcements.model.plural');
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Section::make(__('announcements::announcements.sections.content'))
                     ->schema([
                         TextInput::make('title')
@@ -247,11 +250,11 @@ class AnnouncementResource extends BaseResource
                     ->trueLabel(__('announcements::announcements.filters.active'))
                     ->falseLabel(__('announcements::announcements.filters.inactive')),
             ])
-            ->actions([
+            ->recordActions([
                 EditAction::make(),
                 DeleteAction::make(),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
@@ -262,9 +265,9 @@ class AnnouncementResource extends BaseResource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListAnnouncements::route('/'),
-            'create' => Pages\CreateAnnouncement::route('/create'),
-            'edit' => Pages\EditAnnouncement::route('/{record}/edit'),
+            'index' => ListAnnouncements::route('/'),
+            'create' => CreateAnnouncement::route('/create'),
+            'edit' => EditAnnouncement::route('/{record}/edit'),
         ];
     }
 }
