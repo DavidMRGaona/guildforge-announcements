@@ -89,16 +89,6 @@ final class AnnouncementVisibilityTest extends TestCase
         $this->assertTrue($visibility->isVisibleTo($user));
     }
 
-    /**
-     * @group requires-laravel
-     */
-    public function test_it_returns_label(): void
-    {
-        // Skip this test in unit tests - it requires Laravel's __() helper
-        // which is only available in Feature tests
-        $this->markTestSkipped('This test requires Laravel\'s __() helper, run as Feature test');
-    }
-
     private function createUser(bool $isMember = false): object
     {
         $user = new stdClass;
