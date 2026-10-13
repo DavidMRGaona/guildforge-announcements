@@ -126,7 +126,7 @@ Los administradores tienen todos los permisos. Se asignan a otros roles desde el
 announcements/
 ├── config/
 │   ├── module.php          # Configuración del módulo
-│   └── settings.php        # Ajustes guardados desde el panel
+│   └── settings.php        # Valores por defecto de los ajustes
 ├── database/
 │   └── migrations/
 ├── lang/
