@@ -28,6 +28,7 @@ return [
         'title' => 'Título',
         'content' => 'Contenido',
         'visibility' => 'Visibilidad',
+        'visibility_help' => '«Solo socios» se muestra a los usuarios con el rol member.',
         'position' => 'Posición',
         'priority' => 'Prioridad',
         'priority_help' => '1 (baja) a 10 (alta). Afecta el orden de visualización y el color predeterminado.',
@@ -48,7 +49,7 @@ return [
     'visibility' => [
         'public' => 'Público',
         'authenticated' => 'Usuarios autenticados',
-        'members' => 'Solo miembros',
+        'members' => 'Solo socios',
     ],
 
     // Position options

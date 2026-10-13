@@ -30,6 +30,11 @@ interface AnnouncementServiceInterface
      */
     public function getActiveForUser(?object $user): array;
 
+    /**
+     * Get an announcement only if it is currently valid and visible to the given user.
+     */
+    public function findVisibleForUser(string $id, ?object $user): ?AnnouncementResponseDTO;
+
     public function activate(string $id): void;
 
     public function deactivate(string $id): void;

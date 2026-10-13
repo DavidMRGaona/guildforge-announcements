@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace Modules\Announcements\Application\Services;
 
+use App\Application\Authorization\Services\AuthorizationServiceInterface;
+use App\Domain\Enums\UserRole;
 use Modules\Announcements\Application\DTOs\AnnouncementResponseDTO;
 use Modules\Announcements\Application\DTOs\CreateAnnouncementDTO;
 use Modules\Announcements\Application\DTOs\UpdateAnnouncementDTO;
 use Modules\Announcements\Domain\Entities\Announcement;
+use Modules\Announcements\Domain\Enums\AnnouncementVisibility;
 use Modules\Announcements\Domain\Repositories\AnnouncementRepositoryInterface;
 use Modules\Announcements\Domain\ValueObjects\AnnouncementId;
 use Modules\Announcements\Domain\ValueObjects\AnnouncementPriority;
@@ -16,6 +19,7 @@ final readonly class AnnouncementService implements AnnouncementServiceInterface
 {
     public function __construct(
         private AnnouncementRepositoryInterface $repository,
+        private AuthorizationServiceInterface $authorization,
     ) {}
 
     public function create(CreateAnnouncementDTO $dto): AnnouncementResponseDTO
@@ -111,10 +115,12 @@ final readonly class AnnouncementService implements AnnouncementServiceInterface
     {
         $activeAnnouncements = $this->repository->findActive();
 
+        $isMember = $this->isMemberIfNeeded($user, $activeAnnouncements);
+
         // Filter by visibility and current validity
         $visibleAnnouncements = array_filter(
             $activeAnnouncements,
-            fn (Announcement $announcement) => $announcement->isCurrentlyValid() && $announcement->isVisibleTo($user)
+            fn (Announcement $announcement) => $this->isShownTo($announcement, $user, $isMember)
         );
 
         // Re-index after filter and sort by priority (highest first)
@@ -130,6 +136,23 @@ final readonly class AnnouncementService implements AnnouncementServiceInterface
         );
     }
 
+    public function findVisibleForUser(string $id, ?object $user): ?AnnouncementResponseDTO
+    {
+        $announcement = $this->repository->find(AnnouncementId::fromString($id));
+
+        if ($announcement === null) {
+            return null;
+        }
+
+        $isMember = $this->isMemberIfNeeded($user, [$announcement]);
+
+        if (! $this->isShownTo($announcement, $user, $isMember)) {
+            return null;
+        }
+
+        return AnnouncementResponseDTO::fromEntity($announcement);
+    }
+
     public function activate(string $id): void
     {
         $announcement = $this->repository->findOrFail(AnnouncementId::fromString($id));
@@ -142,5 +165,31 @@ final readonly class AnnouncementService implements AnnouncementServiceInterface
         $announcement = $this->repository->findOrFail(AnnouncementId::fromString($id));
         $announcement->deactivate();
         $this->repository->save($announcement);
+    }
+
+    private function isShownTo(Announcement $announcement, ?object $user, bool $isMember): bool
+    {
+        return $announcement->isCurrentlyValid() && $announcement->isVisibleTo($user, $isMember);
+    }
+
+    /**
+     * A member is a user holding the core "member" role. The role is only looked up
+     * when a members-only announcement is among the candidates.
+     *
+     * @param  array<Announcement>  $announcements
+     */
+    private function isMemberIfNeeded(?object $user, array $announcements): bool
+    {
+        if ($user === null) {
+            return false;
+        }
+
+        foreach ($announcements as $announcement) {
+            if ($announcement->visibility() === AnnouncementVisibility::Members) {
+                return $this->authorization->hasRole($user, UserRole::Member->value);
+            }
+        }
+
+        return false;
     }
 }

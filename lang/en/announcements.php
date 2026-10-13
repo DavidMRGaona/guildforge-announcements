@@ -18,6 +18,7 @@ return [
         'title' => 'Title',
         'content' => 'Content',
         'visibility' => 'Visibility',
+        'visibility_help' => '"Members only" is shown to users holding the member role.',
         'priority' => 'Priority',
         'starts_at' => 'Start date',
         'ends_at' => 'End date',

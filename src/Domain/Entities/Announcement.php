@@ -128,9 +128,9 @@ final class Announcement
         return true;
     }
 
-    public function isVisibleTo(?object $user): bool
+    public function isVisibleTo(?object $user, bool $isMember = false): bool
     {
-        return $this->visibility->isVisibleTo($user);
+        return $this->visibility->isVisibleTo($user, $isMember);
     }
 
     public function update(
