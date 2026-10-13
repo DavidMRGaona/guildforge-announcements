@@ -99,7 +99,7 @@ En **Módulos**, acción **Configuración** del módulo:
 | Rotación automática | Pasa solo de un anuncio a otro cuando hay varios en la misma posición |
 | Intervalo de rotación | Milisegundos entre cambios (1000-30000); solo con la rotación automática activada |
 
-Por defecto el banner está activado y la rotación automática desactivada. Los ajustes se guardan dentro de la carpeta del módulo: una actualización desde ZIP puede devolverlos a los valores del paquete, así que conviene revisarlos después de actualizar.
+Por defecto el banner está activado, con rotación automática cada 5000 ms.
 
 ### Rutas
 
