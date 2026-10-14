@@ -68,7 +68,7 @@ Cada anuncio tiene:
 | `authenticated` | Usuarios con sesión iniciada |
 | `members` | Socios: usuarios con el rol de socio del core |
 
-«Solo socios» se refiere a los socios de la asociación, no a los usuarios registrados: el rol `member`, que tiene cualquier usuario registrado, no basta. El rol de socio se elige en Configuración del sitio → Autenticación (`socio` por defecto) y el módulo se lo pregunta al core, así que un cambio en ese ajuste se aplica sin tocar el módulo. Los administradores no tienen excepción: sin el rol de socio no ven los anuncios para socios.
+«Solo socios» se refiere a los socios de la asociación, no a los usuarios registrados: el rol `member`, que tiene cualquier usuario registrado, no basta. El rol de socio se elige en Configuración del sitio → Autenticación (`socio` por defecto) y el módulo se lo pregunta al core, así que un cambio en ese ajuste se aplica sin tocar el módulo. Los administradores no tienen excepción: sin el rol de socio no ven los anuncios para socios. Si el rol de socio configurado no existe o no es válido (uno de los roles base `admin`, `editor` o `member`), nadie ve los anuncios para socios.
 
 #### Posiciones
 
