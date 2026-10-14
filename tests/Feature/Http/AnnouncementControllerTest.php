@@ -160,8 +160,8 @@ final class AnnouncementControllerTest extends ModuleTestCase
     public function test_members_announcements_are_hidden_from_users_without_any_role(): void
     {
         $this->createAnnouncement(['visibility' => 'members']);
-        // The legacy users.role column says "member" for everyone; it must not count
-        $user = UserModel::factory()->create(['role' => UserRole::Member]);
+        // The legacy users.role column defaults to "member" for everyone; it must not count
+        $user = UserModel::factory()->create();
 
         $response = $this->actingAs($user)->getJson('/anuncios');
 
