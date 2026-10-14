@@ -11,7 +11,6 @@ use App\Application\Modules\DTOs\NavigationItemDTO;
 use App\Application\Modules\DTOs\PermissionDTO;
 use App\Application\Modules\DTOs\SlotRegistrationDTO;
 use App\Modules\ModuleServiceProvider;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Inertia\Inertia;
@@ -194,19 +193,58 @@ final class AnnouncementsServiceProvider extends ModuleServiceProvider
     public function registerSlots(): array
     {
         $slots = [];
+        $settings = $this->bannerSettings();
 
         foreach (AnnouncementPosition::cases() as $position) {
+            $props = ['slotPosition' => $position->value];
+
+            // An empty array would reach the component as a JSON list, not an object
+            if ($settings !== []) {
+                $props['settings'] = $settings;
+            }
+
             $slots[] = new SlotRegistrationDTO(
                 slot: $position->value,
                 component: 'components/AnnouncementBanner.vue',
                 module: $this->moduleName(),
                 order: 0,
-                props: ['slotPosition' => $position->value],
+                props: $props,
                 dataKeys: ['announcements'],
             );
         }
 
         return $slots;
+    }
+
+    /**
+     * Display settings saved in the panel, as the banner component expects them.
+     * Keys that were never saved are left out so the banner uses its own defaults.
+     *
+     * @return array{show_banner?: bool, auto_rotate?: bool, rotate_interval?: int}
+     */
+    private function bannerSettings(): array
+    {
+        $saved = config('modules.settings.announcements');
+
+        if (! is_array($saved)) {
+            return [];
+        }
+
+        $settings = [];
+
+        if (array_key_exists('show_banner', $saved)) {
+            $settings['show_banner'] = (bool) $saved['show_banner'];
+        }
+
+        if (array_key_exists('auto_rotate', $saved)) {
+            $settings['auto_rotate'] = (bool) $saved['auto_rotate'];
+        }
+
+        if (isset($saved['rotate_interval']) && is_numeric($saved['rotate_interval'])) {
+            $settings['rotate_interval'] = (int) $saved['rotate_interval'];
+        }
+
+        return $settings;
     }
 
     /**
@@ -224,14 +262,6 @@ final class AnnouncementsServiceProvider extends ModuleServiceProvider
                         ->label(__('announcements::announcements.settings.show_banner'))
                         ->helperText(__('announcements::announcements.settings.show_banner_help'))
                         ->default(true),
-
-                    Select::make('banner_position')
-                        ->label(__('announcements::announcements.settings.banner_position'))
-                        ->options([
-                            'top' => __('announcements::announcements.settings.position_top'),
-                            'bottom' => __('announcements::announcements.settings.position_bottom'),
-                        ])
-                        ->default('top'),
 
                     Toggle::make('auto_rotate')
                         ->label(__('announcements::announcements.settings.auto_rotate'))

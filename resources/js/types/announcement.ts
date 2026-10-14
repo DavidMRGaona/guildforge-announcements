@@ -27,7 +27,6 @@ export interface Announcement {
 
 export interface AnnouncementSettings {
     show_banner: boolean;
-    banner_position: 'top' | 'bottom';
     auto_rotate: boolean;
     rotate_interval: number;
 }

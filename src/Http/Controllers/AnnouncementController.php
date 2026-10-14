@@ -6,6 +6,7 @@ namespace Modules\Announcements\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Modules\Announcements\Application\Services\AnnouncementServiceInterface;
 use Modules\Announcements\Http\Requests\GetAnnouncementsRequest;
 
@@ -32,11 +33,11 @@ final class AnnouncementController extends Controller
     }
 
     /**
-     * Get a specific announcement.
+     * Get a specific announcement, only if the current user may see it in the list.
      */
-    public function show(string $id): JsonResponse
+    public function show(Request $request, string $id): JsonResponse
     {
-        $announcement = $this->announcementService->find($id);
+        $announcement = $this->announcementService->findVisibleForUser($id, $request->user());
 
         if ($announcement === null) {
             return response()->json([

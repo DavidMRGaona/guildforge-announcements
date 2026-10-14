@@ -10,12 +10,16 @@ enum AnnouncementVisibility: string
     case Authenticated = 'authenticated';
     case Members = 'members';
 
-    public function isVisibleTo(?object $user): bool
+    /**
+     * Whether a user (null for a guest) may see an announcement with this visibility.
+     * Membership is decided by the caller and passed in as $isMember.
+     */
+    public function isVisibleTo(?object $user, bool $isMember = false): bool
     {
         return match ($this) {
             self::Public => true,
             self::Authenticated => $user !== null,
-            self::Members => $user !== null && $this->isMember($user),
+            self::Members => $user !== null && $isMember,
         };
     }
 
@@ -26,24 +30,5 @@ enum AnnouncementVisibility: string
             self::Authenticated => __('announcements::announcements.visibility.authenticated'),
             self::Members => __('announcements::announcements.visibility.members'),
         };
-    }
-
-    private function isMember(?object $user): bool
-    {
-        if ($user === null) {
-            return false;
-        }
-
-        // Check for is_member property (stdClass in tests, UserModel in app)
-        if (property_exists($user, 'is_member')) {
-            return (bool) $user->is_member;
-        }
-
-        // Check for isMember method (if available)
-        if (method_exists($user, 'isMember')) {
-            return $user->isMember();
-        }
-
-        return false;
     }
 }

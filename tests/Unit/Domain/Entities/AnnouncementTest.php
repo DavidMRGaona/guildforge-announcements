@@ -207,7 +207,7 @@ final class AnnouncementTest extends TestCase
 
     public function test_it_checks_visibility_for_authenticated_user(): void
     {
-        $user = $this->createUser(isMember: false);
+        $user = new stdClass;
 
         $publicAnnouncement = $this->createAnnouncement(
             visibility: AnnouncementVisibility::Public,
@@ -226,7 +226,7 @@ final class AnnouncementTest extends TestCase
 
     public function test_it_checks_visibility_for_member(): void
     {
-        $member = $this->createUser(isMember: true);
+        $member = new stdClass;
 
         $publicAnnouncement = $this->createAnnouncement(
             visibility: AnnouncementVisibility::Public,
@@ -238,9 +238,9 @@ final class AnnouncementTest extends TestCase
             visibility: AnnouncementVisibility::Members,
         );
 
-        $this->assertTrue($publicAnnouncement->isVisibleTo($member));
-        $this->assertTrue($authenticatedAnnouncement->isVisibleTo($member));
-        $this->assertTrue($membersAnnouncement->isVisibleTo($member));
+        $this->assertTrue($publicAnnouncement->isVisibleTo($member, isMember: true));
+        $this->assertTrue($authenticatedAnnouncement->isVisibleTo($member, isMember: true));
+        $this->assertTrue($membersAnnouncement->isVisibleTo($member, isMember: true));
     }
 
     public function test_it_updates_announcement(): void
@@ -292,14 +292,5 @@ final class AnnouncementTest extends TestCase
             endsAt: $endsAt,
             isActive: $isActive,
         );
-    }
-
-    private function createUser(bool $isMember = false): object
-    {
-        $user = new stdClass;
-        $user->id = 1;
-        $user->is_member = $isMember;
-
-        return $user;
     }
 }

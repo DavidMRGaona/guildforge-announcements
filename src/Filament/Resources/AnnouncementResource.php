@@ -115,6 +115,7 @@ class AnnouncementResource extends BaseResource
                                 AnnouncementVisibility::Members->value => __('announcements::announcements.visibility.members'),
                             ])
                             ->default(AnnouncementVisibility::Public->value)
+                            ->helperText(__('announcements::announcements.fields.visibility_help'))
                             ->required(),
 
                         Select::make('position')

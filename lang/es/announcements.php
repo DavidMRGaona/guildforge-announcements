@@ -28,6 +28,7 @@ return [
         'title' => 'Título',
         'content' => 'Contenido',
         'visibility' => 'Visibilidad',
+        'visibility_help' => '«Solo socios» se muestra a los usuarios con el rol member.',
         'position' => 'Posición',
         'priority' => 'Prioridad',
         'priority_help' => '1 (baja) a 10 (alta). Afecta el orden de visualización y el color predeterminado.',
@@ -48,7 +49,7 @@ return [
     'visibility' => [
         'public' => 'Público',
         'authenticated' => 'Usuarios autenticados',
-        'members' => 'Solo miembros',
+        'members' => 'Solo socios',
     ],
 
     // Position options
@@ -91,10 +92,7 @@ return [
         'display' => 'Visualización',
         'display_description' => 'Configuración de cómo se muestran los anuncios en el sitio.',
         'show_banner' => 'Mostrar banner',
-        'show_banner_help' => 'Muestra los anuncios como un banner en la parte superior del sitio.',
-        'banner_position' => 'Posición del banner',
-        'position_top' => 'Arriba',
-        'position_bottom' => 'Abajo',
+        'show_banner_help' => 'Muestra los anuncios activos como banner en la posición elegida en cada anuncio.',
         'auto_rotate' => 'Rotación automática',
         'auto_rotate_help' => 'Rota automáticamente entre los anuncios activos.',
         'rotate_interval' => 'Intervalo de rotación',

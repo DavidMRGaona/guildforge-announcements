@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Modules\Announcements\Tests\Feature\Http;
 
+use App\Domain\Enums\UserRole;
+use App\Infrastructure\Persistence\Eloquent\Models\RoleModel;
+use App\Infrastructure\Persistence\Eloquent\Models\UserModel;
 use Modules\Announcements\Infrastructure\Persistence\Eloquent\Models\AnnouncementModel;
 use Tests\Support\Modules\ModuleTestCase;
 
@@ -128,5 +131,129 @@ final class AnnouncementControllerTest extends ModuleTestCase
             ->assertJsonPath('data.0.title', 'High Priority')
             ->assertJsonPath('data.1.title', 'Medium Priority')
             ->assertJsonPath('data.2.title', 'Low Priority');
+    }
+
+    public function test_members_announcements_are_returned_to_users_with_the_member_role(): void
+    {
+        $this->createAnnouncement(['title' => 'Members Announcement', 'visibility' => 'members']);
+
+        $response = $this->actingAs($this->memberUser())->getJson('/anuncios');
+
+        $response->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.title', 'Members Announcement');
+    }
+
+    public function test_members_announcements_are_hidden_from_users_without_the_member_role(): void
+    {
+        $this->createAnnouncement(['visibility' => 'members']);
+        // The legacy users.role column says "member" for everyone; it must not count
+        $user = UserModel::factory()->create(['role' => UserRole::Member]);
+
+        $response = $this->actingAs($user)->getJson('/anuncios');
+
+        $response->assertOk()
+            ->assertJsonCount(0, 'data');
+    }
+
+    public function test_members_announcements_are_hidden_from_guests(): void
+    {
+        $this->createAnnouncement(['visibility' => 'members']);
+
+        $response = $this->getJson('/anuncios');
+
+        $response->assertOk()
+            ->assertJsonCount(0, 'data');
+    }
+
+    public function test_show_returns_a_public_active_announcement(): void
+    {
+        $announcement = $this->createAnnouncement(['title' => 'Visible Announcement']);
+
+        $response = $this->getJson('/anuncios/'.$announcement->id);
+
+        $response->assertOk()
+            ->assertJsonPath('data.title', 'Visible Announcement');
+    }
+
+    public function test_show_returns_404_for_an_inactive_announcement(): void
+    {
+        $announcement = $this->createAnnouncement(['is_active' => false]);
+
+        $this->getJson('/anuncios/'.$announcement->id)->assertNotFound();
+    }
+
+    public function test_show_returns_404_for_an_expired_announcement(): void
+    {
+        $announcement = $this->createAnnouncement([
+            'starts_at' => now()->subWeek(),
+            'ends_at' => now()->subDay(),
+        ]);
+
+        $this->getJson('/anuncios/'.$announcement->id)->assertNotFound();
+    }
+
+    public function test_show_returns_404_for_an_authenticated_announcement_to_a_guest(): void
+    {
+        $announcement = $this->createAnnouncement(['visibility' => 'authenticated']);
+
+        $this->getJson('/anuncios/'.$announcement->id)->assertNotFound();
+    }
+
+    public function test_show_returns_404_for_a_members_announcement_to_a_guest(): void
+    {
+        $announcement = $this->createAnnouncement(['visibility' => 'members']);
+
+        $this->getJson('/anuncios/'.$announcement->id)->assertNotFound();
+    }
+
+    public function test_show_returns_404_for_a_members_announcement_to_a_non_member(): void
+    {
+        $announcement = $this->createAnnouncement(['visibility' => 'members']);
+
+        $this->actingAs(UserModel::factory()->create())
+            ->getJson('/anuncios/'.$announcement->id)
+            ->assertNotFound();
+    }
+
+    public function test_show_returns_a_members_announcement_to_a_member(): void
+    {
+        $announcement = $this->createAnnouncement(['title' => 'For members', 'visibility' => 'members']);
+
+        $this->actingAs($this->memberUser())
+            ->getJson('/anuncios/'.$announcement->id)
+            ->assertOk()
+            ->assertJsonPath('data.title', 'For members');
+    }
+
+    public function test_show_returns_404_for_an_unknown_announcement(): void
+    {
+        $this->getJson('/anuncios/9b2f4c1e-0000-4000-8000-000000000000')->assertNotFound();
+    }
+
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
+    private function createAnnouncement(array $attributes = []): AnnouncementModel
+    {
+        return AnnouncementModel::create(array_merge([
+            'title' => 'Announcement',
+            'content' => '<p>Content.</p>',
+            'visibility' => 'public',
+            'priority' => 5,
+            'is_active' => true,
+        ], $attributes));
+    }
+
+    private function memberUser(): UserModel
+    {
+        $role = RoleModel::firstOrCreate(
+            ['name' => UserRole::Member->value],
+            ['display_name' => 'Member'],
+        );
+        $user = UserModel::factory()->create();
+        $user->roles()->attach($role->id);
+
+        return $user;
     }
 }

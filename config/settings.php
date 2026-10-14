@@ -2,6 +2,6 @@
 
 return [
     'show_banner' => true,
-    'banner_position' => 'top',
-    'auto_rotate' => false,
+    'auto_rotate' => true,
+    'rotate_interval' => 5000,
 ];

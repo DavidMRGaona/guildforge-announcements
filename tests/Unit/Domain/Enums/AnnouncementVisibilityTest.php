@@ -22,79 +22,54 @@ final class AnnouncementVisibilityTest extends TestCase
 
     public function test_public_is_visible_to_guest(): void
     {
-        $visibility = AnnouncementVisibility::Public;
-
-        $this->assertTrue($visibility->isVisibleTo(null));
+        $this->assertTrue(AnnouncementVisibility::Public->isVisibleTo(null));
     }
 
     public function test_public_is_visible_to_authenticated_user(): void
     {
-        $visibility = AnnouncementVisibility::Public;
-        $user = $this->createUser();
-
-        $this->assertTrue($visibility->isVisibleTo($user));
+        $this->assertTrue(AnnouncementVisibility::Public->isVisibleTo(new stdClass));
     }
 
     public function test_public_is_visible_to_member(): void
     {
-        $visibility = AnnouncementVisibility::Public;
-        $user = $this->createUser(isMember: true);
-
-        $this->assertTrue($visibility->isVisibleTo($user));
+        $this->assertTrue(AnnouncementVisibility::Public->isVisibleTo(new stdClass, isMember: true));
     }
 
     public function test_authenticated_is_not_visible_to_guest(): void
     {
-        $visibility = AnnouncementVisibility::Authenticated;
-
-        $this->assertFalse($visibility->isVisibleTo(null));
+        $this->assertFalse(AnnouncementVisibility::Authenticated->isVisibleTo(null));
     }
 
     public function test_authenticated_is_visible_to_authenticated_user(): void
     {
-        $visibility = AnnouncementVisibility::Authenticated;
-        $user = $this->createUser();
-
-        $this->assertTrue($visibility->isVisibleTo($user));
+        $this->assertTrue(AnnouncementVisibility::Authenticated->isVisibleTo(new stdClass));
     }
 
     public function test_authenticated_is_visible_to_member(): void
     {
-        $visibility = AnnouncementVisibility::Authenticated;
-        $user = $this->createUser(isMember: true);
-
-        $this->assertTrue($visibility->isVisibleTo($user));
+        $this->assertTrue(AnnouncementVisibility::Authenticated->isVisibleTo(new stdClass, isMember: true));
     }
 
-    public function test_members_is_not_visible_to_guest(): void
+    public function test_members_is_visible_to_a_member(): void
     {
-        $visibility = AnnouncementVisibility::Members;
-
-        $this->assertFalse($visibility->isVisibleTo(null));
+        $this->assertTrue(AnnouncementVisibility::Members->isVisibleTo(new stdClass, isMember: true));
     }
 
-    public function test_members_is_not_visible_to_regular_authenticated_user(): void
+    public function test_members_is_not_visible_to_a_non_member(): void
     {
-        $visibility = AnnouncementVisibility::Members;
-        $user = $this->createUser(isMember: false);
-
-        $this->assertFalse($visibility->isVisibleTo($user));
+        $this->assertFalse(AnnouncementVisibility::Members->isVisibleTo(new stdClass, isMember: false));
     }
 
-    public function test_members_is_visible_to_member(): void
+    public function test_members_is_not_visible_to_a_guest_even_if_flagged(): void
     {
-        $visibility = AnnouncementVisibility::Members;
-        $user = $this->createUser(isMember: true);
-
-        $this->assertTrue($visibility->isVisibleTo($user));
+        $this->assertFalse(AnnouncementVisibility::Members->isVisibleTo(null, isMember: true));
     }
 
-    private function createUser(bool $isMember = false): object
+    public function test_members_ignores_an_is_member_attribute_on_the_user(): void
     {
         $user = new stdClass;
-        $user->id = 1;
-        $user->is_member = $isMember;
+        $user->is_member = true;
 
-        return $user;
+        $this->assertFalse(AnnouncementVisibility::Members->isVisibleTo($user));
     }
 }

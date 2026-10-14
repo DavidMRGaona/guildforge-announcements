@@ -15,7 +15,6 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
     settings: () => ({
         show_banner: true,
-        banner_position: 'top',
         auto_rotate: true,
         rotate_interval: 5000,
     }),
@@ -77,7 +76,6 @@ const hasMultiple = computed(() => visibleAnnouncements.value.length > 1);
 
 const mergedSettings = computed<AnnouncementSettings>(() => ({
     show_banner: props.settings?.show_banner ?? true,
-    banner_position: props.settings?.banner_position ?? 'top',
     auto_rotate: props.settings?.auto_rotate ?? true,
     rotate_interval: props.settings?.rotate_interval ?? 5000,
 }));
