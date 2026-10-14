@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Modules\Announcements\Tests\Feature\Http;
 
+use App\Application\Authorization\Services\AssociationMembershipServiceInterface;
+use App\Application\Services\SettingsServiceInterface;
 use App\Domain\Enums\UserRole;
 use App\Infrastructure\Persistence\Eloquent\Models\RoleModel;
 use App\Infrastructure\Persistence\Eloquent\Models\UserModel;
@@ -133,24 +135,62 @@ final class AnnouncementControllerTest extends ModuleTestCase
             ->assertJsonPath('data.2.title', 'Low Priority');
     }
 
-    public function test_members_announcements_are_returned_to_users_with_the_member_role(): void
+    public function test_members_announcements_are_returned_to_association_members(): void
     {
         $this->createAnnouncement(['title' => 'Members Announcement', 'visibility' => 'members']);
 
-        $response = $this->actingAs($this->memberUser())->getJson('/anuncios');
+        $response = $this->actingAs($this->userWithRole(AssociationMembershipServiceInterface::DEFAULT_ROLE))
+            ->getJson('/anuncios');
 
         $response->assertOk()
             ->assertJsonCount(1, 'data')
             ->assertJsonPath('data.0.title', 'Members Announcement');
     }
 
-    public function test_members_announcements_are_hidden_from_users_without_the_member_role(): void
+    public function test_members_announcements_are_hidden_from_users_with_only_the_member_role(): void
+    {
+        $this->createAnnouncement(['visibility' => 'members']);
+
+        $response = $this->actingAs($this->userWithRole(UserRole::Member->value))->getJson('/anuncios');
+
+        $response->assertOk()
+            ->assertJsonCount(0, 'data');
+    }
+
+    public function test_members_announcements_are_hidden_from_users_without_any_role(): void
     {
         $this->createAnnouncement(['visibility' => 'members']);
         // The legacy users.role column says "member" for everyone; it must not count
         $user = UserModel::factory()->create(['role' => UserRole::Member]);
 
         $response = $this->actingAs($user)->getJson('/anuncios');
+
+        $response->assertOk()
+            ->assertJsonCount(0, 'data');
+    }
+
+    public function test_members_announcements_follow_the_configured_association_member_role(): void
+    {
+        $this->createAnnouncement(['title' => 'Board Announcement', 'visibility' => 'members']);
+        app(SettingsServiceInterface::class)->set(AssociationMembershipServiceInterface::SETTING_KEY, 'junta');
+
+        $this->actingAs($this->userWithRole('junta'))
+            ->getJson('/anuncios')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.title', 'Board Announcement');
+
+        $this->actingAs($this->userWithRole(AssociationMembershipServiceInterface::DEFAULT_ROLE))
+            ->getJson('/anuncios')
+            ->assertOk()
+            ->assertJsonCount(0, 'data');
+    }
+
+    public function test_members_announcements_are_hidden_from_admins_without_the_association_member_role(): void
+    {
+        $this->createAnnouncement(['visibility' => 'members']);
+
+        $response = $this->actingAs($this->userWithRole(UserRole::Admin->value))->getJson('/anuncios');
 
         $response->assertOk()
             ->assertJsonCount(0, 'data');
@@ -216,11 +256,20 @@ final class AnnouncementControllerTest extends ModuleTestCase
             ->assertNotFound();
     }
 
-    public function test_show_returns_a_members_announcement_to_a_member(): void
+    public function test_show_returns_404_for_a_members_announcement_to_a_user_with_only_the_member_role(): void
+    {
+        $announcement = $this->createAnnouncement(['visibility' => 'members']);
+
+        $this->actingAs($this->userWithRole(UserRole::Member->value))
+            ->getJson('/anuncios/'.$announcement->id)
+            ->assertNotFound();
+    }
+
+    public function test_show_returns_a_members_announcement_to_an_association_member(): void
     {
         $announcement = $this->createAnnouncement(['title' => 'For members', 'visibility' => 'members']);
 
-        $this->actingAs($this->memberUser())
+        $this->actingAs($this->userWithRole(AssociationMembershipServiceInterface::DEFAULT_ROLE))
             ->getJson('/anuncios/'.$announcement->id)
             ->assertOk()
             ->assertJsonPath('data.title', 'For members');
@@ -245,11 +294,11 @@ final class AnnouncementControllerTest extends ModuleTestCase
         ], $attributes));
     }
 
-    private function memberUser(): UserModel
+    private function userWithRole(string $roleName): UserModel
     {
         $role = RoleModel::firstOrCreate(
-            ['name' => UserRole::Member->value],
-            ['display_name' => 'Member'],
+            ['name' => $roleName],
+            ['display_name' => ucfirst($roleName)],
         );
         $user = UserModel::factory()->create();
         $user->roles()->attach($role->id);
