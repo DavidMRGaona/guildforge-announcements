@@ -18,7 +18,7 @@ return [
         'title' => 'Title',
         'content' => 'Content',
         'visibility' => 'Visibility',
-        'visibility_help' => '"Members only" is shown only to association members: users holding the association member role chosen in Site Settings → Authentication.',
+        'visibility_help' => '"Members only" is shown just to users holding the association member role chosen in Site Settings → Authentication.',
         'priority' => 'Priority',
         'starts_at' => 'Start date',
         'ends_at' => 'End date',
