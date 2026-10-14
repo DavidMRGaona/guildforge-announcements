@@ -28,7 +28,7 @@ return [
         'title' => 'Título',
         'content' => 'Contenido',
         'visibility' => 'Visibilidad',
-        'visibility_help' => '«Solo socios» se muestra a los usuarios con el rol member.',
+        'visibility_help' => '«Solo socios» lo ven únicamente los usuarios con el rol de socio elegido en Configuración del sitio → Autenticación.',
         'position' => 'Posición',
         'priority' => 'Prioridad',
         'priority_help' => '1 (baja) a 10 (alta). Afecta el orden de visualización y el color predeterminado.',

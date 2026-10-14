@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Announcements\Application\Services;
 
-use App\Application\Authorization\Services\AuthorizationServiceInterface;
-use App\Domain\Enums\UserRole;
+use App\Application\Authorization\Services\AssociationMembershipServiceInterface;
 use Modules\Announcements\Application\DTOs\AnnouncementResponseDTO;
 use Modules\Announcements\Application\DTOs\CreateAnnouncementDTO;
 use Modules\Announcements\Application\DTOs\UpdateAnnouncementDTO;
@@ -19,7 +18,7 @@ final readonly class AnnouncementService implements AnnouncementServiceInterface
 {
     public function __construct(
         private AnnouncementRepositoryInterface $repository,
-        private AuthorizationServiceInterface $authorization,
+        private AssociationMembershipServiceInterface $associationMembership,
     ) {}
 
     public function create(CreateAnnouncementDTO $dto): AnnouncementResponseDTO
@@ -173,8 +172,10 @@ final readonly class AnnouncementService implements AnnouncementServiceInterface
     }
 
     /**
-     * A member is a user holding the core "member" role. The role is only looked up
-     * when a members-only announcement is among the candidates.
+     * A member is an association member: a user holding the role configured in the core
+     * site settings ("socio" by default), never the "member" role every registered user
+     * has. Admins get no exception. The role is only looked up when a members-only
+     * announcement is among the candidates.
      *
      * @param  array<Announcement>  $announcements
      */
@@ -186,7 +187,7 @@ final readonly class AnnouncementService implements AnnouncementServiceInterface
 
         foreach ($announcements as $announcement) {
             if ($announcement->visibility() === AnnouncementVisibility::Members) {
-                return $this->authorization->hasRole($user, UserRole::Member->value);
+                return $this->associationMembership->isAssociationMember($user);
             }
         }
 

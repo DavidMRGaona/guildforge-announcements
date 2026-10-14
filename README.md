@@ -16,7 +16,7 @@ Anuncios para la web pública de GuildForge. Se crean en el panel de administrac
 
 ## Requisitos
 
-- GuildForge core `^3.0`
+- GuildForge core `^3.8` (rol de socio configurable)
 - PHP >= 8.5, Laravel >= 13, Filament 5
 
 El core rechaza el módulo si no se cumplen (`module.json` → `requires`).
@@ -66,9 +66,9 @@ Cada anuncio tiene:
 |-------|-------------|
 | `public` | Todos los visitantes |
 | `authenticated` | Usuarios con sesión iniciada |
-| `members` | Usuarios con el rol `member` del core |
+| `members` | Socios: usuarios con el rol de socio del core |
 
-El rol `member` lo asigna un administrador en el panel o, si se usa, el módulo memberships cuando tiene activada la asignación de rol. Si en memberships se cambia el nombre del rol, este módulo sigue mirando `member`.
+«Solo socios» se refiere a los socios de la asociación, no a los usuarios registrados: el rol `member`, que tiene cualquier usuario registrado, no basta. El rol de socio se elige en Configuración del sitio → Autenticación (`socio` por defecto) y el módulo se lo pregunta al core, así que un cambio en ese ajuste se aplica sin tocar el módulo. Los administradores no tienen excepción: sin el rol de socio no ven los anuncios para socios. Si el rol de socio configurado no existe o no es válido (uno de los roles base `admin`, `editor` o `member`), nadie ve los anuncios para socios.
 
 #### Posiciones
 
