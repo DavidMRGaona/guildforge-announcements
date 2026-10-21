@@ -1,7 +1,7 @@
 {
   "name": "announcements",
   "displayName": "Anuncios",
-  "version": "2.1.3",
+  "version": "2.1.4",
   "repository": "DavidMRGaona/guildforge-announcements",
   "namespace": "Modules\\Announcements",
   "provider": "AnnouncementsServiceProvider",
