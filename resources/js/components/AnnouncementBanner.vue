@@ -150,9 +150,9 @@ function resetRotation(): void {
 
 function getPriorityClasses(priority: number): string {
     // Banners use solid colors for high visibility
-    if (priority >= 8) return 'bg-error text-white';
-    if (priority >= 5) return 'bg-warning text-white';
-    return 'bg-info text-white';
+    if (priority >= 8) return 'bg-error-light text-base-primary';
+    if (priority >= 5) return 'bg-warning-light text-base-primary';
+    return 'bg-info-light text-base-primary';
 }
 
 function getAnnouncementStyle(announcement: Announcement | null): Record<string, string> {
@@ -236,7 +236,7 @@ onUnmounted(() => {
                     <button
                         v-if="hasMultiple"
                         type="button"
-                        class="p-1 rounded-full hover:bg-white/20 transition-colors flex-shrink-0"
+                        class="p-1 rounded-full hover:bg-current/20 transition-colors flex-shrink-0"
                         @click="previousAnnouncement"
                     >
                         <svg
@@ -283,7 +283,7 @@ onUnmounted(() => {
                     <button
                         v-if="hasMultiple"
                         type="button"
-                        class="p-1 rounded-full hover:bg-white/20 transition-colors flex-shrink-0"
+                        class="p-1 rounded-full hover:bg-current/20 transition-colors flex-shrink-0"
                         @click="nextAnnouncement"
                     >
                         <svg
@@ -305,7 +305,7 @@ onUnmounted(() => {
                     <button
                         v-if="canDismissCurrent"
                         type="button"
-                        class="p-1 rounded-full hover:bg-white/20 transition-colors flex-shrink-0"
+                        class="p-1 rounded-full hover:bg-current/20 transition-colors flex-shrink-0"
                         @click="dismissCurrent"
                     >
                         <svg
@@ -336,8 +336,8 @@ onUnmounted(() => {
                         :class="[
                             'w-2 h-2 rounded-full transition-all',
                             index === currentIndex
-                                ? 'bg-white'
-                                : 'bg-white/40 hover:bg-white/60',
+                                ? 'bg-current'
+                                : 'bg-current/40 hover:bg-current/60',
                         ]"
                         @click="goToAnnouncement(index)"
                     />

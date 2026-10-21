@@ -21,9 +21,9 @@ function getPriorityColor(priority: number): string {
 }
 
 function getPriorityTextColor(priority: number): string {
-    if (priority >= 8) return 'text-error';
-    if (priority >= 5) return 'text-warning';
-    return 'text-info';
+    if (priority >= 8) return 'text-base-primary';
+    if (priority >= 5) return 'text-base-primary';
+    return 'text-base-primary';
 }
 
 function handleClose(): void {
@@ -60,7 +60,7 @@ function handleClose(): void {
                 v-if="showCloseButton"
                 type="button"
                 :class="[
-                    'flex-shrink-0 p-1 rounded-full hover:bg-black/10 dark:hover:bg-white/10 transition-colors',
+                    'flex-shrink-0 p-1 rounded-full hover:bg-base-secondary/10 transition-colors',
                     getPriorityTextColor(announcement.priority),
                 ]"
                 @click="handleClose"
