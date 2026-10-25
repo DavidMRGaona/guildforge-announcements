@@ -38,7 +38,12 @@ Con el repositorio clonado en `src/modules/announcements`:
 ```bash
 php artisan module:discover
 php artisan module:enable announcements
-php artisan module:build announcements   # compila los componentes Vue (--force para recompilar)
+```
+
+Los componentes Vue se compilan con las herramientas del core, desde `src/`:
+
+```bash
+docker exec guildforge_node npm run build:module -- announcements
 ```
 
 En las releases los assets los compila el workflow y van dentro del ZIP.
