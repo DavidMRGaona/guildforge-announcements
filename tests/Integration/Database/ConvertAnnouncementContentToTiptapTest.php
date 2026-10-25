@@ -30,7 +30,8 @@ final class ConvertAnnouncementContentToTiptapTest extends ModuleTestCase
         parent::setUp();
 
         // Bound before the module is enabled: enabling it runs this migration on an empty table
-        $this->app->instance(TrixHtmlConverterInterface::class, new class () implements TrixHtmlConverterInterface {
+        $this->app->instance(TrixHtmlConverterInterface::class, new class implements TrixHtmlConverterInterface
+        {
             public function convert(string $html): string
             {
                 return str_replace(['<div>', '</div>'], ['<p>', '</p>'], $html);

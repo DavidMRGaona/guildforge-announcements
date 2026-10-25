@@ -33,7 +33,7 @@ const STORAGE_KEY = 'guildforge_dismissed_announcements';
  */
 function getStoredDismissedIds(): Set<string> {
     try {
-        const stored = localStorage.getItem(STORAGE_KEY);
+        const stored = window.localStorage.getItem(STORAGE_KEY);
         if (stored) {
             const ids = JSON.parse(stored) as string[];
             return new Set(ids);
@@ -48,7 +48,7 @@ const currentIndex = ref(0);
 const isVisible = ref(true);
 // Load dismissed IDs synchronously to prevent flash
 const dismissedIds = ref<Set<string>>(getStoredDismissedIds());
-let rotationInterval: ReturnType<typeof setInterval> | null = null;
+let rotationInterval: ReturnType<typeof window.setInterval> | null = null;
 
 /**
  * Save dismissed announcement IDs to localStorage
@@ -56,7 +56,7 @@ let rotationInterval: ReturnType<typeof setInterval> | null = null;
 function saveDismissedIds(): void {
     try {
         const ids = Array.from(dismissedIds.value);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
     } catch {
         // Ignore localStorage errors
     }
@@ -64,14 +64,11 @@ function saveDismissedIds(): void {
 
 const visibleAnnouncements = computed(() =>
     props.announcements.filter(
-        (a) =>
-            !dismissedIds.value.has(a.id) && a.position === props.slotPosition
+        (a) => !dismissedIds.value.has(a.id) && a.position === props.slotPosition
     )
 );
 
-const currentAnnouncement = computed(() =>
-    visibleAnnouncements.value[currentIndex.value] ?? null
-);
+const currentAnnouncement = computed(() => visibleAnnouncements.value[currentIndex.value] ?? null);
 
 const hasMultiple = computed(() => visibleAnnouncements.value.length > 1);
 
@@ -83,8 +80,7 @@ const mergedSettings = computed<AnnouncementSettings>(() => ({
 
 function nextAnnouncement(): void {
     if (hasMultiple.value) {
-        currentIndex.value =
-            (currentIndex.value + 1) % visibleAnnouncements.value.length;
+        currentIndex.value = (currentIndex.value + 1) % visibleAnnouncements.value.length;
     }
 }
 
@@ -109,10 +105,7 @@ function dismissCurrent(): void {
         emit('dismiss', id);
 
         if (currentIndex.value >= visibleAnnouncements.value.length) {
-            currentIndex.value = Math.max(
-                0,
-                visibleAnnouncements.value.length - 1
-            );
+            currentIndex.value = Math.max(0, visibleAnnouncements.value.length - 1);
         }
     }
 }
@@ -125,12 +118,8 @@ const canDismissCurrent = computed(() => {
 });
 
 function startRotation(): void {
-    if (
-        mergedSettings.value.auto_rotate &&
-        hasMultiple.value &&
-        !rotationInterval
-    ) {
-        rotationInterval = setInterval(
+    if (mergedSettings.value.auto_rotate && hasMultiple.value && !rotationInterval) {
+        rotationInterval = window.setInterval(
             nextAnnouncement,
             mergedSettings.value.rotate_interval
         );
@@ -139,7 +128,7 @@ function startRotation(): void {
 
 function stopRotation(): void {
     if (rotationInterval) {
-        clearInterval(rotationInterval);
+        window.clearInterval(rotationInterval);
         rotationInterval = null;
     }
 }
@@ -216,11 +205,7 @@ onUnmounted(() => {
         leave-to-class="opacity-0 -translate-y-full"
     >
         <div
-            v-if="
-                isVisible &&
-                visibleAnnouncements.length > 0 &&
-                mergedSettings.show_banner
-            "
+            v-if="isVisible && visibleAnnouncements.length > 0 && mergedSettings.show_banner"
             :class="[
                 'w-full shadow-lg',
                 !hasCustomColors(currentAnnouncement)
@@ -254,10 +239,7 @@ onUnmounted(() => {
                             leave-from-class="opacity-100"
                             leave-to-class="opacity-0"
                         >
-                            <div
-                                v-if="currentAnnouncement"
-                                :key="currentAnnouncement.id"
-                            >
+                            <div v-if="currentAnnouncement" :key="currentAnnouncement.id">
                                 <p class="font-semibold">
                                     {{ currentAnnouncement.title }}
                                 </p>
@@ -290,10 +272,7 @@ onUnmounted(() => {
                 </div>
 
                 <!-- Dots indicator -->
-                <div
-                    v-if="hasMultiple"
-                    class="flex justify-center gap-1.5 mt-2"
-                >
+                <div v-if="hasMultiple" class="flex justify-center gap-1.5 mt-2">
                     <button
                         v-for="(_, index) in visibleAnnouncements"
                         :key="index"

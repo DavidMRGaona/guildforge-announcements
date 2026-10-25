@@ -33,12 +33,7 @@ function handleClose(): void {
 </script>
 
 <template>
-    <div
-        :class="[
-            'rounded-lg border p-4 transition-all',
-            getPriorityColor(announcement.priority),
-        ]"
-    >
+    <div :class="['rounded-lg border p-4 transition-all', getPriorityColor(announcement.priority)]">
         <div class="flex items-start justify-between gap-4">
             <div class="flex-1 min-w-0">
                 <h3

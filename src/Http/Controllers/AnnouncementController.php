@@ -7,6 +7,7 @@ namespace Modules\Announcements\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Modules\Announcements\Application\DTOs\AnnouncementResponseDTO;
 use Modules\Announcements\Application\Services\AnnouncementServiceInterface;
 use Modules\Announcements\Http\Requests\GetAnnouncementsRequest;
 
@@ -39,7 +40,7 @@ final class AnnouncementController extends Controller
     {
         $announcement = $this->announcementService->findVisibleForUser($id, $request->user());
 
-        if ($announcement === null) {
+        if (! $announcement instanceof AnnouncementResponseDTO) {
             return response()->json([
                 'message' => __('announcements::announcements.messages.not_found'),
             ], 404);
