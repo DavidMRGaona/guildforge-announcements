@@ -15,6 +15,7 @@ use Tests\Support\Modules\ModuleTestCase;
 final class AnnouncementControllerTest extends ModuleTestCase
 {
     protected ?string $moduleName = 'announcements';
+
     protected bool $autoEnableModule = true;
 
     public function test_it_returns_empty_list_when_no_announcements(): void

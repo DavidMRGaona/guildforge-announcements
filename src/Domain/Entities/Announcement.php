@@ -115,17 +115,13 @@ final class Announcement
             return false;
         }
 
-        $now = $now ?? new DateTimeImmutable;
+        $now ??= new DateTimeImmutable;
 
-        if ($this->startsAt !== null && $now < $this->startsAt) {
+        if ($this->startsAt instanceof DateTimeImmutable && $now < $this->startsAt) {
             return false;
         }
 
-        if ($this->endsAt !== null && $now > $this->endsAt) {
-            return false;
-        }
-
-        return true;
+        return ! $this->endsAt instanceof DateTimeImmutable || $now <= $this->endsAt;
     }
 
     public function isVisibleTo(?object $user, bool $isMember = false): bool

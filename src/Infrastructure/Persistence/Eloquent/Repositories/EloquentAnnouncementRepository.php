@@ -51,7 +51,7 @@ final class EloquentAnnouncementRepository implements AnnouncementRepositoryInte
     {
         $announcement = $this->find($id);
 
-        if ($announcement === null) {
+        if (! $announcement instanceof Announcement) {
             throw AnnouncementNotFoundException::withId($id);
         }
 

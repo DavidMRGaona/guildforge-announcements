@@ -4,15 +4,16 @@ declare(strict_types=1);
 
 namespace Modules\Announcements;
 
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Resources\Resource;
 use App\Application\Modules\DTOs\NavigationItemDTO;
 use App\Application\Modules\DTOs\PermissionDTO;
 use App\Application\Modules\DTOs\SlotRegistrationDTO;
 use App\Modules\ModuleServiceProvider;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Resources\Resource as FilamentResource;
+use Filament\Schemas\Components\Component;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Inertia\Inertia;
 use Modules\Announcements\Application\Services\AnnouncementService;
 use Modules\Announcements\Application\Services\AnnouncementServiceInterface;
@@ -87,7 +88,7 @@ final class AnnouncementsServiceProvider extends ModuleServiceProvider
     /**
      * Register Filament resources provided by this module.
      *
-     * @return array<class-string<Resource>>
+     * @return array<class-string<FilamentResource>>
      */
     public function registerFilamentResources(): array
     {
@@ -250,7 +251,7 @@ final class AnnouncementsServiceProvider extends ModuleServiceProvider
     /**
      * Get the Filament form schema for module settings.
      *
-     * @return array<\Filament\Schemas\Components\Component>
+     * @return array<Component>
      */
     public function getSettingsSchema(): array
     {

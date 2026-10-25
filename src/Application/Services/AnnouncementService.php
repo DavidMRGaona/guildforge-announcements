@@ -87,7 +87,7 @@ final readonly class AnnouncementService implements AnnouncementServiceInterface
     {
         $announcement = $this->repository->find(AnnouncementId::fromString($id));
 
-        if ($announcement === null) {
+        if (! $announcement instanceof Announcement) {
             return null;
         }
 
@@ -102,7 +102,7 @@ final readonly class AnnouncementService implements AnnouncementServiceInterface
         $announcements = $this->repository->all();
 
         return array_map(
-            fn (Announcement $announcement) => AnnouncementResponseDTO::fromEntity($announcement),
+            AnnouncementResponseDTO::fromEntity(...),
             $announcements
         );
     }
@@ -130,7 +130,7 @@ final readonly class AnnouncementService implements AnnouncementServiceInterface
         );
 
         return array_map(
-            fn (Announcement $announcement) => AnnouncementResponseDTO::fromEntity($announcement),
+            AnnouncementResponseDTO::fromEntity(...),
             $visibleAnnouncements
         );
     }
@@ -139,7 +139,7 @@ final readonly class AnnouncementService implements AnnouncementServiceInterface
     {
         $announcement = $this->repository->find(AnnouncementId::fromString($id));
 
-        if ($announcement === null) {
+        if (! $announcement instanceof Announcement) {
             return null;
         }
 

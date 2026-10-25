@@ -6,6 +6,7 @@ namespace Modules\Announcements\Infrastructure\Persistence\Eloquent\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Modules\Announcements\Domain\Enums\AnnouncementPosition;
 use Modules\Announcements\Domain\Enums\AnnouncementVisibility;
 
@@ -18,12 +19,12 @@ use Modules\Announcements\Domain\Enums\AnnouncementVisibility;
  * @property int $priority
  * @property string|null $background_color
  * @property string|null $text_color
- * @property \Illuminate\Support\Carbon|null $starts_at
- * @property \Illuminate\Support\Carbon|null $ends_at
+ * @property Carbon|null $starts_at
+ * @property Carbon|null $ends_at
  * @property bool $is_active
  * @property bool $is_dismissible
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  */
 final class AnnouncementModel extends Model
 {

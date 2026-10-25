@@ -4,22 +4,19 @@ declare(strict_types=1);
 
 namespace Modules\Announcements\Filament\Resources;
 
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
+use App\Filament\Resources\BaseResource;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
-use Modules\Announcements\Filament\Resources\AnnouncementResource\Pages\ListAnnouncements;
-use Modules\Announcements\Filament\Resources\AnnouncementResource\Pages\CreateAnnouncement;
-use Modules\Announcements\Filament\Resources\AnnouncementResource\Pages\EditAnnouncement;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use App\Filament\Resources\BaseResource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -28,14 +25,16 @@ use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Modules\Announcements\Domain\Enums\AnnouncementPosition;
 use Modules\Announcements\Domain\Enums\AnnouncementVisibility;
-use Modules\Announcements\Filament\Resources\AnnouncementResource\Pages;
+use Modules\Announcements\Filament\Resources\AnnouncementResource\Pages\CreateAnnouncement;
+use Modules\Announcements\Filament\Resources\AnnouncementResource\Pages\EditAnnouncement;
+use Modules\Announcements\Filament\Resources\AnnouncementResource\Pages\ListAnnouncements;
 use Modules\Announcements\Infrastructure\Persistence\Eloquent\Models\AnnouncementModel;
 
 class AnnouncementResource extends BaseResource
 {
     protected static ?string $model = AnnouncementModel::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-megaphone';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-megaphone';
 
     protected static ?int $navigationSort = 1;
 
