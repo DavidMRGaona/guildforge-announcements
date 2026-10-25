@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ChevronLeft, ChevronRight, X } from '@lucide/vue';
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import type {
     Announcement,
@@ -239,19 +240,7 @@ onUnmounted(() => {
                         class="p-1 rounded-full hover:bg-current/20 transition-colors flex-shrink-0"
                         @click="previousAnnouncement"
                     >
-                        <svg
-                            class="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M15 19l-7-7 7-7"
-                            />
-                        </svg>
+                        <ChevronLeft class="w-5 h-5" aria-hidden="true" />
                     </button>
 
                     <!-- Content -->
@@ -286,19 +275,7 @@ onUnmounted(() => {
                         class="p-1 rounded-full hover:bg-current/20 transition-colors flex-shrink-0"
                         @click="nextAnnouncement"
                     >
-                        <svg
-                            class="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M9 5l7 7-7 7"
-                            />
-                        </svg>
+                        <ChevronRight class="w-5 h-5" aria-hidden="true" />
                     </button>
 
                     <!-- Close button (only if dismissible) -->
@@ -308,19 +285,7 @@ onUnmounted(() => {
                         class="p-1 rounded-full hover:bg-current/20 transition-colors flex-shrink-0"
                         @click="dismissCurrent"
                     >
-                        <svg
-                            class="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12"
-                            />
-                        </svg>
+                        <X class="w-5 h-5" aria-hidden="true" />
                     </button>
                 </div>
 
