@@ -33,6 +33,9 @@ final class AnnouncementPriorityTest extends TestCase
         $this->assertEquals($value, $priority->value);
     }
 
+    /**
+     * @return array<string, array{int}>
+     */
     public static function validPriorityProvider(): array
     {
         return [
@@ -53,6 +56,9 @@ final class AnnouncementPriorityTest extends TestCase
         new AnnouncementPriority($value);
     }
 
+    /**
+     * @return array<string, array{int}>
+     */
     public static function invalidPriorityProvider(): array
     {
         return [
