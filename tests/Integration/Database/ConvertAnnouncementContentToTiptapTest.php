@@ -48,7 +48,7 @@ final class ConvertAnnouncementContentToTiptapTest extends ModuleTestCase
         $announcement = $this->announcement(self::TRIX);
         $updatedAt = $announcement->updated_at?->toDateTimeString();
 
-        $this->migration->up();
+        $this->migrate('up');
 
         $announcement->refresh();
         $this->assertSame(self::CONVERTED, $announcement->content);
@@ -60,7 +60,7 @@ final class ConvertAnnouncementContentToTiptapTest extends ModuleTestCase
     {
         $announcement = $this->announcement(self::CONVERTED);
 
-        $this->migration->up();
+        $this->migrate('up');
 
         $this->assertSame(self::CONVERTED, $announcement->refresh()->content);
         $this->assertSame(0, DB::table('announcements_trix_content_backup')->count());
@@ -70,8 +70,8 @@ final class ConvertAnnouncementContentToTiptapTest extends ModuleTestCase
     {
         $announcement = $this->announcement(self::TRIX);
 
-        $this->migration->up();
-        $this->migration->up();
+        $this->migrate('up');
+        $this->migrate('up');
 
         $this->assertSame(self::CONVERTED, $announcement->refresh()->content);
         $this->assertSame(self::TRIX, DB::table('announcements_trix_content_backup')->where('announcement_id', $announcement->id)->value('content'));
@@ -80,9 +80,9 @@ final class ConvertAnnouncementContentToTiptapTest extends ModuleTestCase
     public function test_down_restores_the_original_content(): void
     {
         $announcement = $this->announcement(self::TRIX);
-        $this->migration->up();
+        $this->migrate('up');
 
-        $this->migration->down();
+        $this->migrate('down');
 
         $this->assertSame(self::TRIX, $announcement->refresh()->content);
         $this->assertFalse(Schema::hasTable('announcements_trix_content_backup'));
@@ -97,5 +97,19 @@ final class ConvertAnnouncementContentToTiptapTest extends ModuleTestCase
             'priority' => 5,
             'is_active' => true,
         ])->refresh();
+    }
+
+    /**
+     * The file returns an anonymous Migration: up() and down() are not declared on the base class.
+     */
+    private function migrate(string $direction): void
+    {
+        $step = [$this->migration, $direction];
+
+        if (! is_callable($step)) {
+            $this->fail("The migration has no {$direction}()");
+        }
+
+        $step();
     }
 }
