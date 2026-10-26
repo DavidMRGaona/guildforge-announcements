@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Announcements\Application\DTOs;
 
+use App\Application\Services\TimezoneServiceInterface;
 use Modules\Announcements\Domain\Entities\Announcement;
 
 final readonly class AnnouncementResponseDTO
@@ -27,6 +28,8 @@ final readonly class AnnouncementResponseDTO
 
     public static function fromEntity(Announcement $announcement): self
     {
+        $timezone = app(TimezoneServiceInterface::class);
+
         return new self(
             id: $announcement->id()->value,
             title: $announcement->title(),
@@ -36,12 +39,12 @@ final readonly class AnnouncementResponseDTO
             priority: $announcement->priority()->value,
             backgroundColor: $announcement->backgroundColor(),
             textColor: $announcement->textColor(),
-            startsAt: $announcement->startsAt()?->format('c'),
-            endsAt: $announcement->endsAt()?->format('c'),
+            startsAt: $timezone->iso($announcement->startsAt()),
+            endsAt: $timezone->iso($announcement->endsAt()),
             isActive: $announcement->isActive(),
             isDismissible: $announcement->isDismissible(),
-            createdAt: $announcement->createdAt()?->format('c'),
-            updatedAt: $announcement->updatedAt()?->format('c'),
+            createdAt: $timezone->iso($announcement->createdAt()),
+            updatedAt: $timezone->iso($announcement->updatedAt()),
         );
     }
 

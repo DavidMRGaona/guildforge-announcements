@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Announcements\Infrastructure\Persistence\Eloquent\Models;
 
+use App\Infrastructure\Persistence\Eloquent\Concerns\StoresInstantsInStorageTimezone;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -29,6 +30,7 @@ use Modules\Announcements\Domain\Enums\AnnouncementVisibility;
 final class AnnouncementModel extends Model
 {
     use HasUuids;
+    use StoresInstantsInStorageTimezone;
 
     protected $table = 'announcements_announcements';
 
