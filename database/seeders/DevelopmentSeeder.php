@@ -93,7 +93,7 @@ final class DevelopmentSeeder extends Seeder
                 'is_active' => true,
                 'is_dismissible' => true,
                 'starts_at' => $today->modify('+10 days'),
-                'ends_at' => $today->modify('+18 days')->modify('-1 second'),
+                'ends_at' => $today->modify('+17 days')->setTime(23, 59, 59),
             ],
             [
                 'title' => 'Aviso con colores personalizados',
