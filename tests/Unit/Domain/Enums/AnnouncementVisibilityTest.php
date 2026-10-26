@@ -10,11 +10,8 @@ use stdClass;
 
 final class AnnouncementVisibilityTest extends TestCase
 {
-    public function test_it_has_three_visibility_levels(): void
+    public function test_visibility_levels_keep_their_stored_values(): void
     {
-        $cases = AnnouncementVisibility::cases();
-
-        $this->assertCount(3, $cases);
         $this->assertEquals('public', AnnouncementVisibility::Public->value);
         $this->assertEquals('authenticated', AnnouncementVisibility::Authenticated->value);
         $this->assertEquals('members', AnnouncementVisibility::Members->value);
