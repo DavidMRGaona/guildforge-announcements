@@ -61,7 +61,7 @@ final class AnnouncementSlotsTest extends ModuleTestCase
 
     public function test_banner_slots_receive_no_settings_when_none_are_saved(): void
     {
-        config()->set('modules.settings.announcements', null);
+        config()->set('modules.settings.announcements');
 
         foreach ($this->slots() as $slot) {
             $this->assertArrayNotHasKey('settings', $slot->props);

@@ -114,8 +114,6 @@ final class AnnouncementTest extends TestCase
     {
         $announcement = $this->createAnnouncement(
             isActive: true,
-            startsAt: null,
-            endsAt: null,
         );
 
         $this->assertTrue($announcement->isCurrentlyValid());
@@ -170,7 +168,6 @@ final class AnnouncementTest extends TestCase
         $announcement = $this->createAnnouncement(
             isActive: true,
             startsAt: $now->modify('-1 day'),
-            endsAt: null,
         );
 
         $this->assertTrue($announcement->isCurrentlyValid());
@@ -181,7 +178,6 @@ final class AnnouncementTest extends TestCase
         $now = new DateTimeImmutable;
         $announcement = $this->createAnnouncement(
             isActive: true,
-            startsAt: null,
             endsAt: $now->modify('+1 day'),
         );
 
