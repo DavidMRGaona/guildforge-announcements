@@ -20,7 +20,7 @@ final class AnnouncementContentConversionTest extends ModuleTestCase
     use InteractsWithModulePanel;
 
     // Trix markup as the Filament 3 editor saved it, with every tool the resource offers
-    private const TRIX = '<div>Primera línea<br>segunda línea</div><div><br></div><h1>Título</h1>'
+    private const string TRIX = '<div>Primera línea<br>segunda línea</div><div><br></div><h1>Título</h1>'
         .'<div><strong>negrita</strong> <em>cursiva</em> <del>tachado</del> <a href="https://example.test">enlace</a></div>'
         .'<ul><li>uno</li><li>dos</li></ul><ol><li>primero</li></ol><blockquote>cita</blockquote><pre>código</pre>';
 

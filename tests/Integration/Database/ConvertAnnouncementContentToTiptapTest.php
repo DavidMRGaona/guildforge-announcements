@@ -17,9 +17,9 @@ use Tests\Support\Modules\ModuleTestCase;
  */
 final class ConvertAnnouncementContentToTiptapTest extends ModuleTestCase
 {
-    private const TRIX = '<div>Primera línea<br>segunda línea</div>';
+    private const string TRIX = '<div>Primera línea<br>segunda línea</div>';
 
-    private const CONVERTED = '<p>Primera línea<br>segunda línea</p>';
+    private const string CONVERTED = '<p>Primera línea<br>segunda línea</p>';
 
     protected ?string $moduleName = 'announcements';
 
