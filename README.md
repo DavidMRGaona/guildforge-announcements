@@ -16,10 +16,12 @@ Anuncios para la web pública de GuildForge. Se crean en el panel de administrac
 
 ## Requisitos
 
-- GuildForge core `^3.8` (rol de socio configurable)
+- GuildForge core `^3.22` (rol de socio configurable, fechas en UTC)
 - PHP >= 8.5, Laravel >= 13, Filament 5
 
 El core rechaza el módulo si no se cumplen (`module.json` → `requires`).
+
+Las fechas de vigencia se guardan en la zona de almacenamiento del sitio (UTC cuando el core lo indica) y el panel y la API las muestran en la zona de visualización (Europe/Madrid). El módulo declara `"storesUtc": true`.
 
 ## Instalación
 

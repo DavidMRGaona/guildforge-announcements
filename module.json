@@ -7,8 +7,9 @@
   "provider": "AnnouncementsServiceProvider",
   "description": "Sistema de anuncios para la asociación",
   "author": "GuildForge",
+  "storesUtc": true,
   "requires": {
-    "core": "^3.21",
+    "core": "^3.22",
     "filament": "^5.0",
     "php": ">=8.5",
     "laravel": ">=13.0"

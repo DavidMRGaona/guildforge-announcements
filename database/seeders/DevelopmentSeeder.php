@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Announcements\Database\Seeders;
 
+use App\Application\Services\TimezoneServiceInterface;
 use Illuminate\Database\Seeder;
 use Modules\Announcements\Domain\Enums\AnnouncementPosition;
 use Modules\Announcements\Domain\Enums\AnnouncementVisibility;
@@ -34,6 +35,9 @@ final class DevelopmentSeeder extends Seeder
      */
     private function seedAnnouncements(): void
     {
+        // Calendar days of the site, whatever zone the dates are stored in
+        $today = app(TimezoneServiceInterface::class)->today();
+
         $announcements = [
             [
                 'title' => 'Bienvenida a la temporada de otoño',
@@ -88,8 +92,8 @@ final class DevelopmentSeeder extends Seeder
                 'priority' => 5,
                 'is_active' => true,
                 'is_dismissible' => true,
-                'starts_at' => now()->addDays(10)->startOfDay(),
-                'ends_at' => now()->addDays(17)->endOfDay(),
+                'starts_at' => $today->modify('+10 days'),
+                'ends_at' => $today->modify('+18 days')->modify('-1 second'),
             ],
             [
                 'title' => 'Aviso con colores personalizados',
