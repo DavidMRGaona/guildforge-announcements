@@ -44,6 +44,8 @@ function handleClose(): void {
                 >
                     {{ announcement.title }}
                 </h3>
+                <!-- The server sanitizes the content (EloquentAnnouncementRepository) -->
+                <!-- eslint-disable vue/no-v-html -->
                 <div
                     :class="[
                         'prose prose-sm max-w-none',
@@ -51,6 +53,7 @@ function handleClose(): void {
                     ]"
                     v-html="announcement.content"
                 />
+                <!-- eslint-enable vue/no-v-html -->
             </div>
             <button
                 v-if="showCloseButton"
