@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Announcements\Infrastructure\Persistence\Eloquent\Repositories;
 
+use App\Infrastructure\Support\SanitizesHtml;
 use DateTimeImmutable;
 use Modules\Announcements\Domain\Entities\Announcement;
 use Modules\Announcements\Domain\Enums\AnnouncementPosition;
@@ -16,6 +17,8 @@ use Modules\Announcements\Infrastructure\Persistence\Eloquent\Models\Announcemen
 
 final class EloquentAnnouncementRepository implements AnnouncementRepositoryInterface
 {
+    use SanitizesHtml;
+
     public function save(Announcement $announcement): void
     {
         AnnouncementModel::updateOrCreate(
@@ -99,7 +102,8 @@ final class EloquentAnnouncementRepository implements AnnouncementRepositoryInte
         return new Announcement(
             id: AnnouncementId::fromString($model->id),
             title: $model->title,
-            content: $model->content,
+            // The rich editor's value can be tampered with and AnnouncementCard renders it as HTML
+            content: $this->sanitizeHtml($model->content),
             visibility: $visibility,
             position: $position,
             priority: new AnnouncementPriority($model->priority),
