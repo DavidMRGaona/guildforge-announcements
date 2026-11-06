@@ -12,11 +12,12 @@ Anuncios para la web pública de GuildForge. Se crean en el panel de administrac
 - Fechas de inicio y fin opcionales, además del interruptor de activo
 - Anuncios que el visitante puede cerrar (o no), a elección de cada anuncio
 - Rutas JSON de solo lectura (`/anuncios`)
+- Guías de ayuda para la web y el panel (base de conocimiento del core), con el botón de ayuda en las páginas del recurso
 - Traducciones en español e inglés
 
 ## Requisitos
 
-- GuildForge core `^3.22` (rol de socio configurable, fechas en UTC)
+- GuildForge core `^3.35` (base de conocimiento, rol de socio configurable, fechas en UTC)
 - PHP >= 8.5, Laravel >= 13, Filament 5
 
 El core rechaza el módulo si no se cumplen (`module.json` → `requires`).
