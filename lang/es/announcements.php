@@ -54,12 +54,12 @@ return [
 
     // Position options
     'position' => [
-        'before_header' => 'Antes del header',
-        'after_header' => 'Después del header',
+        'before_header' => 'Antes de la cabecera',
+        'after_header' => 'Después de la cabecera',
         'before_content' => 'Antes del contenido',
         'after_content' => 'Después del contenido',
-        'before_footer' => 'Antes del footer',
-        'after_footer' => 'Después del footer',
+        'before_footer' => 'Antes del pie de página',
+        'after_footer' => 'Después del pie de página',
     ],
 
     // Actions
