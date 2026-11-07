@@ -17,9 +17,12 @@ final class AnnouncementPolicy
         return $this->authorize($user, 'announcements:announcements.view_any');
     }
 
+    /**
+     * No page shows a single announcement: whoever sees the list may see each one in it.
+     */
     public function view(UserModel $user, AnnouncementModel $announcement): bool
     {
-        return $this->authorize($user, 'announcements:announcements.view');
+        return $this->viewAny($user);
     }
 
     public function create(UserModel $user): bool

@@ -63,7 +63,6 @@ return [
     // Permissions
     'permissions' => [
         'view_any' => 'View announcements list',
-        'view' => 'View announcement detail',
         'create' => 'Create announcements',
         'update' => 'Edit announcements',
         'delete' => 'Delete announcements',
