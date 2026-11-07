@@ -50,6 +50,16 @@ return [
         'not_found' => 'Announcement not found.',
     ],
 
+    // Position options
+    'position' => [
+        'before_header' => 'Before the header',
+        'after_header' => 'After the header',
+        'before_content' => 'Before the content',
+        'after_content' => 'After the content',
+        'before_footer' => 'Before the footer',
+        'after_footer' => 'After the footer',
+    ],
+
     // Permissions
     'permissions' => [
         'view_any' => 'View announcements list',
