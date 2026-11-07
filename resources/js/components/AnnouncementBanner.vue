@@ -2,6 +2,7 @@
 import { ChevronLeft, ChevronRight, X } from '@lucide/vue';
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { stripHtml } from '../utils/stripHtml';
 import type {
     Announcement,
     AnnouncementPosition,
@@ -167,10 +168,6 @@ function getAnnouncementStyle(announcement: Announcement | null): Record<string,
 function hasCustomColors(announcement: Announcement | null): boolean {
     if (!announcement) return false;
     return Boolean(announcement.background_color || announcement.text_color);
-}
-
-function stripHtml(html: string): string {
-    return html.replace(/<[^>]*>/g, '');
 }
 
 watch(
