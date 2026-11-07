@@ -121,12 +121,13 @@ Por defecto el banner está activado, con rotación automática cada 5000 ms.
 | Permiso | Descripción | Editor |
 |---------|-------------|--------|
 | `announcements.view_any` | Ver el listado de anuncios (y el menú) | Sí |
-| `announcements.view` | Ver un anuncio | Sí |
 | `announcements.create` | Crear anuncios | Sí |
 | `announcements.update` | Editar anuncios | Sí |
 | `announcements.delete` | Eliminar anuncios | No |
 
 Los administradores tienen todos los permisos. Se asignan a otros roles desde el editor de roles del panel.
+
+`announcements.view` («Ver detalle de anuncio») se retiró porque no lo pedía ninguna página: ver un anuncio exige `announcements.view_any`. El core nunca borra permisos, así que en los sitios que lo concedieron la fila y la concesión siguen en la base de datos, pero ya no hacen nada, no salen en el editor de roles y guardar un rol las conserva.
 
 ## Estructura
 

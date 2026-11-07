@@ -137,13 +137,6 @@ final class AnnouncementsServiceProvider extends ModuleServiceProvider
                 roles: ['editor'],
             ),
             new PermissionDTO(
-                name: 'announcements.view',
-                label: __('announcements::announcements.permissions.view'),
-                group: __('announcements::announcements.navigation'),
-                module: 'announcements',
-                roles: ['editor'],
-            ),
-            new PermissionDTO(
                 name: 'announcements.create',
                 label: __('announcements::announcements.permissions.create'),
                 group: __('announcements::announcements.navigation'),

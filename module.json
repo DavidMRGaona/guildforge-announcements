@@ -18,7 +18,6 @@
   "provides": {
     "permissions": [
       "announcements.view_any",
-      "announcements.view",
       "announcements.create",
       "announcements.update",
       "announcements.delete"
