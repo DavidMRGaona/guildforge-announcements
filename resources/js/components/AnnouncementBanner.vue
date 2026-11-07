@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ChevronLeft, ChevronRight, X } from '@lucide/vue';
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import type {
     Announcement,
     AnnouncementPosition,
@@ -25,6 +26,8 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
     dismiss: [id: string];
 }>();
+
+const { t } = useI18n();
 
 const STORAGE_KEY = 'guildforge_dismissed_announcements';
 
@@ -222,6 +225,7 @@ onUnmounted(() => {
                     <button
                         v-if="hasMultiple"
                         type="button"
+                        :aria-label="t('announcementsBanner.previous')"
                         class="p-1 rounded-full hover:bg-current/20 transition-colors flex-shrink-0"
                         @click="previousAnnouncement"
                     >
@@ -254,6 +258,7 @@ onUnmounted(() => {
                     <button
                         v-if="hasMultiple"
                         type="button"
+                        :aria-label="t('announcementsBanner.next')"
                         class="p-1 rounded-full hover:bg-current/20 transition-colors flex-shrink-0"
                         @click="nextAnnouncement"
                     >
@@ -264,6 +269,7 @@ onUnmounted(() => {
                     <button
                         v-if="canDismissCurrent"
                         type="button"
+                        :aria-label="t('announcementsBanner.close')"
                         class="p-1 rounded-full hover:bg-current/20 transition-colors flex-shrink-0"
                         @click="dismissCurrent"
                     >
@@ -277,6 +283,8 @@ onUnmounted(() => {
                         v-for="(_, index) in visibleAnnouncements"
                         :key="index"
                         type="button"
+                        :aria-label="t('announcementsBanner.goTo', { n: index + 1 })"
+                        :aria-current="index === currentIndex ? 'true' : undefined"
                         :class="[
                             'w-2 h-2 rounded-full transition-all',
                             index === currentIndex
