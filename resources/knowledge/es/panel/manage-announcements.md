@@ -17,11 +17,11 @@ Un anuncio se puede cambiar en cualquier momento, y los cambios se ven en la web
 
 En el menú lateral, abre **Comunicación** y elige **Anuncios**. La lista sale ordenada por **Prioridad**, de más a menos, y muestra si cada uno está **Activo**.
 
-Puedes filtrarla por **Visibilidad**, por **Posición** y por **Estado** (**Activos** o **Inactivos**). Las columnas de **Posición**, **Color de fondo**, las fechas y **Creado** están ocultas: puedes mostrarlas desde el selector de columnas de la tabla.
+Puedes filtrarla por **Visibilidad**, por **Posición** y por **Estado** (**Activos** o **Inactivos**). Las columnas de **Posición**, **Color de fondo**, las fechas y **Creado** están ocultas: puedes mostrarlas desde el selector de columnas de la tabla. En una ventana estrecha la lista también oculta **Visibilidad** y **Prioridad** para que quepa la fila; ábrela para verlas.
 
 ## Cambiar un anuncio
 
-1. Pulsa **Editar** en su fila.
+1. Abre el menú **⋯** de su fila y pulsa **Editar**.
 2. Cambia lo que necesites. Las secciones **Estilo personalizado** y **Programación** están plegadas: ábrelas para ver sus campos.
 3. Pulsa **Guardar cambios**.
 
@@ -43,7 +43,7 @@ Abre el anuncio, desmarca **Activo** y pulsa **Guardar cambios**. Deja de salir 
 
 ## Borrarlo
 
-Pulsa **Borrar** en su fila, o dentro del anuncio, y confirma. Para borrar varios a la vez, marca sus casillas y usa **Borrar seleccionados** en las acciones de la tabla.
+Pulsa **Borrar** en el menú **⋯** de su fila, o dentro del anuncio, y confirma. Para borrar varios a la vez, marca sus casillas y usa **Borrar seleccionados** en las acciones de la tabla.
 
 > [!WARNING]
 > Borrar un anuncio no se puede deshacer. Si puede que lo necesites otra vez, desactívalo en lugar de borrarlo.

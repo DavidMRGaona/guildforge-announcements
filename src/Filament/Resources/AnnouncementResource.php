@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Announcements\Filament\Resources;
 
 use App\Filament\Resources\BaseResource;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -176,7 +177,8 @@ class AnnouncementResource extends BaseResource
                     ->label(__('announcements::announcements.fields.title'))
                     ->searchable()
                     ->sortable()
-                    ->limit(50),
+                    ->limit(50)
+                    ->wrap(),
 
                 TextColumn::make('position')
                     ->label(__('announcements::announcements.fields.position'))
@@ -197,12 +199,14 @@ class AnnouncementResource extends BaseResource
                         AnnouncementVisibility::Public => 'success',
                         AnnouncementVisibility::Authenticated => 'warning',
                         AnnouncementVisibility::Members => 'info',
-                    }),
+                    })
+                    ->visibleFrom('md'),
 
                 TextColumn::make('priority')
                     ->label(__('announcements::announcements.fields.priority'))
                     ->sortable()
-                    ->alignCenter(),
+                    ->alignCenter()
+                    ->visibleFrom('sm'),
 
                 ColorColumn::make('background_color')
                     ->label(__('announcements::announcements.fields.background_color'))
@@ -250,9 +254,12 @@ class AnnouncementResource extends BaseResource
                     ->trueLabel(__('announcements::announcements.filters.active'))
                     ->falseLabel(__('announcements::announcements.filters.inactive')),
             ])
+            // One menu: two labelled actions made the table overflow its container
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
+                ActionGroup::make([
+                    EditAction::make(),
+                    DeleteAction::make(),
+                ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
