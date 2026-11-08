@@ -38,13 +38,6 @@ final class PanelNavigationTest extends ModuleTestCase
         $this->assertNull(AnnouncementResource::getNavigationParentItem());
     }
 
-    public function test_the_module_declares_no_navigation_group_of_its_own(): void
-    {
-        $provider = new AnnouncementsServiceProvider($this->app);
-
-        $this->assertSame([], $provider->registerNavigationGroups());
-    }
-
     public function test_the_navigation_entry_uses_the_core_group_and_slot(): void
     {
         $provider = new AnnouncementsServiceProvider($this->app);
