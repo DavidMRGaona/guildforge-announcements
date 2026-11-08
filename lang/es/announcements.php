@@ -5,7 +5,6 @@ declare(strict_types=1);
 return [
     // Navigation
     'navigation' => 'Anuncios',
-    'navigation_group' => 'Comunicación',
 
     // Model labels
     'model' => [
