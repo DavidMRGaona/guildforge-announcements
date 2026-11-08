@@ -9,7 +9,7 @@ return [
 
     // Model labels
     'model' => [
-        'singular' => 'Announcement',
+        'singular' => 'announcement',
         'plural' => 'Announcements',
     ],
 
