@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Modules\Announcements\Tests\Feature\Filament;
 
+use App\Filament\Actions\RowDetailsAction;
 use Filament\Actions\ActionGroup;
+use Filament\Support\Enums\Alignment;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
@@ -42,6 +44,13 @@ final class PanelTableFitsTest extends ModuleTestCase
 
         $this->assertCount(1, $actions);
         $this->assertInstanceOf(ActionGroup::class, $actions[0]);
+        $this->assertSame([RowDetailsAction::NAME, 'edit', 'delete'], array_keys($actions[0]->getFlatActions()));
+        $this->assertNotNull($this->table()->getAction(RowDetailsAction::NAME));
+    }
+
+    public function test_the_priority_counter_is_centred(): void
+    {
+        $this->assertSame(Alignment::Center, $this->table()->getColumn('priority')?->getAlignment());
     }
 
     /**

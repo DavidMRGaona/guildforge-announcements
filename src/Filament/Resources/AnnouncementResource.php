@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Announcements\Filament\Resources;
 
+use App\Filament\Actions\RowDetailsAction;
 use App\Filament\Resources\BaseResource;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
@@ -257,6 +258,7 @@ class AnnouncementResource extends BaseResource
             // One menu: two labelled actions made the table overflow its container
             ->recordActions([
                 ActionGroup::make([
+                    RowDetailsAction::make(),
                     EditAction::make(),
                     DeleteAction::make(),
                 ]),
