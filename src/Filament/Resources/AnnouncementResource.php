@@ -6,6 +6,7 @@ namespace Modules\Announcements\Filament\Resources;
 
 use App\Filament\Actions\RowDetailsAction;
 use App\Filament\Resources\BaseResource;
+use App\Filament\Support\PanelNavigationGroup;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -38,11 +39,11 @@ class AnnouncementResource extends BaseResource
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-megaphone';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 10;
 
-    public static function getNavigationGroup(): ?string
+    public static function getNavigationGroup(): string
     {
-        return __('announcements::announcements.navigation_group');
+        return PanelNavigationGroup::Communication->getLabel();
     }
 
     public static function getNavigationLabel(): string

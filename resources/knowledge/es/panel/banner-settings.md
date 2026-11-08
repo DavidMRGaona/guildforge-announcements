@@ -15,7 +15,7 @@ Estos ajustes valen para todos los anuncios a la vez. Lo de cada anuncio (texto,
 
 ## Abrir los ajustes
 
-1. En el menú lateral, abre **Administración** y elige **Módulos**.
+1. En el menú lateral, abre **Sistema** y elige **Módulos**.
 2. En la tarjeta de **Anuncios**, pulsa **Configuración**.
 3. Cambia los ajustes de **Visualización**.
 4. Pulsa **Guardar configuración**.

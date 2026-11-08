@@ -7,6 +7,7 @@ namespace Modules\Announcements;
 use App\Application\Modules\DTOs\NavigationItemDTO;
 use App\Application\Modules\DTOs\PermissionDTO;
 use App\Application\Modules\DTOs\SlotRegistrationDTO;
+use App\Filament\Support\PanelNavigationGroup;
 use App\Modules\ModuleServiceProvider;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -110,17 +111,13 @@ final class AnnouncementsServiceProvider extends ModuleServiceProvider
     }
 
     /**
-     * Register navigation groups provided by this module.
+     * The sidebar groups belong to the core (PanelNavigationGroup): the module declares none.
      *
      * @return array<string, array{icon?: string, sort?: int}>
      */
     public function registerNavigationGroups(): array
     {
-        return [
-            __('announcements::announcements.navigation_group') => [
-                'sort' => 20, // After 'Contenido' (10), before 'Páginas' (30)
-            ],
-        ];
+        return [];
     }
 
     /**
@@ -170,8 +167,8 @@ final class AnnouncementsServiceProvider extends ModuleServiceProvider
                 label: __('announcements::announcements.navigation'),
                 route: 'filament.admin.resources.announcements.index',
                 icon: 'heroicon-o-megaphone',
-                group: __('announcements::announcements.navigation_group'),
-                sort: 1,
+                group: PanelNavigationGroup::Communication->getLabel(),
+                sort: 10,
                 permissions: ['announcements:announcements.view_any'],
                 module: 'announcements',
             ),
