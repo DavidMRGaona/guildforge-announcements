@@ -111,16 +111,6 @@ final class AnnouncementsServiceProvider extends ModuleServiceProvider
     }
 
     /**
-     * The sidebar groups belong to the core (PanelNavigationGroup): the module declares none.
-     *
-     * @return array<string, array{icon?: string, sort?: int}>
-     */
-    public function registerNavigationGroups(): array
-    {
-        return [];
-    }
-
-    /**
      * @return array<PermissionDTO>
      */
     public function registerPermissions(): array
