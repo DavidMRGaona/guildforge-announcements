@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Modules\Announcements\Infrastructure\Content;
 
 use App\Application\Media\Services\MediaIndexerInterface;
+use App\Infrastructure\Media\Sources\StoredMediaIdPrefilter;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Filesystem\Cloud;
 use Illuminate\Contracts\Filesystem\Filesystem;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use League\MimeTypeDetection\FinfoMimeTypeDetector;
@@ -27,8 +29,10 @@ use Throwable;
  *
  * - Safe to run again: images already on Cloudinary are skipped, and a moved file is named after
  *   its content, so an upload repeated after an interrupted run overwrites the same asset.
- * - A local copy is deleted only once every announcement using it is saved; a failed upload or
- *   save leaves the announcement and its local copy as they were.
+ * - A local copy is deleted only once every announcement using it is saved, and only when no
+ *   other text names it: the core's rich texts share the same local folder, and an image copied
+ *   from an article keeps its local URL. A failed upload or save leaves the announcement and its
+ *   local copy as they were.
  * - Announcements are written straight to the table: moving an image is not an edit (no
  *   updated_at, no model events), and only if nobody saved the announcement meanwhile. Their
  *   media usages are refreshed right after, as no model event does it.
@@ -42,6 +46,24 @@ final readonly class ContentImageMover implements ContentImageMoverInterface
     private const string TABLE = 'announcements_announcements';
 
     private const string COLUMN = 'content';
+
+    /**
+     * Core texts written with editors that stored images on the same local disk, which may still
+     * name a local copy (until the core's own move runs, or as a link)
+     */
+    private const array CORE_TEXTS = [
+        ['table' => 'events', 'column' => 'description'],
+        ['table' => 'articles', 'column' => 'content'],
+        ['table' => 'knowledge_guides', 'column' => 'body'],
+    ];
+
+    private const array CORE_SETTINGS = [
+        'about_history',
+        'legal_privacy_content',
+        'legal_notice_content',
+        'legal_cookies_content',
+        'legal_terms_content',
+    ];
 
     /** Name space of the moved files' UUIDs (version 5): same content, same name */
     private const string NAMESPACE = 'c3a8e2f1-7b4d-5a9e-8c6f-2d1e0b9a7f43';
@@ -135,15 +157,25 @@ final readonly class ContentImageMover implements ContentImageMoverInterface
             }
         }
 
+        $kept = [];
+
         if (! $dryRun) {
             foreach ($saved as $path => $count) {
-                if ($count === $references[$path] && ! $this->local()->delete($path)) {
+                if ($count !== $references[$path]) {
+                    continue;
+                }
+
+                $usedBy = $this->usedElsewhere($path);
+
+                if ($usedBy !== null) {
+                    $kept[] = $path.' ('.$usedBy.')';
+                } elseif (! $this->local()->delete($path)) {
                     $failed[] = $path.' (moved, but the local copy could not be deleted)';
                 }
             }
         }
 
-        return new ContentImageMoveReportDTO(count($announcements), $moved, $broken, $failed);
+        return new ContentImageMoveReportDTO(count($announcements), $moved, $broken, $failed, $kept);
     }
 
     /**
@@ -163,6 +195,57 @@ final readonly class ContentImageMover implements ContentImageMoverInterface
         }
 
         return $announcements;
+    }
+
+    /**
+     * The first text, after the announcements were saved, that still names the local copy (an
+     * announcement linking to it, or a core text), or null when none does. Any form counts, so a
+     * near miss keeps the copy; a check that fails keeps it too.
+     */
+    private function usedElsewhere(string $path): ?string
+    {
+        $texts = [...self::CORE_TEXTS, ['table' => self::TABLE, 'column' => self::COLUMN]];
+
+        try {
+            foreach ($texts as ['table' => $table, 'column' => $column]) {
+                $rows = $this->likePath(DB::table($table)->whereNotNull($column), $column, $path)->orderBy('id')->get(['id', $column]);
+
+                foreach ($rows as $row) {
+                    if ($this->names((string) $row->{$column}, $path)) {
+                        return ($table === self::TABLE ? 'announcements' : $table.'.'.$column).'#'.$row->id;
+                    }
+                }
+            }
+
+            foreach (self::CORE_SETTINGS as $key) {
+                $value = DB::table('settings')->where('key', $key)->value('value');
+
+                if (is_string($value) && $this->names($value, $path)) {
+                    return 'settings#'.$key;
+                }
+            }
+        } catch (Throwable $e) {
+            return 'could not be checked: '.$e->getMessage();
+        }
+
+        return null;
+    }
+
+    /**
+     * Narrows the rows to those holding the longest plain run of the path (letters, digits, "-" and
+     * "_", never encoded); the caller confirms. "_" is left as the LIKE wildcard: it only lets more
+     * rows through. A path without a plain run reads every row.
+     */
+    private function likePath(Builder $query, string $column, string $path): Builder
+    {
+        $piece = StoredMediaIdPrefilter::longestPlainRun($path);
+
+        return $piece === '' ? $query : $query->where($column, 'like', '%'.$piece.'%');
+    }
+
+    private function names(string $html, string $path): bool
+    {
+        return str_contains(rawurldecode(html_entity_decode($html, ENT_QUOTES | ENT_HTML5, 'UTF-8')), $path);
     }
 
     /**

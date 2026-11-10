@@ -130,7 +130,7 @@ php artisan announcements:move-editor-images-to-cloudinary --dry-run
 php artisan announcements:move-editor-images-to-cloudinary
 ```
 
-Con `--dry-run` solo lista lo que movería. Se puede repetir sin riesgo: lo ya movido no se toca y un mismo archivo siempre acaba en el mismo destino. La copia local se borra solo cuando todos los avisos que la usan están guardados. Si una subida o un guardado falla, ese aviso y su copia local quedan como estaban y el comando termina con error.
+Con `--dry-run` solo lista lo que movería. Se puede repetir sin riesgo: lo ya movido no se toca y un mismo archivo siempre acaba en el mismo destino. La copia local se borra solo cuando todos los avisos que la usan están guardados y ningún otro texto la nombra: ni otro aviso (por ejemplo, en un enlace) ni un texto del core (eventos, artículos, guías del sitio, textos legales y «Nosotros»), que comparten la misma carpeta local. Si otro texto la nombra, la copia se conserva y el comando la lista. Si una subida o un guardado falla, ese aviso y su copia local quedan como estaban y el comando termina con error.
 
 ## Permisos
 

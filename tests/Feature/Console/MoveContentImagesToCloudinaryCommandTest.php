@@ -32,7 +32,7 @@ final class MoveContentImagesToCloudinaryCommandTest extends ModuleTestCase
 
     public function test_a_dry_run_lists_what_would_move(): void
     {
-        $this->mover(true, new ContentImageMoveReportDTO(4, ['announcements#a1: /storage/x.png → announcements/content/2026/11/u.png'], ['announcements#a2: /storage/missing.png'], []));
+        $this->mover(true, new ContentImageMoveReportDTO(4, ['announcements#a1: /storage/x.png → announcements/content/2026/11/u.png'], ['announcements#a2: /storage/missing.png'], [], []));
 
         $this->artisanCommand(self::COMMAND, ['--dry-run' => true])
             ->expectsOutput('  announcements#a1: /storage/x.png → announcements/content/2026/11/u.png')
@@ -44,7 +44,7 @@ final class MoveContentImagesToCloudinaryCommandTest extends ModuleTestCase
 
     public function test_a_run_reports_what_moved(): void
     {
-        $this->mover(false, new ContentImageMoveReportDTO(4, ['announcements#a1: /storage/x.png → announcements/content/2026/11/u.png'], [], []));
+        $this->mover(false, new ContentImageMoveReportDTO(4, ['announcements#a1: /storage/x.png → announcements/content/2026/11/u.png'], [], [], []));
 
         $this->artisanCommand(self::COMMAND)
             ->expectsOutput('  announcements#a1: /storage/x.png → announcements/content/2026/11/u.png')
@@ -55,13 +55,24 @@ final class MoveContentImagesToCloudinaryCommandTest extends ModuleTestCase
 
     public function test_a_failure_ends_with_an_error(): void
     {
-        $this->mover(false, new ContentImageMoveReportDTO(4, [], [], ['announcements#a1: /storage/x.png (Upload refused)']));
+        $this->mover(false, new ContentImageMoveReportDTO(4, [], [], ['announcements#a1: /storage/x.png (Upload refused)'], []));
 
         $this->artisanCommand(self::COMMAND)
             ->expectsOutput('Not moved (the announcement and its local copy are kept; run the command again):')
             ->expectsOutput('  announcements#a1: /storage/x.png (Upload refused)')
             ->expectsOutput('4 announcement(s) checked, 0 image(s) moved, 0 broken reference(s), 1 failure(s).')
             ->assertExitCode(1);
+    }
+
+    public function test_kept_local_copies_are_listed_without_failing(): void
+    {
+        $this->mover(false, new ContentImageMoveReportDTO(1, ['announcements#a1: /storage/x.png → announcements/content/2026/11/u.png'], [], [], ['x.png (articles.content#b2)']));
+
+        $this->artisanCommand(self::COMMAND)
+            ->expectsOutput('Local copies kept (still used outside the moved announcements):')
+            ->expectsOutput('  x.png (articles.content#b2)')
+            ->expectsOutput('1 announcement(s) checked, 1 image(s) moved, 0 broken reference(s), 0 failure(s).')
+            ->assertExitCode(0);
     }
 
     public function test_the_command_moves_the_images_and_a_dry_run_before_it_does_not(): void

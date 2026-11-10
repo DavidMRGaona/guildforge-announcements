@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Modules\Announcements\Tests\Integration\Infrastructure\Content;
 
 use App\Application\Media\Services\MediaIndexerInterface;
+use App\Application\Services\SettingsServiceInterface;
+use App\Infrastructure\Persistence\Eloquent\Models\ArticleModel;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -58,6 +60,7 @@ final class ContentImageMoverTest extends ModuleTestCase
         $this->assertSame(['announcements#'.$announcement->id.': '.$this->localUrl('3fJk2Lm9Qx.png').' → '.$path], $report->moved);
         $this->assertSame([], $report->broken);
         $this->assertSame([], $report->failed);
+        $this->assertSame([], $report->kept);
     }
 
     public function test_a_relative_url_without_id_moves_and_gains_its_id(): void
@@ -208,6 +211,46 @@ final class ContentImageMoverTest extends ModuleTestCase
         Storage::disk('public')->assertMissing('shared.png');
         $this->assertCount(1, $this->images->allFiles());
         $this->assertCount(2, $report->moved);
+    }
+
+    public function test_a_local_copy_a_core_text_still_uses_is_kept(): void
+    {
+        // An image copied from an article into an announcement keeps its local URL in both
+        $this->localFile('shared.png', 'png-bytes');
+        $article = ArticleModel::factory()->create(['content' => '<p><img src="/storage/shared.png" data-id="shared.png"></p>']);
+        $announcement = $this->announcement('<p><img src="/storage/shared.png"></p>');
+
+        $report = $this->mover()->move();
+
+        $this->assertStringContainsString('/announcements/content/', $this->content($announcement->id));
+        $this->assertSame('<p><img src="/storage/shared.png" data-id="shared.png"></p>', (string) DB::table('articles')->where('id', $article->id)->value('content'));
+        Storage::disk('public')->assertExists('shared.png');
+        $this->assertSame(['shared.png (articles.content#'.$article->id.')'], $report->kept);
+        $this->assertSame([], $report->failed);
+    }
+
+    public function test_a_local_copy_a_core_setting_still_uses_is_kept(): void
+    {
+        $this->localFile('con espacio.png', 'png-bytes');
+        app(SettingsServiceInterface::class)->set('about_history', '<p><img src="/storage/con%20espacio.png"></p>');
+        $this->announcement('<p><img src="/storage/con%20espacio.png"></p>');
+
+        $report = $this->mover()->move();
+
+        Storage::disk('public')->assertExists('con espacio.png');
+        $this->assertSame(['con espacio.png (settings#about_history)'], $report->kept);
+    }
+
+    public function test_a_local_copy_another_announcement_links_to_is_kept(): void
+    {
+        $this->localFile('cartel.png', 'png-bytes');
+        $this->announcement('<p><img src="/storage/cartel.png"></p>');
+        $linking = $this->announcement('<p><a href="/storage/cartel.png">Cartel</a></p>');
+
+        $report = $this->mover()->move();
+
+        Storage::disk('public')->assertExists('cartel.png');
+        $this->assertSame(['cartel.png (announcements#'.$linking->id.')'], $report->kept);
     }
 
     public function test_broken_references_are_reported_and_left_alone(): void

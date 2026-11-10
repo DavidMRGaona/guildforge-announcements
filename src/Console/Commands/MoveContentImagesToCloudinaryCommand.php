@@ -33,6 +33,7 @@ final class MoveContentImagesToCloudinaryCommand extends Command implements Isol
 
         $this->section('Broken references (left as they are):', $report->broken);
         $this->section('Not moved (the announcement and its local copy are kept; run the command again):', $report->failed);
+        $this->section('Local copies kept (still used outside the moved announcements):', $report->kept);
 
         $verb = $dryRun ? 'would move' : 'moved';
         $this->info(sprintf(
