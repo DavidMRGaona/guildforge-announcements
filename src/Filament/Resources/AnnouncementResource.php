@@ -28,6 +28,7 @@ use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Modules\Announcements\Domain\Enums\AnnouncementPosition;
 use Modules\Announcements\Domain\Enums\AnnouncementVisibility;
+use Modules\Announcements\Filament\Forms\ContentEditorImages;
 use Modules\Announcements\Filament\Resources\AnnouncementResource\Pages\CreateAnnouncement;
 use Modules\Announcements\Filament\Resources\AnnouncementResource\Pages\EditAnnouncement;
 use Modules\Announcements\Filament\Resources\AnnouncementResource\Pages\ListAnnouncements;
@@ -74,7 +75,7 @@ class AnnouncementResource extends BaseResource
                             ->maxLength(255)
                             ->columnSpanFull(),
 
-                        RichEditor::make('content')
+                        ContentEditorImages::configure(RichEditor::make('content'))
                             ->label(__('announcements::announcements.fields.content'))
                             ->placeholder(__('announcements::announcements.placeholders.content'))
                             ->required()

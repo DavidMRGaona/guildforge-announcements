@@ -12,12 +12,13 @@ Anuncios para la web pública de GuildForge. Se crean en el panel de administrac
 - Fechas de inicio y fin opcionales, además del interruptor de activo
 - Anuncios que el visitante puede cerrar (o no), a elección de cada anuncio
 - Rutas JSON de solo lectura (`/anuncios`)
+- Imágenes del texto en Cloudinary y fuente propia en la biblioteca de medios del panel
 - Guías de ayuda para la web y el panel (base de conocimiento del core), con el botón de ayuda en las páginas del recurso
 - Traducciones en español e inglés
 
 ## Requisitos
 
-- GuildForge core `^3.35` (base de conocimiento, rol de socio configurable, fechas en UTC)
+- GuildForge core `^3.53` (biblioteca de medios, base de conocimiento, rol de socio configurable, fechas en UTC)
 - PHP >= 8.5, Laravel >= 13, Filament 5
 
 El core rechaza el módulo si no se cumplen (`module.json` → `requires`).
@@ -116,6 +117,21 @@ Por defecto el banner está activado, con rotación automática cada 5000 ms.
 | `GET` | `/anuncios` | Anuncios vigentes visibles para el usuario actual (JSON) |
 | `GET` | `/anuncios/{id}` | Un anuncio (JSON); 404 si no está vigente o el usuario no puede verlo |
 
+### Imágenes en el texto
+
+Las imágenes que se pegan o arrastran al texto de un anuncio se suben a Cloudinary, a `announcements/content/<año>/<mes>`, con un nombre UUID. Solo se aceptan JPEG, PNG, WebP y GIF de hasta 2 MB, como en los editores del core. El HTML guarda la URL completa de entrega.
+
+La biblioteca de medios del panel (**Contenido** → **Biblioteca de medios**) muestra esas imágenes con el origen «Anuncios», el rol «En el texto», el título del aviso y el enlace para editarlo, si quien mira puede hacerlo. La fuente (`announcements.content`) reclama la carpeta `announcements/content/` y cuenta como uso cualquier URL de entrega del sitio que aparezca en el texto, esté en la carpeta que esté. Crear un aviso, cambiar su título o su texto y borrarlo actualiza los usos al momento. Los avisos borrados no se pueden recuperar, así que dejan de contar.
+
+Las imágenes que se pegaron antes de este cambio están en el almacenamiento local. Para moverlas a Cloudinary:
+
+```bash
+php artisan announcements:move-editor-images-to-cloudinary --dry-run
+php artisan announcements:move-editor-images-to-cloudinary
+```
+
+Con `--dry-run` solo lista lo que movería. Se puede repetir sin riesgo: lo ya movido no se toca y un mismo archivo siempre acaba en el mismo destino. La copia local se borra solo cuando todos los avisos que la usan están guardados. Si una subida o un guardado falla, ese aviso y su copia local quedan como estaban y el comando termina con error.
+
 ## Permisos
 
 | Permiso | Descripción | Editor |
@@ -150,10 +166,11 @@ announcements/
 │   └── web.php             # /anuncios
 ├── src/
 │   ├── Application/        # DTOs y servicios
+│   ├── Console/            # Comando que mueve las imágenes del texto a Cloudinary
 │   ├── Domain/             # Entidades, enums, value objects, repositorios
-│   ├── Filament/           # Recurso del panel
+│   ├── Filament/           # Recurso del panel, imágenes del editor y fuente de medios
 │   ├── Http/               # Controlador y requests
-│   ├── Infrastructure/     # Persistencia Eloquent
+│   ├── Infrastructure/     # Persistencia Eloquent, imágenes del texto y URL de medios
 │   └── Policies/
 ├── tests/
 │   ├── Feature/
