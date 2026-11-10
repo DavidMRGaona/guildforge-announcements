@@ -112,4 +112,10 @@ return [
         'content' => 'Escribe el contenido del anuncio...',
         'no_date' => 'Sin fecha',
     ],
+
+    // Media library (core#482)
+    'media' => [
+        'source' => 'Anuncios',
+        'role_in_text' => 'En el texto',
+    ],
 ];

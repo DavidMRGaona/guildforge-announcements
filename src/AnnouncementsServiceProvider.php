@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Modules\Announcements;
 
+use App\Application\Media\Contracts\MediaUsageSourceInterface;
 use App\Application\Modules\DTOs\NavigationItemDTO;
 use App\Application\Modules\DTOs\PermissionDTO;
 use App\Application\Modules\DTOs\SlotRegistrationDTO;
 use App\Filament\Support\PanelNavigationGroup;
+use App\Infrastructure\Media\Observers\RefreshMediaUsagesObserver;
 use App\Modules\ModuleServiceProvider;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -15,12 +17,18 @@ use Filament\Resources\Resource as FilamentResource;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
+use Illuminate\Database\Eloquent\Model;
 use Inertia\Inertia;
 use Modules\Announcements\Application\Services\AnnouncementService;
 use Modules\Announcements\Application\Services\AnnouncementServiceInterface;
+use Modules\Announcements\Application\Services\ContentImageMoverInterface;
+use Modules\Announcements\Console\Commands\MoveContentImagesToCloudinaryCommand;
+use Modules\Announcements\Domain\Content\ContentImages;
 use Modules\Announcements\Domain\Enums\AnnouncementPosition;
 use Modules\Announcements\Domain\Repositories\AnnouncementRepositoryInterface;
+use Modules\Announcements\Filament\Media\AnnouncementContentMediaSource;
 use Modules\Announcements\Filament\Resources\AnnouncementResource;
+use Modules\Announcements\Infrastructure\Content\ContentImageMover;
 use Modules\Announcements\Infrastructure\Persistence\Eloquent\Models\AnnouncementModel;
 use Modules\Announcements\Infrastructure\Persistence\Eloquent\Repositories\EloquentAnnouncementRepository;
 use Modules\Announcements\Policies\AnnouncementPolicy;
@@ -52,11 +60,19 @@ final class AnnouncementsServiceProvider extends ModuleServiceProvider
             AnnouncementServiceInterface::class,
             AnnouncementService::class
         );
+
+        $this->app->bind(ContentImageMoverInterface::class, ContentImageMover::class);
     }
 
     public function boot(): void
     {
         parent::boot();
+
+        $this->keepMediaUsagesUpToDate();
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([MoveContentImagesToCloudinaryCommand::class]);
+        }
 
         // Share announcements with Inertia if available
         if (class_exists(Inertia::class)) {
@@ -74,6 +90,36 @@ final class AnnouncementsServiceProvider extends ModuleServiceProvider
                 );
             });
         }
+    }
+
+    /**
+     * Creating or deleting an announcement refreshes its usages in the media library. An update refreshes
+     * them only when the title or the text changed (a usage carries the title); dates or colours do not.
+     * The "updated" event is used, not "saved": wasRecentlyCreated stays true for the instance's whole life,
+     * and a save with nothing dirty keeps the changes of the previous one.
+     */
+    private function keepMediaUsagesUpToDate(): void
+    {
+        $always = new RefreshMediaUsagesObserver(
+            ContentImages::MEDIA_TYPE,
+            static fn (Model $model): array => [(string) $model->getKey()],
+        );
+        $whenShownChanges = new RefreshMediaUsagesObserver(
+            ContentImages::MEDIA_TYPE,
+            static fn (Model $model): array => $model->wasChanged(['title', 'content']) ? [(string) $model->getKey()] : [],
+        );
+
+        AnnouncementModel::created($always->saved(...));
+        AnnouncementModel::updated($whenShownChanges->saved(...));
+        AnnouncementModel::deleted($always->deleted(...));
+    }
+
+    /**
+     * @return array<class-string<MediaUsageSourceInterface>>
+     */
+    public function registerMediaSources(): array
+    {
+        return [AnnouncementContentMediaSource::class];
     }
 
     public function onEnable(): void

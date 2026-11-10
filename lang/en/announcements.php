@@ -93,4 +93,10 @@ return [
         'content' => 'Write the announcement content...',
         'no_date' => 'No date',
     ],
+
+    // Media library (core#482)
+    'media' => [
+        'source' => 'Announcements',
+        'role_in_text' => 'In the text',
+    ],
 ];
