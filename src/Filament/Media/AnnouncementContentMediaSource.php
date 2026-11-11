@@ -6,13 +6,13 @@ namespace Modules\Announcements\Filament\Media;
 
 use App\Application\Media\Contracts\MediaUsageSourceInterface;
 use App\Application\Media\DTOs\MediaUsageDTO;
+use App\Application\Media\Services\MediaUrlExtractorInterface;
+use App\Domain\Content\ValueObjects\EditorImageFolder;
 use App\Domain\Media\ValueObjects\MediaFileId;
 use App\Infrastructure\Media\Sources\StoredMediaIdPrefilter;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
-use Modules\Announcements\Domain\Content\ContentImages;
 use Modules\Announcements\Filament\Resources\AnnouncementResource;
-use Modules\Announcements\Infrastructure\Media\ContentMediaFileIds;
 use Modules\Announcements\Infrastructure\Persistence\Eloquent\Models\AnnouncementModel;
 
 /**
@@ -22,18 +22,21 @@ use Modules\Announcements\Infrastructure\Persistence\Eloquent\Models\Announcemen
  */
 final readonly class AnnouncementContentMediaSource implements MediaUsageSourceInterface
 {
+    /** Stored with each usage: never rename it */
+    public const string TYPE = 'announcements.content';
+
     private const string COLUMN = 'content';
 
     /** Announcements read at a time */
     private const int CHUNK_SIZE = 200;
 
     public function __construct(
-        private ContentMediaFileIds $fileIds,
+        private MediaUrlExtractorInterface $urls,
     ) {}
 
     public function type(): string
     {
-        return ContentImages::MEDIA_TYPE;
+        return self::TYPE;
     }
 
     public function label(): string
@@ -43,7 +46,7 @@ final readonly class AnnouncementContentMediaSource implements MediaUsageSourceI
 
     public function folders(): array
     {
-        return [ContentImages::FOLDER];
+        return [EditorImageFolder::of('announcements')->claim()];
     }
 
     public function excludedSubfolders(): array
@@ -92,7 +95,7 @@ final readonly class AnnouncementContentMediaSource implements MediaUsageSourceI
         }
 
         foreach ($query->lazy(self::CHUNK_SIZE) as $announcement) {
-            if (isset($this->fileIds->in($announcement->getAttribute(self::COLUMN))[$file->value])) {
+            if (isset($this->urls->fileIdsIn($announcement->getAttribute(self::COLUMN))[$file->value])) {
                 return true;
             }
         }
@@ -128,7 +131,7 @@ final readonly class AnnouncementContentMediaSource implements MediaUsageSourceI
     {
         $usages = [];
 
-        foreach ($this->fileIds->in($announcement->getAttribute(self::COLUMN)) as $url) {
+        foreach ($this->urls->fileIdsIn($announcement->getAttribute(self::COLUMN)) as $url) {
             $usages[] = new MediaUsageDTO(
                 storedPath: $url,
                 recordId: $announcement->id,

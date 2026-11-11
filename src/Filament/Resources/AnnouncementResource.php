@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Modules\Announcements\Filament\Resources;
 
+use App\Domain\Content\ValueObjects\EditorImageFolder;
 use App\Filament\Actions\RowDetailsAction;
+use App\Filament\Forms\RichEditor\EditorImages;
 use App\Filament\Resources\BaseResource;
 use App\Filament\Support\PanelNavigationGroup;
 use Filament\Actions\ActionGroup;
@@ -28,7 +30,6 @@ use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Modules\Announcements\Domain\Enums\AnnouncementPosition;
 use Modules\Announcements\Domain\Enums\AnnouncementVisibility;
-use Modules\Announcements\Filament\Forms\ContentEditorImages;
 use Modules\Announcements\Filament\Resources\AnnouncementResource\Pages\CreateAnnouncement;
 use Modules\Announcements\Filament\Resources\AnnouncementResource\Pages\EditAnnouncement;
 use Modules\Announcements\Filament\Resources\AnnouncementResource\Pages\ListAnnouncements;
@@ -75,7 +76,7 @@ class AnnouncementResource extends BaseResource
                             ->maxLength(255)
                             ->columnSpanFull(),
 
-                        ContentEditorImages::configure(RichEditor::make('content'))
+                        EditorImages::configure(RichEditor::make('content'), EditorImageFolder::of('announcements'))
                             ->label(__('announcements::announcements.fields.content'))
                             ->placeholder(__('announcements::announcements.placeholders.content'))
                             ->required()
