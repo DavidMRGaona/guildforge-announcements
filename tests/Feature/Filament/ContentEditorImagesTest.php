@@ -20,7 +20,7 @@ use Tests\Support\Modules\ModuleTestCase;
 
 /**
  * Images inserted in an announcement's text go to the "images" disk (Cloudinary), in
- * "announcements/content/<year>/<month>", with a UUID name, as the core's editors (core#481).
+ * "announcements/content/<year>/<month>", with a UUID name, through the core's EditorImages (core#481, core#496).
  */
 final class ContentEditorImagesTest extends ModuleTestCase
 {
@@ -94,7 +94,14 @@ final class ContentEditorImagesTest extends ModuleTestCase
 
         // null makes Filament keep the src saved in the HTML until the images are moved
         $this->assertNull($editor->getFileAttachmentUrl('3fJk2Lm9Qx.png'));
-        $this->assertNull($editor->getFileAttachmentUrl('articles/content/2026/11/0b7e7c1e-6a0f-4c56-9d0e-1b2f3a4c5d6e.png'));
+    }
+
+    public function test_an_image_of_another_content_folder_gets_its_delivery_url(): void
+    {
+        // An image copied from an article keeps pointing at the article's upload
+        $path = 'articles/content/2026/11/0b7e7c1e-6a0f-4c56-9d0e-1b2f3a4c5d6e.png';
+
+        $this->assertSame(Storage::disk('images')->url($path), $this->editor()->getFileAttachmentUrl($path));
     }
 
     public function test_saved_html_holds_the_cloudinary_url(): void

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Announcements;
 
+use App\Application\Content\Contracts\EditorTextSourceInterface;
 use App\Application\Media\Contracts\MediaUsageSourceInterface;
 use App\Application\Modules\DTOs\NavigationItemDTO;
 use App\Application\Modules\DTOs\PermissionDTO;
@@ -21,14 +22,11 @@ use Illuminate\Database\Eloquent\Model;
 use Inertia\Inertia;
 use Modules\Announcements\Application\Services\AnnouncementService;
 use Modules\Announcements\Application\Services\AnnouncementServiceInterface;
-use Modules\Announcements\Application\Services\ContentImageMoverInterface;
-use Modules\Announcements\Console\Commands\MoveContentImagesToCloudinaryCommand;
-use Modules\Announcements\Domain\Content\ContentImages;
 use Modules\Announcements\Domain\Enums\AnnouncementPosition;
 use Modules\Announcements\Domain\Repositories\AnnouncementRepositoryInterface;
 use Modules\Announcements\Filament\Media\AnnouncementContentMediaSource;
 use Modules\Announcements\Filament\Resources\AnnouncementResource;
-use Modules\Announcements\Infrastructure\Content\ContentImageMover;
+use Modules\Announcements\Infrastructure\Content\AnnouncementContentTextSource;
 use Modules\Announcements\Infrastructure\Persistence\Eloquent\Models\AnnouncementModel;
 use Modules\Announcements\Infrastructure\Persistence\Eloquent\Repositories\EloquentAnnouncementRepository;
 use Modules\Announcements\Policies\AnnouncementPolicy;
@@ -60,8 +58,6 @@ final class AnnouncementsServiceProvider extends ModuleServiceProvider
             AnnouncementServiceInterface::class,
             AnnouncementService::class
         );
-
-        $this->app->bind(ContentImageMoverInterface::class, ContentImageMover::class);
     }
 
     public function boot(): void
@@ -69,10 +65,6 @@ final class AnnouncementsServiceProvider extends ModuleServiceProvider
         parent::boot();
 
         $this->keepMediaUsagesUpToDate();
-
-        if ($this->app->runningInConsole()) {
-            $this->commands([MoveContentImagesToCloudinaryCommand::class]);
-        }
 
         // Share announcements with Inertia if available
         if (class_exists(Inertia::class)) {
@@ -101,11 +93,11 @@ final class AnnouncementsServiceProvider extends ModuleServiceProvider
     private function keepMediaUsagesUpToDate(): void
     {
         $always = new RefreshMediaUsagesObserver(
-            ContentImages::MEDIA_TYPE,
+            AnnouncementContentMediaSource::TYPE,
             static fn (Model $model): array => [(string) $model->getKey()],
         );
         $whenShownChanges = new RefreshMediaUsagesObserver(
-            ContentImages::MEDIA_TYPE,
+            AnnouncementContentMediaSource::TYPE,
             static fn (Model $model): array => $model->wasChanged(['title', 'content']) ? [(string) $model->getKey()] : [],
         );
 
@@ -120,6 +112,16 @@ final class AnnouncementsServiceProvider extends ModuleServiceProvider
     public function registerMediaSources(): array
     {
         return [AnnouncementContentMediaSource::class];
+    }
+
+    /**
+     * The core's content:move-editor-images-to-cloudinary moves the local images of these texts.
+     *
+     * @return array<class-string<EditorTextSourceInterface>>
+     */
+    public function registerEditorTextSources(): array
+    {
+        return [AnnouncementContentTextSource::class];
     }
 
     public function onEnable(): void

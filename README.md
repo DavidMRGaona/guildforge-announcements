@@ -18,7 +18,7 @@ Anuncios para la web pública de GuildForge. Se crean en el panel de administrac
 
 ## Requisitos
 
-- GuildForge core `^3.53` (biblioteca de medios, base de conocimiento, rol de socio configurable, fechas en UTC)
+- GuildForge core `^3.55` (imágenes del editor, biblioteca de medios, base de conocimiento, rol de socio configurable, fechas en UTC)
 - PHP >= 8.5, Laravel >= 13, Filament 5
 
 El core rechaza el módulo si no se cumplen (`module.json` → `requires`).
@@ -123,14 +123,14 @@ Las imágenes que se pegan o arrastran al texto de un anuncio se suben a Cloudin
 
 La biblioteca de medios del panel (**Contenido** → **Biblioteca de medios**) muestra esas imágenes con el origen «Anuncios», el rol «En el texto», el título del aviso y el enlace para editarlo, si quien mira puede hacerlo. La fuente (`announcements.content`) reclama la carpeta `announcements/content/` y cuenta como uso cualquier URL de entrega del sitio que aparezca en el texto, esté en la carpeta que esté. Crear un aviso, cambiar su título o su texto y borrarlo actualiza los usos al momento. Los avisos borrados no se pueden recuperar, así que dejan de contar.
 
-Las imágenes que se pegaron antes de este cambio están en el almacenamiento local. Para moverlas a Cloudinary:
+Las imágenes que se pegaron antes de la versión 2.7.0 están en el almacenamiento local. Las mueve a Cloudinary el comando del core, que lee los textos de los avisos como fuente `announcements.content`:
 
 ```bash
-php artisan announcements:move-editor-images-to-cloudinary --dry-run
-php artisan announcements:move-editor-images-to-cloudinary
+php artisan content:move-editor-images-to-cloudinary --source=announcements.content --dry-run
+php artisan content:move-editor-images-to-cloudinary --source=announcements.content
 ```
 
-Con `--dry-run` solo lista lo que movería. Se puede repetir sin riesgo: lo ya movido no se toca y un mismo archivo siempre acaba en el mismo destino. La copia local se borra solo cuando todos los avisos que la usan están guardados y ningún otro texto la nombra: ni otro aviso (por ejemplo, en un enlace) ni un texto del core (eventos, artículos, guías del sitio, textos legales y «Nosotros»), que comparten la misma carpeta local. Si otro texto la nombra, la copia se conserva y el comando la lista. Si una subida o un guardado falla, ese aviso y su copia local quedan como estaban y el comando termina con error.
+Sin `--source` mueve las imágenes de todos los textos del sitio, también los de los avisos. La copia local solo se borra cuando ningún texto la nombra, sea del módulo que sea. El comando escribe el texto directamente en la tabla, así que la biblioteca de medios ve las URL nuevas en su siguiente sincronización diaria (`media:sync`). Las opciones y el informe se explican en la guía del core `docs/modules/editor-images.md`.
 
 ## Permisos
 
@@ -166,11 +166,10 @@ announcements/
 │   └── web.php             # /anuncios
 ├── src/
 │   ├── Application/        # DTOs y servicios
-│   ├── Console/            # Comando que mueve las imágenes del texto a Cloudinary
 │   ├── Domain/             # Entidades, enums, value objects, repositorios
-│   ├── Filament/           # Recurso del panel, imágenes del editor y fuente de medios
+│   ├── Filament/           # Recurso del panel y fuente de medios
 │   ├── Http/               # Controlador y requests
-│   ├── Infrastructure/     # Persistencia Eloquent, imágenes del texto y URL de medios
+│   ├── Infrastructure/     # Persistencia Eloquent y textos del editor para el core
 │   └── Policies/
 ├── tests/
 │   ├── Feature/
