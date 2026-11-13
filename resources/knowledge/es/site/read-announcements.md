@@ -5,7 +5,7 @@ summary: Qué son las bandas de aviso que salen en la web, cómo pasar de un anu
 category: community
 audience: site
 order: 30
-keywords: [anuncio, anuncios, aviso, avisos, banda, banner, franja, cartel, mensaje arriba, comunicado, cerrar anuncio, quitar aviso, ocultar, volver a ver, desaparecido, solo socios, anucio, anuncions]
+keywords: [campana, aviso nuevo, anuncios nuevos, anuncio, anuncios, aviso, avisos, banda, banner, franja, cartel, mensaje arriba, comunicado, cerrar anuncio, quitar aviso, ocultar, volver a ver, desaparecido, solo socios, anucio, anuncions]
 related: [core.help.welcome]
 ---
 {{site_name}} publica a veces anuncios cortos: un cierre por vacaciones, un cambio de horario o un plazo que vence. Salen como una banda de color a lo ancho de la página, arriba, en medio o abajo.
@@ -27,6 +27,12 @@ Si hay varios en la misma banda, se van turnando, el más importante primero.
 Si el anuncio tiene una ✕, púlsala para cerrarlo. No lo vuelves a ver en ese navegador.
 
 Lo que cierras se recuerda solo en el navegador donde lo cerraste: en otro dispositivo o en otro navegador sale otra vez. Algunos anuncios no tienen ✕: esos salen hasta que termina su plazo.
+
+## Aviso en la campana
+
+Si tienes cuenta, cuando sale un anuncio nuevo que puedes ver te llega también un aviso en la campana, con su texto. Al abrirlo vas a la portada, donde está la banda. Si salen varios seguidos antes de que los leas, se juntan en uno («3 anuncios nuevos»).
+
+Si no quieres estos avisos, apaga **Anuncios nuevos** en tus preferencias de avisos. La banda sigue saliendo igual.
 
 ## Si algo no sale bien
 

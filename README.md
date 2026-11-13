@@ -18,7 +18,7 @@ Anuncios para la web pública de GuildForge. Se crean en el panel de administrac
 
 ## Requisitos
 
-- GuildForge core `^3.55` (imágenes del editor, biblioteca de medios, base de conocimiento, rol de socio configurable, fechas en UTC)
+- GuildForge core `^3.65` (avisos en la campana, imágenes del editor, biblioteca de medios, base de conocimiento, rol de socio configurable, fechas en UTC)
 - PHP >= 8.5, Laravel >= 13, Filament 5
 
 El core rechaza el módulo si no se cumplen (`module.json` → `requires`).
@@ -98,6 +98,17 @@ Al cerrar un anuncio se guarda en el navegador (`localStorage`): deja de verse e
 
 Los anuncios visibles para el usuario actual se comparten con todas las páginas como prop de Inertia `announcements`. El componente `AnnouncementCard` (`:announcement`) está disponible para mostrar un anuncio en otras vistas.
 
+### Avisos en la campana
+
+Cuando un anuncio empieza a salir en la web por primera vez, cada cuenta que puede verlo recibe un aviso en la campana del core: «Nuevo anuncio: <título>», con el texto del anuncio y un enlace a la portada, donde sale la banda. Nunca se manda por correo.
+
+- **Cuándo**: al crearlo activo, al activarlo o al cambiar su fecha de inicio. Si tiene una fecha de inicio futura, el aviso se encola hasta esa fecha. Se avisa una sola vez por anuncio (tabla `announcements_notices`): cambiar el texto, desactivarlo y volver a activarlo o moverlo de fecha no avisa otra vez.
+- **A quién**: a todas las cuentas activas salvo a quien lo guarda. Al entregarlo se comprueba con la misma regla que la banda: si el anuncio ya no está activo, ha caducado o la cuenta no entra en su visibilidad (por ejemplo, «Solo socios»), no se guarda nada.
+- **Preferencia**: categoría `announcements.new-announcements` («Anuncios nuevos»), opcional, solo para la web y activada por defecto. Cada persona la apaga en sus preferencias de avisos.
+- **Agrupado**: mientras no se lean, los avisos de anuncios de una persona se juntan en una fila («3 anuncios nuevos»).
+- **Al borrar** un anuncio se borran sus avisos.
+- El envío va en lotes de 100 cuentas por la cola y directo al canal `site` del core, sin pasar por la fachada `Notification`, así que un `Notification::fake()` en los tests de otros módulos no lo ve.
+
 ### Ajustes
 
 En **Módulos**, acción **Configuración** del módulo:
@@ -169,7 +180,8 @@ announcements/
 │   ├── Domain/             # Entidades, enums, value objects, repositorios
 │   ├── Filament/           # Recurso del panel y fuente de medios
 │   ├── Http/               # Controlador y requests
-│   ├── Infrastructure/     # Persistencia Eloquent y textos del editor para el core
+│   ├── Infrastructure/     # Persistencia Eloquent, textos del editor y envío de avisos de la campana
+│   ├── Notifications/      # Aviso de anuncio nuevo y su categoría
 │   └── Policies/
 ├── tests/
 │   ├── Feature/
