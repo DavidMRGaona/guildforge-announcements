@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Announcements;
 
 use App\Application\Content\Contracts\EditorTextSourceInterface;
+use App\Application\Mail\DTOs\MailCategoryDTO;
 use App\Application\Media\Contracts\MediaUsageSourceInterface;
 use App\Application\Modules\DTOs\NavigationItemDTO;
 use App\Application\Modules\DTOs\PermissionDTO;
@@ -27,8 +28,10 @@ use Modules\Announcements\Domain\Repositories\AnnouncementRepositoryInterface;
 use Modules\Announcements\Filament\Media\AnnouncementContentMediaSource;
 use Modules\Announcements\Filament\Resources\AnnouncementResource;
 use Modules\Announcements\Infrastructure\Content\AnnouncementContentTextSource;
+use Modules\Announcements\Infrastructure\Notifications\AnnouncementNoticeObserver;
 use Modules\Announcements\Infrastructure\Persistence\Eloquent\Models\AnnouncementModel;
 use Modules\Announcements\Infrastructure\Persistence\Eloquent\Repositories\EloquentAnnouncementRepository;
+use Modules\Announcements\Notifications\AnnouncementMailCategories;
 use Modules\Announcements\Policies\AnnouncementPolicy;
 
 final class AnnouncementsServiceProvider extends ModuleServiceProvider
@@ -65,6 +68,9 @@ final class AnnouncementsServiceProvider extends ModuleServiceProvider
         parent::boot();
 
         $this->keepMediaUsagesUpToDate();
+
+        // A new announcement is told in the bell once it is shown (announcements#63)
+        AnnouncementModel::observe(AnnouncementNoticeObserver::class);
 
         // Share announcements with Inertia if available
         if (class_exists(Inertia::class)) {
@@ -122,6 +128,16 @@ final class AnnouncementsServiceProvider extends ModuleServiceProvider
     public function registerEditorTextSources(): array
     {
         return [AnnouncementContentTextSource::class];
+    }
+
+    /**
+     * The bell notice of new announcements: site only, optional, on by default.
+     *
+     * @return list<MailCategoryDTO>
+     */
+    public function registerMailCategories(): array
+    {
+        return AnnouncementMailCategories::all();
     }
 
     public function onEnable(): void

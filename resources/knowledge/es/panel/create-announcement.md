@@ -5,7 +5,7 @@ summary: Escribe un anuncio, elige quién lo ve, en qué parte de la página sal
 category: content
 audience: panel
 order: 81
-keywords: [crear anuncio, nuevo anuncio, publicar anuncio, poner un aviso, avisar, banner, banda, comunicado, visibilidad, posición, prioridad, color, fecha de inicio, fecha de fin, programar, solo socios, cerrar anuncio]
+keywords: [campana, aviso en la campana, crear anuncio, nuevo anuncio, publicar anuncio, poner un aviso, avisar, banner, banda, comunicado, visibilidad, posición, prioridad, color, fecha de inicio, fecha de fin, programar, solo socios, cerrar anuncio]
 related: [announcements.panel.overview, announcements.panel.manage-announcements]
 conditions:
   permissions:
@@ -29,6 +29,10 @@ Un anuncio nuevo sale en la web en cuanto lo creas, si está activo y no tiene f
 10. Pulsa **Crear**, o **Crear y crear otro** si vas a escribir varios.
 
 Vuelves a la lista de anuncios. La gente lo ve en cuanto carga otra página.
+
+## Aviso en la campana
+
+Cuando el anuncio empieza a salir en la web, quien puede verlo y tiene cuenta recibe además un aviso en la campana, con el texto del anuncio. Si tiene **Fecha de inicio**, el aviso llega ese día. Se avisa una sola vez por anuncio: cambiarlo, desactivarlo y volver a activarlo no avisa otra vez. Tú no lo recibes, porque ya lo sabes, y quien apagó «Anuncios nuevos» en sus preferencias de avisos tampoco.
 
 > [!TIP]
 > Si cambias los colores, elige los dos. Con uno solo, el otro deja de salir de la prioridad y el texto puede no leerse bien sobre el fondo.
