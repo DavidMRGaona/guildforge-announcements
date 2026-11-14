@@ -11,20 +11,24 @@ import type { PopupAnnouncement } from '../types/announcement';
 import {
     countPageView,
     forgetShown,
-    isDismissed,
+    isDue,
     markDismissed,
     markShown,
-    wasShownThisVisit,
+    setVolatileMemory,
+    type PopupRecord,
 } from '../utils/popupMemory';
 import { fitsDevice, fitsPage, pathOf, type PopupPageContext } from '../utils/popupPages';
+import { reportPopup } from '../utils/popupReports';
 import { armPopupTriggers, detectEnvironment, type PopupEnvironment } from '../utils/popupTriggers';
 
 /**
  * The windows of announcements (announcements#67), mounted once in the layout. The server sends
  * the ones this person may see now, best first (priority, then the most recent start); this
- * component opens at most one per page: the first that fits the page and the screen and was
- * neither closed in this browser nor opened in this visit, once the cookie banner has an answer
- * and one of its triggers is met.
+ * component opens at most one per page: the first that fits the page and the screen, is due by
+ * its frequency in this browser (announcements#68) and was not opened in this visit, once the
+ * cookie banner has an answer and one of its triggers is met. For a signed-in account the server
+ * has already left out what that account saw on any device, and is told when a window is shown
+ * or closed.
  *
  * The layout stays mounted while Inertia moves between pages, so each new path is a new page:
  * pending triggers are dropped, and an open window stays only if it fits the new page.
@@ -47,9 +51,29 @@ let stopConsentWatch: (() => void) | null = null;
 // A window opened (or closed) on this page: no other opens until the path changes
 let handledThisPage = false;
 let offeredIds = idsOf(props.announcementPopups);
+// What the browser remembered of the open window before it opened, to give it back if it is retired
+let rememberedBefore: PopupRecord | null = null;
 
 function idsOf(announcements: PopupAnnouncement[]): string {
     return announcements.map(({ id }) => id).join(',');
+}
+
+/** Something is wrong to write while an administrator views the site as someone else */
+function isImpersonating(): boolean {
+    return page.props.impersonation != null;
+}
+
+function isSignedIn(): boolean {
+    const auth: unknown = page.props.auth;
+
+    return typeof auth === 'object' && auth !== null && 'user' in auth && auth.user != null;
+}
+
+/** Nothing leaves the page while impersonating, and guests keep their memory in the browser alone */
+function tellServer(announcement: PopupAnnouncement, notice: 'shown' | 'dismissed'): void {
+    if (isSignedIn() && !isImpersonating()) {
+        reportPopup(announcement.id, notice);
+    }
 }
 
 function pageContext(): PopupPageContext {
@@ -83,9 +107,7 @@ function candidate(): PopupAnnouncement | null {
     return (
         props.announcementPopups.find(
             (announcement) =>
-                fits(announcement, context, isMobile) &&
-                !isDismissed(announcement.id) &&
-                !wasShownThisVisit(announcement.id)
+                fits(announcement, context, isMobile) && isDue(announcement.id, announcement.popup)
         ) ?? null
     );
 }
@@ -164,7 +186,8 @@ function open(announcement: PopupAnnouncement, answeredWhenArmed: boolean): void
 
     current.value = announcement;
     handledThisPage = true;
-    markShown(announcement.id);
+    rememberedBefore = markShown(announcement.id);
+    tellServer(announcement, 'shown');
 }
 
 /**
@@ -195,7 +218,7 @@ function watchConsent(): void {
 
         if (shown !== null) {
             current.value = null;
-            forgetShown(shown.id);
+            forgetShown(shown.id, rememberedBefore);
             handledThisPage = false;
         }
 
@@ -213,7 +236,7 @@ function close(): void {
     current.value = null;
 }
 
-/** Closed with the ✕, Esc, the backdrop or its button: not again in this browser, and no other on this page */
+/** Closed with the ✕, Esc, the backdrop or its button: it counts as seen, and no other opens on this page */
 function onClose(): void {
     const announcement = current.value;
 
@@ -222,6 +245,7 @@ function onClose(): void {
     }
 
     markDismissed(announcement.id);
+    tellServer(announcement, 'dismissed');
     close();
 }
 
@@ -240,6 +264,9 @@ function visitPage(): void {
 }
 
 watch(pathname, visitPage);
+
+// Looking at the site as someone else leaves the administrator's storage alone
+watch(isImpersonating, setVolatileMemory, { immediate: true });
 
 /**
  * Every Inertia visit brings a new array, also to the same path (pages of results, filters, a
@@ -273,6 +300,7 @@ onMounted(visitPage);
 onBeforeUnmount(() => {
     cancelPending();
     close();
+    setVolatileMemory(false);
 });
 </script>
 

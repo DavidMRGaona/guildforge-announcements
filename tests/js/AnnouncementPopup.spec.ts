@@ -7,6 +7,7 @@ import {
     registerCookieConsentProvider,
 } from '@/contracts/cookieConsent';
 import AnnouncementPopup from '../../resources/js/components/AnnouncementPopup.vue';
+import { resetPageMemory } from '../../resources/js/utils/popupMemory';
 import type {
     AnnouncementPopup as PopupSettings,
     PopupAnnouncement,
@@ -72,6 +73,8 @@ function popup(
             pages: 'all',
             paths: [],
             device: 'all',
+            frequency: 'once',
+            frequency_days: null,
             ...settings,
         },
         ...overrides,
@@ -99,6 +102,11 @@ function dialog(): HTMLElement | null {
     return document.body.querySelector('[role="dialog"]');
 }
 
+/** What this browser keeps about the windows in `localStorage`, by announcement id */
+function storedViews(): Record<string, { shown: number | null; dismissed: number | null }> {
+    return JSON.parse(window.localStorage.getItem('guildforge_popup_views') ?? '{}');
+}
+
 async function visit(url: string, component = 'Home'): Promise<void> {
     page.url = url;
     page.component = component;
@@ -110,6 +118,7 @@ describe('AnnouncementPopup', () => {
         vi.useFakeTimers();
         window.localStorage.clear();
         window.sessionStorage.clear();
+        resetPageMemory();
         mobileScreen = false;
         stubScreen();
         page.url = '/';
@@ -163,7 +172,10 @@ describe('AnnouncementPopup', () => {
     });
 
     it('skips windows for another page, another screen, or already closed in this browser', async () => {
-        window.localStorage.setItem('guildforge_dismissed_popups', JSON.stringify(['cerrada']));
+        window.localStorage.setItem(
+            'guildforge_popup_views',
+            JSON.stringify({ cerrada: { shown: Date.now(), dismissed: Date.now() } })
+        );
         mobileScreen = true;
 
         mountPopups([
@@ -236,9 +248,7 @@ describe('AnnouncementPopup', () => {
 
         expect(dialog()).toBeNull();
         expect(document.activeElement).toBe(opener);
-        expect(
-            JSON.parse(window.localStorage.getItem('guildforge_dismissed_popups') ?? '[]')
-        ).toEqual(['a']);
+        expect(storedViews().a?.dismissed).toEqual(expect.any(Number));
         // At most one window per page: the next one waits for another page
         await settle(60_000);
         expect(dialog()).toBeNull();
@@ -291,9 +301,7 @@ describe('AnnouncementPopup', () => {
         await settle();
 
         expect(dialog()).toBeNull();
-        expect(
-            JSON.parse(window.localStorage.getItem('guildforge_dismissed_popups') ?? '[]')
-        ).toEqual(['a']);
+        expect(storedViews().a?.dismissed).toEqual(expect.any(Number));
     });
 
     it('stays open on the next page if it fits there, and goes if it does not', async () => {
@@ -463,7 +471,8 @@ describe('AnnouncementPopup', () => {
         document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
         await settle();
         expect(dialog()).not.toBeNull();
-        expect(window.localStorage.getItem('guildforge_dismissed_popups')).toBeNull();
+        // Opened, not closed: the browser knows it was shown and nothing more
+        expect(storedViews().a?.dismissed).toBeNull();
 
         dialog()?.querySelector<HTMLButtonElement>('button')?.focus();
         document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
@@ -488,5 +497,212 @@ describe('AnnouncementPopup', () => {
         mountPopups([popup('b', { image_public_id: 'announcements/popups/2026/11/b.webp' })]);
         await settle();
         expect(dialog()?.querySelector('img')?.getAttribute('alt')).toBe('');
+    });
+
+    describe('frequency (announcements#68)', () => {
+        async function closeIt(): Promise<void> {
+            dialog()?.querySelector<HTMLButtonElement>('button')?.click();
+            await settle();
+        }
+
+        /** A new visit of the same browser: the page loads again and the tab's session is new */
+        async function newVisit(offered: PopupAnnouncement[]): Promise<void> {
+            wrapper?.unmount();
+            wrapper = null;
+            window.sessionStorage.clear();
+            resetPageMemory();
+            mountPopups(offered);
+            await settle();
+        }
+
+        it('opens a window once: not again in a later visit', async () => {
+            const offered = [popup('a', { frequency: 'once' })];
+            mountPopups(offered);
+            await settle();
+            await closeIt();
+
+            await newVisit(offered);
+            expect(dialog()).toBeNull();
+        });
+
+        it('keeps a window opened but not closed from coming back, as it counts as seen', async () => {
+            const offered = [popup('a', { frequency: 'once' })];
+            mountPopups(offered);
+            await settle();
+            expect(dialog()).not.toBeNull();
+
+            await newVisit(offered);
+            expect(dialog()).toBeNull();
+        });
+
+        it('opens a window once per session: again in the next visit, not in the same', async () => {
+            const offered = [popup('a', { frequency: 'session' })];
+            mountPopups(offered);
+            await settle();
+            await closeIt();
+
+            await visit('/eventos', 'Events/Index');
+            await settle(60_000);
+            expect(dialog()).toBeNull();
+
+            await newVisit(offered);
+            expect(dialog()?.textContent).toContain('Ventana a');
+        });
+
+        it('opens a window every N days once they have passed since it was shown', async () => {
+            const offered = [popup('a', { frequency: 'days', frequency_days: 7 })];
+            mountPopups(offered);
+            await settle();
+            await closeIt();
+
+            vi.advanceTimersByTime(6 * 86_400_000 + 23 * 3_600_000);
+            await newVisit(offered);
+            expect(dialog()).toBeNull();
+
+            vi.advanceTimersByTime(3_600_000);
+            await newVisit(offered);
+            expect(dialog()?.textContent).toContain('Ventana a');
+        });
+
+        it('counts the days from the last time it was shown, not from the closing', async () => {
+            const offered = [popup('a', { frequency: 'days', frequency_days: 2 })];
+            mountPopups(offered);
+            await settle();
+
+            vi.advanceTimersByTime(86_400_000);
+            await closeIt();
+
+            // Shown two days ago, closed one day ago: due
+            vi.advanceTimersByTime(86_400_000);
+            await newVisit(offered);
+            expect(dialog()).not.toBeNull();
+        });
+    });
+
+    describe('what the server is told (announcements#68)', () => {
+        const fetchMock = vi.fn(() => Promise.resolve(new Response(null, { status: 204 })));
+
+        beforeEach(() => {
+            fetchMock.mockClear();
+            vi.stubGlobal('fetch', fetchMock);
+        });
+
+        function lastCalls(): string[] {
+            return (fetchMock.mock.calls as unknown as [string, RequestInit][]).map(
+                ([url, init]) => `${init.method} ${url}`
+            );
+        }
+
+        it('is told when a signed-in account gets a window and when it closes it', async () => {
+            page.props = { cookieConsentModule: false, auth: { user: { id: 'u1' } } };
+            mountPopups([popup('a')]);
+            await settle();
+
+            expect(lastCalls()).toEqual(['POST /anuncios/ventanas/a/mostrada']);
+
+            dialog()?.querySelector<HTMLButtonElement>('button')?.click();
+            await settle();
+
+            expect(lastCalls()).toEqual([
+                'POST /anuncios/ventanas/a/mostrada',
+                'POST /anuncios/ventanas/a/cerrada',
+            ]);
+        });
+
+        it('keeps a guest’s memory in the browser alone', async () => {
+            mountPopups([popup('a')]);
+            await settle();
+            dialog()?.querySelector<HTMLButtonElement>('button')?.click();
+            await settle();
+
+            expect(fetchMock).not.toHaveBeenCalled();
+            expect(storedViews().a?.dismissed).toEqual(expect.any(Number));
+        });
+
+        it('writes and sends nothing while an administrator views the site as someone else', async () => {
+            page.props = {
+                cookieConsentModule: false,
+                auth: { user: { id: 'u1' } },
+                impersonation: { targetName: 'Ana', mode: 'read_only', notice: null },
+            };
+            mountPopups([popup('a')]);
+            await settle();
+            expect(dialog()).not.toBeNull();
+
+            dialog()?.querySelector<HTMLButtonElement>('button')?.click();
+            await settle();
+
+            expect(fetchMock).not.toHaveBeenCalled();
+            expect(window.localStorage.length).toBe(0);
+            expect(window.sessionStorage.getItem('guildforge_shown_popups')).toBeNull();
+
+            // The administrator’s own browser memory does not hide it either
+            wrapper?.unmount();
+            wrapper = null;
+            // A new page load
+            resetPageMemory();
+            window.localStorage.setItem(
+                'guildforge_popup_views',
+                JSON.stringify({ a: { shown: 1, dismissed: 1 } })
+            );
+            mountPopups([popup('a')]);
+            await settle();
+            expect(dialog()).not.toBeNull();
+        });
+
+        it('still works when the notice cannot be sent', async () => {
+            fetchMock.mockImplementation(() => Promise.reject(new Error('offline')));
+            page.props = { cookieConsentModule: false, auth: { user: { id: 'u1' } } };
+            mountPopups([popup('a')]);
+            await settle();
+
+            dialog()?.querySelector<HTMLButtonElement>('button')?.click();
+            await settle();
+
+            expect(dialog()).toBeNull();
+        });
+    });
+
+    describe('storage that fails (announcements#68)', () => {
+        function breakStorage(): void {
+            vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+                throw new DOMException('full', 'QuotaExceededError');
+            });
+            vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+                throw new DOMException('blocked', 'SecurityError');
+            });
+        }
+
+        afterEach(() => {
+            vi.restoreAllMocks();
+        });
+
+        it('opens and closes the window as usual', async () => {
+            breakStorage();
+            mountPopups([popup('a')]);
+            await settle();
+            expect(dialog()).not.toBeNull();
+
+            dialog()?.querySelector<HTMLButtonElement>('button')?.click();
+            await settle();
+            expect(dialog()).toBeNull();
+        });
+
+        it('does not open it again on this page load', async () => {
+            breakStorage();
+            mountPopups([popup('a'), popup('b')]);
+            await settle();
+            dialog()?.querySelector<HTMLButtonElement>('button')?.click();
+            await settle();
+
+            await visit('/eventos', 'Events/Index');
+            expect(dialog()?.textContent).toContain('Ventana b');
+            dialog()?.querySelector<HTMLButtonElement>('button')?.click();
+            await settle();
+
+            await visit('/', 'Home');
+            await settle(60_000);
+            expect(dialog()).toBeNull();
+        });
     });
 });
