@@ -9,7 +9,7 @@
   "author": "GuildForge",
   "storesUtc": true,
   "requires": {
-    "core": "^3.65",
+    "core": "^3.74",
     "filament": "^5.0",
     "php": ">=8.5",
     "laravel": ">=13.0"
@@ -20,7 +20,8 @@
       "announcements.view_any",
       "announcements.create",
       "announcements.update",
-      "announcements.delete"
+      "announcements.delete",
+      "settings.manage"
     ],
     "routes": [
       "api"

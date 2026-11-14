@@ -111,7 +111,7 @@ Cuando un anuncio empieza a salir en la web por primera vez, cada cuenta que pue
 
 ### Ajustes
 
-En **Módulos**, acción **Configuración** del módulo:
+En **Sistema → Configuración → Anuncios** (permiso `announcements.settings.manage`, que un administrador da a mano en el editor de roles; el botón **Configuración** de **Módulos** lleva a la misma página a quien lo tiene). Los valores se guardan en la fila `module_settings:announcements`:
 
 | Ajuste | Descripción |
 |--------|-------------|
@@ -151,6 +151,7 @@ Sin `--source` mueve las imágenes de todos los textos del sitio, también los d
 | `announcements.create` | Crear anuncios | Sí |
 | `announcements.update` | Editar anuncios | Sí |
 | `announcements.delete` | Eliminar anuncios | No |
+| `announcements.settings.manage` | Cambiar los ajustes del banner | No |
 
 Los administradores tienen todos los permisos. Se asignan a otros roles desde el editor de roles del panel.
 
@@ -178,7 +179,7 @@ announcements/
 ├── src/
 │   ├── Application/        # DTOs y servicios
 │   ├── Domain/             # Entidades, enums, value objects, repositorios
-│   ├── Filament/           # Recurso del panel y fuente de medios
+│   ├── Filament/           # Recurso del panel, página de ajustes y fuente de medios
 │   ├── Http/               # Controlador y requests
 │   ├── Infrastructure/     # Persistencia Eloquent, textos del editor y envío de avisos de la campana
 │   ├── Notifications/      # Aviso de anuncio nuevo y su categoría

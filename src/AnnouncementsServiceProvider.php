@@ -13,12 +13,9 @@ use App\Application\Modules\DTOs\SlotRegistrationDTO;
 use App\Filament\Support\PanelNavigationGroup;
 use App\Infrastructure\Media\Observers\RefreshMediaUsagesObserver;
 use App\Modules\ModuleServiceProvider;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
+use Filament\Pages\Page;
 use Filament\Resources\Resource as FilamentResource;
 use Filament\Schemas\Components\Component;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Utilities\Get;
 use Illuminate\Database\Eloquent\Model;
 use Inertia\Inertia;
 use Modules\Announcements\Application\Services\AnnouncementService;
@@ -26,6 +23,7 @@ use Modules\Announcements\Application\Services\AnnouncementServiceInterface;
 use Modules\Announcements\Domain\Enums\AnnouncementPosition;
 use Modules\Announcements\Domain\Repositories\AnnouncementRepositoryInterface;
 use Modules\Announcements\Filament\Media\AnnouncementContentMediaSource;
+use Modules\Announcements\Filament\Pages\AnnouncementsSettings;
 use Modules\Announcements\Filament\Resources\AnnouncementResource;
 use Modules\Announcements\Infrastructure\Content\AnnouncementContentTextSource;
 use Modules\Announcements\Infrastructure\Notifications\AnnouncementNoticeObserver;
@@ -208,6 +206,14 @@ final class AnnouncementsServiceProvider extends ModuleServiceProvider
                 module: 'announcements',
                 roles: [],
             ),
+            // Site-wide display of the banner, so it is not suggested for the editor
+            new PermissionDTO(
+                name: 'settings.manage',
+                label: __('announcements::announcements.permissions.settings_manage'),
+                group: __('announcements::announcements.navigation'),
+                module: 'announcements',
+                roles: [],
+            ),
         ];
     }
 
@@ -293,38 +299,28 @@ final class AnnouncementsServiceProvider extends ModuleServiceProvider
     }
 
     /**
-     * Get the Filament form schema for module settings.
+     * The settings live on their own page of the «Configuración» cluster, not on the generic one.
      *
      * @return array<Component>
      */
     public function getSettingsSchema(): array
     {
-        return [
-            Section::make(__('announcements::announcements.settings.display'))
-                ->description(__('announcements::announcements.settings.display_description'))
-                ->schema([
-                    Toggle::make('show_banner')
-                        ->label(__('announcements::announcements.settings.show_banner'))
-                        ->helperText(__('announcements::announcements.settings.show_banner_help'))
-                        ->default(true),
+        return [];
+    }
 
-                    Toggle::make('auto_rotate')
-                        ->label(__('announcements::announcements.settings.auto_rotate'))
-                        ->helperText(__('announcements::announcements.settings.auto_rotate_help'))
-                        ->default(true)
-                        ->live(),
+    /**
+     * @return class-string<Page>
+     */
+    public function getSettingsPage(): string
+    {
+        return AnnouncementsSettings::class;
+    }
 
-                    TextInput::make('rotate_interval')
-                        ->label(__('announcements::announcements.settings.rotate_interval'))
-                        ->helperText(__('announcements::announcements.settings.rotate_interval_help'))
-                        ->numeric()
-                        ->suffix('ms')
-                        ->default(5000)
-                        ->minValue(1000)
-                        ->maxValue(30000)
-                        ->visible(fn (Get $get): bool => $get('auto_rotate') === true),
-                ])
-                ->columns(2),
-        ];
+    /**
+     * @return array<class-string<Page>>
+     */
+    public function registerFilamentPages(): array
+    {
+        return [AnnouncementsSettings::class];
     }
 }

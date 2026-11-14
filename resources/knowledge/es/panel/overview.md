@@ -77,13 +77,13 @@ Con **Permite cerrar**, la banda tiene una ✕ para cerrarlo. Lo que se cierra s
 | **Crear anuncios** | Crear anuncios nuevos |
 | **Editar anuncios** | Cambiar los anuncios, también activarlos y desactivarlos |
 | **Eliminar anuncios** | Borrar anuncios |
-| **Configurar módulos** | Cambiar los ajustes del banner, como los de los demás módulos |
+| **Cambiar los ajustes del banner** | Cambiar los ajustes del banner, en *Sistema → Configuración → Anuncios* |
 
 Ninguno de estos permisos se concede solo: se dan a cada rol en **Roles**.
 
 ## Dónde está cada cosa
 
 - En el menú lateral, el grupo **Comunicación** tiene **Anuncios**.
-- Los ajustes que valen para todos los anuncios (mostrar el banner y la rotación) están en **Módulos**, en la tarjeta de **Anuncios**.
+- Los ajustes que valen para todos los anuncios (mostrar el banner y la rotación) están en **Sistema → Configuración → Anuncios**.
 
 [[action:filament.admin.resources.announcements.index|Ver los anuncios]]

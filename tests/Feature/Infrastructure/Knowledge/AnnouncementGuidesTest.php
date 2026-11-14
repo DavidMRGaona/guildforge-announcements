@@ -84,7 +84,7 @@ final class AnnouncementGuidesTest extends ModuleTestCase
         );
         $this->assertSame(
             ['announcements.panel.banner-settings'],
-            $this->visibleGuides($this->userWith('modules.configure'), GuideAudience::Panel),
+            $this->visibleGuides($this->userWith('announcements:settings.manage'), GuideAudience::Panel),
         );
         // Module permissions are never granted on their own: an editor without them sees none
         $this->assertSame([], $this->visibleGuides(UserModel::factory()->editor()->create(), GuideAudience::Panel));

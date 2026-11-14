@@ -83,10 +83,15 @@ return [
         'create' => 'Crear anuncios',
         'update' => 'Editar anuncios',
         'delete' => 'Eliminar anuncios',
+        'settings_manage' => 'Cambiar los ajustes del banner',
     ],
 
     // Settings
     'settings' => [
+        'navigation' => 'Anuncios',
+        'title' => 'Ajustes de anuncios',
+        'saved' => 'Ajustes guardados.',
+        'save' => 'Guardar cambios',
         'display' => 'Visualización',
         'display_description' => 'Configuración de cómo se muestran los anuncios en el sitio.',
         'show_banner' => 'Mostrar banner',

@@ -6,19 +6,18 @@ category: content
 audience: panel
 order: 83
 keywords: [ajustes, configuración, configurar anuncios, banner, banda, mostrar banner, ocultar anuncios, apagar anuncios, rotación automática, carrusel, pasar anuncios, intervalo, velocidad, milisegundos]
-related: [announcements.panel.overview, core.panel.modules]
+related: [announcements.panel.overview]
 conditions:
   permissions:
-    all: [modules.configure]
+    all: ['announcements:settings.manage']
 ---
-Estos ajustes valen para todos los anuncios a la vez. Lo de cada anuncio (texto, visibilidad, posición, fechas) se cambia en el propio anuncio.
+Hace falta el permiso **Cambiar los ajustes del banner**, que un administrador da a mano en el editor de roles. Estos ajustes valen para todos los anuncios a la vez. Lo de cada anuncio (texto, visibilidad, posición, fechas) se cambia en el propio anuncio.
 
 ## Abrir los ajustes
 
-1. En el menú lateral, abre **Sistema** y elige **Módulos**.
-2. En la tarjeta de **Anuncios**, pulsa **Configuración**.
-3. Cambia los ajustes de **Visualización**.
-4. Pulsa **Guardar configuración**.
+1. En el menú lateral, abre **Sistema**, entra en **Configuración** y elige **Anuncios**.
+2. Cambia los ajustes de **Visualización**.
+3. Pulsa **Guardar cambios**.
 
 ## Qué decide cada ajuste
 
@@ -31,4 +30,4 @@ Por defecto, el banner sale y pasa de un anuncio a otro cada 5000 milisegundos (
 > [!TIP]
 > Si los anuncios tienen textos largos, sube el intervalo para que dé tiempo a leerlos.
 
-[[action:filament.admin.pages.modules-page|Ver los módulos]]
+[[action:filament.admin.configuracion.pages.anuncios|Abrir los ajustes de anuncios]]

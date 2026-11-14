@@ -65,10 +65,15 @@ return [
         'create' => 'Create announcements',
         'update' => 'Edit announcements',
         'delete' => 'Delete announcements',
+        'settings_manage' => 'Change the banner settings',
     ],
 
     // Settings
     'settings' => [
+        'navigation' => 'Announcements',
+        'title' => 'Announcement settings',
+        'saved' => 'Settings saved.',
+        'save' => 'Save changes',
         'display' => 'Display',
         'display_description' => 'Configure how announcements are displayed on the site.',
         'show_banner' => 'Show banner',

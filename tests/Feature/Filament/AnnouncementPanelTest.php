@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Modules\Announcements\Tests\Feature\Filament;
 
-use App\Filament\Pages\ModuleSettingsPage;
 use Livewire\Livewire;
+use Modules\Announcements\Filament\Pages\AnnouncementsSettings;
 use Modules\Announcements\Filament\Resources\AnnouncementResource;
 use Modules\Announcements\Filament\Resources\AnnouncementResource\Pages\CreateAnnouncement;
 use Modules\Announcements\Filament\Resources\AnnouncementResource\Pages\EditAnnouncement;
@@ -55,7 +55,7 @@ final class AnnouncementPanelTest extends ModuleTestCase
 
     public function test_settings_page_renders(): void
     {
-        Livewire::test(ModuleSettingsPage::class, ['module' => 'announcements'])->assertOk();
+        Livewire::test(AnnouncementsSettings::class)->assertOk();
     }
 
     private function createAnnouncement(): AnnouncementModel
