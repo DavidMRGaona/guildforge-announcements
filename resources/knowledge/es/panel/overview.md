@@ -77,7 +77,7 @@ Con **Permite cerrar**, la banda tiene una ✕ para cerrarlo. Lo que se cierra s
 | **Crear anuncios** | Crear anuncios nuevos |
 | **Editar anuncios** | Cambiar los anuncios, también activarlos y desactivarlos |
 | **Eliminar anuncios** | Borrar anuncios |
-| **Ajustes de anuncios** | Cambiar los ajustes del banner, en *Sistema → Configuración → Anuncios* |
+| **Cambiar los ajustes del banner** | Cambiar los ajustes del banner, en *Sistema → Configuración → Anuncios* |
 
 Ninguno de estos permisos se concede solo: se dan a cada rol en **Roles**.
 

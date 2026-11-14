@@ -91,8 +91,14 @@ final class AnnouncementsSettingsPageTest extends ModuleTestCase
     {
         $resolver = $this->app->make(ModuleSettingsPages::class);
 
+        // The core accepts the declared page: it is usable and has a URL
+        $this->assertNotNull($resolver->pageUrl('announcements'));
+
         $this->actingAs($this->userWith('modules.configure'));
         $this->assertNull($resolver->accessibleUrl('announcements'));
+
+        $this->actingAs($this->userWith(AnnouncementsSettings::PERMISSION));
+        $this->assertNotNull($resolver->accessibleUrl('announcements'));
     }
 
     public function test_saving_without_the_permission_is_refused(): void

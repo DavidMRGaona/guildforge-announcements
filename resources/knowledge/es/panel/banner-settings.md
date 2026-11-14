@@ -11,7 +11,7 @@ conditions:
   permissions:
     all: ['announcements:settings.manage']
 ---
-Hace falta el permiso para cambiar los ajustes de anuncios, que un administrador da a mano en el editor de roles. Estos ajustes valen para todos los anuncios a la vez. Lo de cada anuncio (texto, visibilidad, posición, fechas) se cambia en el propio anuncio.
+Hace falta el permiso **Cambiar los ajustes del banner**, que un administrador da a mano en el editor de roles. Estos ajustes valen para todos los anuncios a la vez. Lo de cada anuncio (texto, visibilidad, posición, fechas) se cambia en el propio anuncio.
 
 ## Abrir los ajustes
 
