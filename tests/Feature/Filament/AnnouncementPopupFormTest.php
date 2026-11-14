@@ -33,6 +33,7 @@ final class AnnouncementPopupFormTest extends ModuleTestCase
     private const array POPUP_FIELDS = [
         'popup_shape',
         'popup_image_public_id',
+        'popup_image_alt',
         'popup_action_label',
         'popup_action_url',
         'popup_trigger_delay',
@@ -89,6 +90,7 @@ final class AnnouncementPopupFormTest extends ModuleTestCase
         $this->popupForm([
             'visibility' => 'guests',
             'popup_shape' => 'corner',
+            'popup_image_alt' => 'Cartel de la campaña',
             'popup_action_label' => 'Apúntate',
             'popup_action_url' => '/socios',
             'popup_trigger_delay' => 5,
@@ -106,6 +108,7 @@ final class AnnouncementPopupFormTest extends ModuleTestCase
         $this->assertSame(AnnouncementFormat::Popup, $model->format);
         $this->assertSame('guests', $model->visibility->value);
         $this->assertSame('corner', $model->popup_shape);
+        $this->assertSame('Cartel de la campaña', $model->popup_image_alt);
         $this->assertSame('Apúntate', $model->popup_action_label);
         $this->assertSame('/socios', $model->popup_action_url);
         $this->assertSame([5, 50, true, 3], [$model->popup_trigger_delay, $model->popup_trigger_scroll, $model->popup_trigger_exit_intent, $model->popup_trigger_page_views]);

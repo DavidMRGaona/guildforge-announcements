@@ -67,6 +67,7 @@ final readonly class AnnouncementResponseDTO
         return [
             'shape' => $popup->shape->value,
             'image_public_id' => $popup->imagePublicId,
+            'image_alt' => $popup->imageAlt,
             'action' => $popup->action instanceof PopupAction
                 ? ['label' => $popup->action->label, 'url' => $popup->action->url]
                 : null,

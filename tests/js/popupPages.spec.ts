@@ -12,6 +12,7 @@ function popup(overrides: Partial<AnnouncementPopup> = {}): AnnouncementPopup {
     return {
         shape: 'centered',
         image_public_id: null,
+        image_alt: null,
         action: null,
         triggers: { delay_seconds: 0, scroll_percent: null, exit_intent: false, page_views: null },
         pages: 'all',

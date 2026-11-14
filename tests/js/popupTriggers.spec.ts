@@ -71,6 +71,25 @@ describe('armPopupTriggers', () => {
         expect(open).toHaveBeenCalledTimes(1);
     });
 
+    it('reaches 100 % with a fractional scroll position at the bottom', () => {
+        const open = vi.fn();
+        armPopupTriggers(triggers({ scroll_percent: 100 }), desktop, open, controller.signal);
+
+        scrollTo(1999.4);
+        expect(open).toHaveBeenCalledTimes(1);
+    });
+
+    it('counts only scrolling down, not a page that loads already scrolled and goes up', () => {
+        scrollTo(1800);
+        const open = vi.fn();
+        armPopupTriggers(triggers({ scroll_percent: 50 }), desktop, open, controller.signal);
+
+        scrollTo(1500);
+        expect(open).not.toHaveBeenCalled();
+        scrollTo(1600);
+        expect(open).toHaveBeenCalledTimes(1);
+    });
+
     it('never opens by scrolling on a page that cannot be scrolled', () => {
         setScrollable(800, 1000);
         const open = vi.fn();

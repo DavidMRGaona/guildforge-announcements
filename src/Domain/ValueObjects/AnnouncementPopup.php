@@ -18,7 +18,12 @@ final readonly class AnnouncementPopup
 {
     public const int MAX_PATHS = 30;
 
+    public const int IMAGE_ALT_MAX_LENGTH = 255;
+
     public ?string $imagePublicId;
+
+    /** What the image shows, for people who cannot see it; null when it is only decoration */
+    public ?string $imageAlt;
 
     /** @var list<string> */
     public array $paths;
@@ -34,9 +39,18 @@ final readonly class AnnouncementPopup
         public PopupPages $pages = PopupPages::All,
         array $paths = [],
         public PopupDevice $device = PopupDevice::All,
+        ?string $imageAlt = null,
     ) {
         $imagePublicId = $imagePublicId !== null ? trim($imagePublicId) : null;
         $this->imagePublicId = $imagePublicId === '' ? null : $imagePublicId;
+
+        $imageAlt = $imageAlt !== null ? trim($imageAlt) : null;
+
+        if ($imageAlt !== null && mb_strlen($imageAlt) > self::IMAGE_ALT_MAX_LENGTH) {
+            throw new InvalidArgumentException(sprintf('The text of the image of a window has at most %d characters.', self::IMAGE_ALT_MAX_LENGTH));
+        }
+
+        $this->imageAlt = $imageAlt === '' ? null : $imageAlt;
         $this->paths = $pages === PopupPages::Paths ? $this->validPaths($paths) : [];
     }
 

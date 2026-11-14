@@ -39,7 +39,16 @@ function focusableElements(): HTMLElement[] {
     return panel.value ? Array.from(panel.value.querySelectorAll<HTMLElement>(FOCUSABLE)) : [];
 }
 
+/**
+ * Esc closes the modal window from anywhere (the focus is inside it). The corner card is not
+ * modal: Esc closes it only while the focus is in it, so Esc meant for a menu or a lightbox of
+ * the page does not throw it away.
+ */
 function onDocumentKeydown(event: KeyboardEvent): void {
+    if (!isModal.value && !(panel.value?.contains(document.activeElement) ?? false)) {
+        return;
+    }
+
     if (event.key === 'Escape' && !event.defaultPrevented) {
         event.preventDefault();
         emit('close', 'dismiss');
@@ -145,7 +154,7 @@ onBeforeUnmount(() => {
                 <img
                     v-if="imageUrl"
                     :src="imageUrl"
-                    alt=""
+                    :alt="announcement.popup.image_alt ?? ''"
                     class="max-h-64 w-full rounded-t-lg object-cover"
                     loading="lazy"
                 />
@@ -192,7 +201,7 @@ onBeforeUnmount(() => {
             <img
                 v-if="imageUrl"
                 :src="imageUrl"
-                alt=""
+                :alt="announcement.popup.image_alt ?? ''"
                 class="max-h-40 w-full rounded-t-lg object-cover"
                 loading="lazy"
             />

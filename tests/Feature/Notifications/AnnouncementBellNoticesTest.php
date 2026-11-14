@@ -118,6 +118,15 @@ final class AnnouncementBellNoticesTest extends ModuleTestCase
         $this->assertSame(0, $this->unread($reader));
     }
 
+    public function test_a_banner_for_visitors_without_a_session_queues_nothing(): void
+    {
+        Queue::fake();
+
+        $this->announcement(['visibility' => 'guests']);
+
+        Queue::assertNotPushed(AnnounceAnnouncementJob::class);
+    }
+
     public function test_a_scheduled_banner_turned_into_a_window_before_it_starts_tells_nobody(): void
     {
         UserModel::factory()->create();

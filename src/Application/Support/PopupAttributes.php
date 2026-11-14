@@ -23,6 +23,7 @@ final class PopupAttributes
     public const array COLUMNS = [
         'popup_shape',
         'popup_image_public_id',
+        'popup_image_alt',
         'popup_action_label',
         'popup_action_url',
         'popup_trigger_delay',
@@ -57,6 +58,7 @@ final class PopupAttributes
             paths: self::paths($attributes['popup_paths'] ?? null),
             device: PopupDevice::tryFrom(self::enumValue($attributes['popup_device'] ?? null, PopupDevice::All->value))
                 ?? throw new InvalidArgumentException('Unknown window device.'),
+            imageAlt: self::stringOrNull($attributes['popup_image_alt'] ?? null),
         );
     }
 
@@ -68,6 +70,7 @@ final class PopupAttributes
         return [
             'popup_shape' => $popup->shape->value,
             'popup_image_public_id' => $popup->imagePublicId,
+            'popup_image_alt' => $popup->imageAlt,
             'popup_action_label' => $popup->action?->label,
             'popup_action_url' => $popup->action?->url,
             'popup_trigger_delay' => $popup->triggers->delaySeconds,

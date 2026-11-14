@@ -150,6 +150,8 @@ return [
         ],
         'image' => 'Image',
         'image_help' => 'Optional. Shown above the title.',
+        'image_alt' => 'Image alternative text',
+        'image_alt_help' => 'What the image shows, for people who cannot see it. Leave it empty if it is only decoration.',
         'action_label' => 'Button text',
         'action_label_help' => 'Optional. Without both text and link there is no button.',
         'action_url' => 'Button link',

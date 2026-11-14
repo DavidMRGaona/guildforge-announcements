@@ -36,6 +36,8 @@ export interface PopupAction {
 export interface AnnouncementPopup {
     shape: PopupShape;
     image_public_id: string | null;
+    /** What the image shows; null when it is only decoration (empty `alt`) */
+    image_alt: string | null;
     action: PopupAction | null;
     triggers: PopupTriggers;
     pages: PopupPages;

@@ -44,6 +44,13 @@ const pathname = computed(() => pathOf(page.url));
 let pending: AbortController | null = null;
 let pageViews = 0;
 let stopConsentWatch: (() => void) | null = null;
+// A window opened (or closed) on this page: no other opens until the path changes
+let handledThisPage = false;
+let offeredIds = idsOf(props.announcementPopups);
+
+function idsOf(announcements: PopupAnnouncement[]): string {
+    return announcements.map(({ id }) => id).join(',');
+}
 
 function pageContext(): PopupPageContext {
     return { pathname: pathname.value, component: page.component };
@@ -83,16 +90,25 @@ function candidate(): PopupAnnouncement | null {
     );
 }
 
+/** The banner is asking: a consent module is on the page and has no answer */
+function bannerIsAsking(): boolean {
+    return hasCookieConsentModule() && !hasCookieConsentDecided();
+}
+
 function cancelPending(): void {
     pending?.abort();
     pending = null;
+
+    if (current.value === null) {
+        stopWatchingConsent();
+    }
 }
 
 /** Looks for the window of this page and waits for the banner answer and its first trigger */
 async function schedule(): Promise<void> {
     cancelPending();
 
-    if (current.value !== null) {
+    if (current.value !== null || handledThisPage) {
         return;
     }
 
@@ -116,30 +132,48 @@ async function schedule(): Promise<void> {
         return;
     }
 
-    armPopupTriggers(next.popup.triggers, environment(), () => open(next), controller.signal);
+    // False only when the wait gave up on a provider that never registered
+    const answered = hasCookieConsentDecided();
+
+    watchConsent();
+    armPopupTriggers(
+        next.popup.triggers,
+        environment(),
+        () => open(next, answered),
+        controller.signal
+    );
 }
 
-function open(announcement: PopupAnnouncement): void {
+function open(announcement: PopupAnnouncement, answeredWhenArmed: boolean): void {
     pending = null;
 
     if (
         current.value !== null ||
+        handledThisPage ||
         !props.announcementPopups.some(({ id }) => id === announcement.id)
     ) {
         return;
     }
 
+    // The banner came back while the trigger was pending: wait for its new answer
+    if (answeredWhenArmed && bannerIsAsking()) {
+        void schedule();
+
+        return;
+    }
+
     current.value = announcement;
+    handledThisPage = true;
     markShown(announcement.id);
-    watchConsent(announcement);
 }
 
 /**
- * If the banner asks again while the window is open (preferences reopened, or a provider that
- * registered late with its banner showing), the window goes and waits for the new answer.
+ * While a trigger is pending or the window is open, a banner that asks again (preferences
+ * reopened, or a provider that registered late with its banner showing) puts the window away
+ * and makes it wait for the new answer, triggers and all.
  */
-function watchConsent(announcement: PopupAnnouncement): void {
-    stopConsentWatch?.();
+function watchConsent(): void {
+    stopWatchingConsent();
 
     let first = true;
 
@@ -153,17 +187,29 @@ function watchConsent(announcement: PopupAnnouncement): void {
             return;
         }
 
-        if (!decided && hasCookieConsentModule() && current.value?.id === announcement.id) {
-            close();
-            forgetShown(announcement.id);
-            void schedule();
+        if (decided || !hasCookieConsentModule()) {
+            return;
         }
+
+        const shown = current.value;
+
+        if (shown !== null) {
+            current.value = null;
+            forgetShown(shown.id);
+            handledThisPage = false;
+        }
+
+        void schedule();
     });
 }
 
-function close(): void {
+function stopWatchingConsent(): void {
     stopConsentWatch?.();
     stopConsentWatch = null;
+}
+
+function close(): void {
+    stopWatchingConsent();
     current.value = null;
 }
 
@@ -188,15 +234,28 @@ function visitPage(): void {
         close();
     }
 
+    // An open window that fits the new page is that page's window
+    handledThisPage = current.value !== null;
     void schedule();
 }
 
 watch(pathname, visitPage);
 
-// The list changes with the session (signing in or out): a window no longer offered goes
+/**
+ * Every Inertia visit brings a new array, also to the same path (pages of results, filters, a
+ * form that redirects back): only a change in the windows offered (signing in or out) counts.
+ * A window no longer offered goes; pending triggers start again only for a new set.
+ */
 watch(
     () => props.announcementPopups,
     (announcements) => {
+        const ids = idsOf(announcements);
+
+        if (ids === offeredIds) {
+            return;
+        }
+
+        offeredIds = ids;
         const shown = current.value;
 
         if (shown !== null && !announcements.some(({ id }) => id === shown.id)) {

@@ -61,6 +61,7 @@ function popup(
         popup: {
             shape: 'centered',
             image_public_id: null,
+            image_alt: null,
             action: null,
             triggers: {
                 delay_seconds: 0,
@@ -382,5 +383,110 @@ describe('AnnouncementPopup', () => {
         notifyCookieConsentDecided();
         await settle(60_000);
         expect(dialog()).toBeNull();
+    });
+
+    it('does not open over a banner reopened before its trigger is met', async () => {
+        page.props = { cookieConsentModule: true };
+        let decided = true;
+        registerCookieConsentProvider({ hasConsent: () => decided, hasDecided: () => decided });
+        const delay = {
+            delay_seconds: 30,
+            scroll_percent: null,
+            exit_intent: false,
+            page_views: null,
+        };
+
+        mountPopups([popup('a', { triggers: delay })]);
+        await settle(10_000);
+
+        decided = false;
+        notifyCookieConsentChanged();
+        await settle(25_000);
+        expect(dialog()).toBeNull();
+
+        decided = true;
+        notifyCookieConsentDecided();
+        // The triggers start again from the new answer
+        await settle(29_000);
+        expect(dialog()).toBeNull();
+        await settle(1000);
+        expect(dialog()).not.toBeNull();
+    });
+
+    it('opens no other window after a visit to the same path brings the same windows again', async () => {
+        const offered = [popup('a'), popup('b')];
+        const wrapped = mountPopups(offered);
+        await settle();
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+        await settle();
+        expect(dialog()).toBeNull();
+
+        // A page of results, a filter or a form that redirects back: a new array, the same windows
+        page.url = '/?pagina=2';
+        await wrapped.setProps({
+            announcementPopups: offered.map((announcement) => ({ ...announcement })),
+        });
+        await settle(60_000);
+
+        expect(dialog()).toBeNull();
+    });
+
+    it('keeps counting its delay when a visit to the same path brings the same windows again', async () => {
+        const offered = [
+            popup('a', {
+                triggers: {
+                    delay_seconds: 10,
+                    scroll_percent: null,
+                    exit_intent: false,
+                    page_views: null,
+                },
+            }),
+        ];
+        const wrapped = mountPopups(offered);
+        await settle(5000);
+
+        await wrapped.setProps({
+            announcementPopups: offered.map((announcement) => ({ ...announcement })),
+        });
+        await settle(5000);
+
+        expect(dialog()).not.toBeNull();
+    });
+
+    it('closes the corner card with Escape only while the focus is in it', async () => {
+        const menu = document.createElement('button');
+        document.body.appendChild(menu);
+        mountPopups([popup('a', { shape: 'corner' })]);
+        await settle();
+
+        menu.focus();
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+        await settle();
+        expect(dialog()).not.toBeNull();
+        expect(window.localStorage.getItem('guildforge_dismissed_popups')).toBeNull();
+
+        dialog()?.querySelector<HTMLButtonElement>('button')?.focus();
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+        await settle();
+        expect(dialog()).toBeNull();
+        menu.remove();
+    });
+
+    it('describes its image with the alternative text, or marks it as decoration', async () => {
+        mountPopups([
+            popup('a', {
+                image_public_id: 'announcements/popups/2026/11/a.webp',
+                image_alt: 'Mesa con dados',
+            }),
+        ]);
+        await settle();
+        expect(dialog()?.querySelector('img')?.getAttribute('alt')).toBe('Mesa con dados');
+        wrapper?.unmount();
+        wrapper = null;
+        window.sessionStorage.clear();
+
+        mountPopups([popup('b', { image_public_id: 'announcements/popups/2026/11/b.webp' })]);
+        await settle();
+        expect(dialog()?.querySelector('img')?.getAttribute('alt')).toBe('');
     });
 });

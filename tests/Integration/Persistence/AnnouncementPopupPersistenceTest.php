@@ -71,6 +71,7 @@ final class AnnouncementPopupPersistenceTest extends ModuleTestCase
             pages: PopupPages::Paths,
             paths: ['/eventos*', '/articulos'],
             device: PopupDevice::Desktop,
+            imageAlt: 'Cartel de la campaña de socios',
         );
 
         $created = $this->service()->create(new CreateAnnouncementDTO(
@@ -170,6 +171,7 @@ final class AnnouncementPopupPersistenceTest extends ModuleTestCase
             'is_dismissible' => false,
             'popup_shape' => 'corner',
             'popup_image_public_id' => 'announcements/popups/2026/11/a.webp',
+            'popup_image_alt' => 'Mesa de rol con dados',
             'popup_action_label' => 'Ver eventos',
             'popup_action_url' => '/eventos',
             'popup_trigger_delay' => null,
@@ -188,6 +190,7 @@ final class AnnouncementPopupPersistenceTest extends ModuleTestCase
         $this->assertSame([
             'shape' => 'corner',
             'image_public_id' => 'announcements/popups/2026/11/a.webp',
+            'image_alt' => 'Mesa de rol con dados',
             'action' => ['label' => 'Ver eventos', 'url' => '/eventos'],
             'triggers' => ['delay_seconds' => null, 'scroll_percent' => 50, 'exit_intent' => true, 'page_views' => null],
             'pages' => 'home',

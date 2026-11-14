@@ -19,6 +19,7 @@ return new class extends Migration
         'format',
         'popup_shape',
         'popup_image_public_id',
+        'popup_image_alt',
         'popup_action_label',
         'popup_action_url',
         'popup_trigger_delay',
@@ -36,6 +37,7 @@ return new class extends Migration
             $table->string('format', 16)->default('banner');
             $table->string('popup_shape', 16)->default('centered');
             $table->string('popup_image_public_id')->nullable();
+            $table->string('popup_image_alt')->nullable();
             $table->string('popup_action_label', 60)->nullable();
             $table->string('popup_action_url', 2048)->nullable();
             $table->unsignedSmallInteger('popup_trigger_delay')->nullable();

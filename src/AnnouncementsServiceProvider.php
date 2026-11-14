@@ -27,6 +27,7 @@ use Modules\Announcements\Filament\Media\AnnouncementContentMediaSource;
 use Modules\Announcements\Filament\Media\AnnouncementPopupImageMediaSource;
 use Modules\Announcements\Filament\Pages\AnnouncementsSettings;
 use Modules\Announcements\Filament\Resources\AnnouncementResource;
+use Modules\Announcements\Http\Support\SharedAnnouncements;
 use Modules\Announcements\Infrastructure\Content\AnnouncementContentTextSource;
 use Modules\Announcements\Infrastructure\Notifications\AnnouncementNoticeObserver;
 use Modules\Announcements\Infrastructure\Persistence\Eloquent\Models\AnnouncementModel;
@@ -61,6 +62,9 @@ final class AnnouncementsServiceProvider extends ModuleServiceProvider
             AnnouncementServiceInterface::class,
             AnnouncementService::class
         );
+
+        // Banners and windows of the page, read once per request
+        $this->app->singleton(SharedAnnouncements::class);
     }
 
     public function boot(): void
@@ -74,29 +78,21 @@ final class AnnouncementsServiceProvider extends ModuleServiceProvider
 
         // Banners and windows go to the page apart: the banners keep the prop they always had
         if (class_exists(Inertia::class)) {
-            Inertia::share('announcements', fn (): array => $this->sharedAnnouncements(AnnouncementFormat::Banner));
-            Inertia::share('announcementPopups', fn (): array => $this->sharedAnnouncements(AnnouncementFormat::Popup));
+            Inertia::share('announcements', fn (): array => $this->shared(AnnouncementFormat::Banner));
+            Inertia::share('announcementPopups', fn (): array => $this->shared(AnnouncementFormat::Popup));
         }
     }
 
     /**
-     * The announcements of one format the current user may see now. For windows, the order is
-     * also which one wins: the browser opens the first that fits the page.
-     *
      * @return list<array<string, mixed>>
      */
-    private function sharedAnnouncements(AnnouncementFormat $format): array
+    private function shared(AnnouncementFormat $format): array
     {
         if (! $this->app->bound(AnnouncementServiceInterface::class)) {
             return [];
         }
 
-        $service = $this->app->make(AnnouncementServiceInterface::class);
-
-        return array_values(array_map(
-            static fn ($dto): array => $dto->toArray(),
-            $service->getActiveForUser(auth()->user(), $format)
-        ));
+        return $this->app->make(SharedAnnouncements::class)->of($format, $this->app->make('request'));
     }
 
     /**

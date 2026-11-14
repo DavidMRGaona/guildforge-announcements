@@ -26,9 +26,10 @@ Una ventana emergente es un anuncio que se abre encima de la página en lugar de
 
 - **Forma**: **Centrada** tapa la página con un fondo oscuro hasta que se cierra. **Tarjeta en la esquina inferior** sale abajo, a la derecha en escritorio y a lo ancho en el móvil, y deja seguir leyendo.
 - **Imagen**: opcional. Sale encima del título. Puedes subir una o pulsar **Elegir de la biblioteca** para usar una que ya esté en la web.
+- **Texto alternativo de la imagen**: qué muestra la imagen, para quien usa un lector de pantalla o no la ve cargar. Déjalo vacío si la imagen es solo decoración.
 - **Texto del botón** y **Enlace del botón**: opcionales, pero van juntos. El enlace puede ser una dirección que empiece por `https://` o una página de la web que empiece por `/`, como `/eventos`. No se aceptan direcciones `http://` sin cifrar ni nada que no sea un enlace.
 
-La ventana siempre se puede cerrar, con su ✕, con la tecla Esc o, en la centrada, pulsando fuera de ella. Quien la cierra o pulsa su botón no la vuelve a ver en ese navegador.
+La ventana siempre se puede cerrar, con su ✕, con la tecla Esc o, en la centrada, pulsando fuera de ella. La tarjeta se cierra con Esc cuando se está usando, para no cerrarse al pulsar Esc en otra cosa de la página. Quien la cierra o pulsa su botón no la vuelve a ver en ese navegador.
 
 ## Cuándo se abre
 
@@ -58,8 +59,9 @@ Además de **Público**, **Usuarios autenticados** y **Solo socios** (quien tien
 ## Reglas que no cambian
 
 - **Una ventana por página como mucho.** Si a la vez pueden salir varias, sale la de más **Prioridad**. Con la misma prioridad, la que empezó más tarde (su **Fecha de inicio** o, sin ella, cuándo se creó). Cada ventana sale como mucho una vez por visita.
-- **Nunca encima del banner de cookies.** La ventana espera a que la persona responda al banner. Si vuelve a abrir el banner, la ventana se cierra y espera a la nueva respuesta.
+- **Nunca encima del banner de cookies.** La ventana espera a que la persona responda al banner. Si lo vuelve a abrir, la ventana se retira (o no llega a salir) y espera a la nueva respuesta para volver a contar sus disparadores.
 - **No avisa en la campana.** Las ventanas no mandan el aviso «Nuevo anuncio».
+- **No sale en la lista de anuncios.** Las ventanas se abren en las páginas, no como tarjetas de anuncio.
 
 > [!WARNING]
 > Para que la ventana espere al banner de cookies, el módulo **Banner de cookies** tiene que estar en una versión posterior a la 2.14.0. Con la 2.14.0 o anteriores, la ventana puede salir mientras el banner está abierto.

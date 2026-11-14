@@ -32,7 +32,7 @@ Lo que cierras se recuerda solo en el navegador donde lo cerraste: en otro dispo
 
 Algunos anuncios se abren en una ventana encima de la página: en el centro, con el fondo oscurecido, o como una tarjeta abajo. Pueden salir al rato de entrar, al bajar por la página, al ir a salir o después de ver varias páginas. Sale como mucho una por página y nunca mientras está abierto el aviso de cookies.
 
-- Ciérrala con la ✕, con la tecla Esc o, si está en el centro, pulsando fuera de ella. Siempre se puede cerrar.
+- Ciérrala con la ✕, con la tecla Esc o, si está en el centro, pulsando fuera de ella. Si es una tarjeta abajo, Esc la cierra cuando estás en ella. Siempre se puede cerrar.
 - Si tiene un botón, te lleva a la página de la que habla.
 - Lo que cierras, o el botón que pulsas, se recuerda en ese navegador: no la vuelves a ver ahí. Si no la cierras, no vuelve a salir hasta tu próxima visita.
 

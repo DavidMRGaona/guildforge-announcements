@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Modules\Announcements\Domain\Entities\Announcement;
+use Modules\Announcements\Domain\Enums\AnnouncementVisibility;
 use Modules\Announcements\Domain\Repositories\AnnouncementRepositoryInterface;
 use Modules\Announcements\Domain\ValueObjects\AnnouncementId;
 use Modules\Announcements\Infrastructure\Notifications\AnnouncementNotices;
@@ -47,8 +48,14 @@ final class AnnounceAnnouncementJob implements ShouldQueue
     {
         $announcement = app(AnnouncementRepositoryInterface::class)->find(AnnouncementId::fromString($this->announcementId));
 
-        // Deleted, turned off, expired, not started yet or turned into a window: nothing to tell now
-        if (! $announcement instanceof Announcement || ! $announcement->isCurrentlyValid() || $announcement->isPopup()) {
+        // Deleted, turned off, expired, not started yet, turned into a window or only for visitors
+        // without a session: nothing to tell now
+        if (
+            ! $announcement instanceof Announcement
+            || ! $announcement->isCurrentlyValid()
+            || $announcement->isPopup()
+            || $announcement->visibility() === AnnouncementVisibility::Guests
+        ) {
             return;
         }
 

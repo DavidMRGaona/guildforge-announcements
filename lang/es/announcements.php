@@ -150,6 +150,8 @@ return [
         ],
         'image' => 'Imagen',
         'image_help' => 'Opcional. Sale encima del título.',
+        'image_alt' => 'Texto alternativo de la imagen',
+        'image_alt_help' => 'Qué muestra la imagen, para quien no puede verla. Déjalo vacío si es solo decoración.',
         'action_label' => 'Texto del botón',
         'action_label_help' => 'Opcional. Sin texto y enlace no sale el botón.',
         'action_url' => 'Enlace del botón',

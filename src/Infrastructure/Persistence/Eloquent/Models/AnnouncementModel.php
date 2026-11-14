@@ -29,6 +29,7 @@ use Modules\Announcements\Domain\Enums\AnnouncementVisibility;
  * @property AnnouncementFormat $format
  * @property string $popup_shape
  * @property string|null $popup_image_public_id
+ * @property string|null $popup_image_alt
  * @property string|null $popup_action_label
  * @property string|null $popup_action_url
  * @property int|null $popup_trigger_delay
@@ -93,6 +94,7 @@ final class AnnouncementModel extends Model
         'format',
         'popup_shape',
         'popup_image_public_id',
+        'popup_image_alt',
         'popup_action_label',
         'popup_action_url',
         'popup_trigger_delay',

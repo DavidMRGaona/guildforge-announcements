@@ -78,6 +78,16 @@ final class AnnouncementPopupTest extends TestCase
         new AnnouncementPopup(pages: PopupPages::Paths, paths: $paths);
     }
 
+    public function test_the_image_text_is_trimmed_blank_means_decorative_and_has_a_limit(): void
+    {
+        $this->assertSame('Dados', (new AnnouncementPopup(imageAlt: ' Dados '))->imageAlt);
+        $this->assertNull((new AnnouncementPopup(imageAlt: '  '))->imageAlt);
+        $this->assertNull((new AnnouncementPopup)->imageAlt);
+
+        $this->expectException(InvalidArgumentException::class);
+        new AnnouncementPopup(imageAlt: str_repeat('a', AnnouncementPopup::IMAGE_ALT_MAX_LENGTH + 1));
+    }
+
     public function test_a_blank_image_is_no_image(): void
     {
         $this->assertNull((new AnnouncementPopup(imagePublicId: '  '))->imagePublicId);

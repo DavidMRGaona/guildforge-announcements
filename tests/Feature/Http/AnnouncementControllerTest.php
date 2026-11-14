@@ -276,6 +276,24 @@ final class AnnouncementControllerTest extends ModuleTestCase
             ->assertJsonPath('data.title', 'For members');
     }
 
+    public function test_the_list_leaves_out_the_popup_windows(): void
+    {
+        $this->createAnnouncement(['title' => 'Banda']);
+        $this->createAnnouncement(['title' => 'Ventana', 'format' => 'popup']);
+
+        $this->getJson('/anuncios')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.title', 'Banda');
+    }
+
+    public function test_show_returns_404_for_a_popup_window(): void
+    {
+        $announcement = $this->createAnnouncement(['format' => 'popup']);
+
+        $this->getJson('/anuncios/'.$announcement->id)->assertNotFound();
+    }
+
     public function test_show_returns_404_for_an_unknown_announcement(): void
     {
         $this->getJson('/anuncios/9b2f4c1e-0000-4000-8000-000000000000')->assertNotFound();

@@ -242,6 +242,12 @@ class AnnouncementResource extends BaseResource
                         ->nullable()
                         ->columnSpanFull()),
 
+                    TextInput::make('popup_image_alt')
+                        ->label(__('announcements::announcements.popup.image_alt'))
+                        ->helperText(__('announcements::announcements.popup.image_alt_help'))
+                        ->maxLength(AnnouncementPopup::IMAGE_ALT_MAX_LENGTH)
+                        ->columnSpanFull(),
+
                     TextInput::make('popup_action_label')
                         ->label(__('announcements::announcements.popup.action_label'))
                         ->helperText(__('announcements::announcements.popup.action_label_help'))

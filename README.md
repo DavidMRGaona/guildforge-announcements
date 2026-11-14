@@ -109,9 +109,10 @@ Un anuncio con formato `popup` se abre encima de la página. El servidor decide 
 |-------|---------|---------|
 | Forma | `popup_shape` | `centered` (modal) o `corner` (tarjeta abajo, a la derecha en escritorio) |
 | Imagen | `popup_image_public_id` | Opcional. Cloudinary, en `announcements/popups/<año>/<mes>`, o elegida de la biblioteca de medios |
+| Texto alternativo | `popup_image_alt` | Opcional (máx. 255). Vacío, la imagen es decorativa (`alt=""`) |
 | Botón | `popup_action_label`, `popup_action_url` | Opcional, los dos juntos. Enlace `https://` o ruta de la web que empieza por `/` (nunca `//`, `http:` ni `javascript:`) |
 | Al cargar, tras unos segundos | `popup_trigger_delay` | 0–60 |
-| Al bajar por la página | `popup_trigger_scroll` | 10–100 %. Solo cuenta al bajar |
+| Al bajar por la página | `popup_trigger_scroll` | 10–100 %. Solo cuenta al bajar (ni una página que no se puede bajar ni subir desde una posición restaurada); 1 px del final cuenta como el final |
 | Al ir a salir | `popup_trigger_exit_intent` | Ratón que sale por arriba, solo en escritorio con ratón. Sin él se usa el retardo, o 10 s si no hay |
 | Tras ver varias páginas | `popup_trigger_page_views` | 2–20 páginas de la misma visita (`sessionStorage`) |
 | Páginas | `popup_pages`, `popup_paths` | `all`, `home` o `paths` (hasta 30 rutas; `*` final para «y lo que hay debajo») |
@@ -121,20 +122,21 @@ Los disparadores se combinan: abre el primero que se cumpla. Sin ninguno, la ven
 
 Reglas fijas:
 
-- Como mucho una ventana por página: la primera de la lista que encaje en la página y la pantalla. Cerrar una no abre otra en esa página.
-- Nunca antes de que se responda al banner de cookies (`whenConsentDecided()` del contrato `@/contracts/cookieConsent`, cancelado con un `AbortSignal` al cambiar de página o desmontar). Si `hasCookieConsentDecided()` vuelve a ser falso con la ventana abierta, se cierra y espera a la nueva respuesta. Hace falta una versión de cookie-consent que implemente `hasDecided()` (posterior a la 2.14.0): con la 2.14.0 o anteriores el contrato da al visitante por decidido y la ventana puede salir con el banner abierto.
+- Como mucho una ventana por página: la primera de la lista que encaje en la página y la pantalla. Cerrar una no abre otra en esa página, tampoco tras otra visita de Inertia a la misma ruta (paginación, filtros, un formulario que vuelve): solo cuenta un cambio de ruta o del conjunto de ventanas ofrecidas.
+- Nunca antes de que se responda al banner de cookies (`whenConsentDecided()` del contrato `@/contracts/cookieConsent`, cancelado con un `AbortSignal` al cambiar de página o desmontar). Si `hasCookieConsentDecided()` vuelve a ser falso mientras un disparador espera o con la ventana abierta, la ventana se retira y vuelve a esperar la respuesta, con los disparadores desde cero. Hace falta una versión de cookie-consent que implemente `hasDecided()` (cookie-consent#98, posterior a la 2.14.0): con la 2.14.0 o anteriores el contrato da al visitante por decidido y la ventana puede salir con el banner abierto.
 - Nunca en `/admin*`, las páginas de acceso (`Auth/*`), las legales (`Legal/*`), mantenimiento, `/newsletter` y lo que cuelga de ella, las de error ni las de los enlaces de los correos (`Mail/*`).
-- Siempre se puede cerrar, aunque el anuncio tenga «Permite cerrar» desmarcado (la respuesta dice `is_dismissible: true`): ✕, Esc y, en la centrada, pulsar fuera. La centrada es `role="dialog"` con `aria-modal="true"`, atrapa el foco, bloquea el desplazamiento de la página y devuelve el foco al cerrarse. La tarjeta es un `role="dialog"` sin `aria-modal`: no roba el foco ni lo atrapa. La animación de entrada solo se ve sin `prefers-reduced-motion`.
+- Siempre se puede cerrar, aunque el anuncio tenga «Permite cerrar» desmarcado (la respuesta dice `is_dismissible: true`): ✕, Esc y, en la centrada, pulsar fuera. La centrada es `role="dialog"` con `aria-modal="true"`, atrapa el foco, bloquea el desplazamiento de la página y devuelve el foco al cerrarse. La tarjeta es un `role="dialog"` sin `aria-modal`: no roba el foco ni lo atrapa, y Esc la cierra solo con el foco dentro de ella. La animación de entrada solo se ve sin `prefers-reduced-motion`.
 - Cerrar la ventana o pulsar su botón la oculta para siempre en ese navegador (`localStorage`, `guildforge_dismissed_popups`); abrirla la oculta el resto de la visita (`sessionStorage`).
 - El layout de Inertia es persistente: cada ruta nueva es otra página. Los disparadores pendientes se cancelan, y una ventana abierta sigue solo si encaja en la página nueva. Si cambia la lista (al iniciar o cerrar sesión), una ventana que ya no se ofrece se cierra.
-- Una ventana cuyos ajustes guardados no se pueden leer (una fila editada a mano) no se muestra nunca y deja un aviso en el log.
+- Una ventana cuyos ajustes guardados no se pueden leer (una fila editada a mano) no se muestra nunca y deja un aviso en el log. Lo mismo cualquier anuncio con un formato, visibilidad, posición o prioridad desconocidos: se deja fuera en vez de romper todas las páginas.
+- Banners y ventanas se leen con una sola consulta por petición y se reparten entre las dos props.
 - Al cambiar el formato a `banner` se conservan los ajustes de la ventana. El ajuste «Mostrar banner» no afecta a las ventanas.
 
 ### Avisos en la campana
 
 Cuando un anuncio empieza a salir en la web por primera vez, cada cuenta que puede verlo recibe un aviso en la campana del core: «Nuevo anuncio: <título>», con el texto del anuncio y un enlace a la portada, donde sale la banda. Nunca se manda por correo.
 
-- **Qué anuncios**: solo los banners. Las ventanas emergentes no avisan.
+- **Qué anuncios**: solo los banners para cuentas. Ni las ventanas emergentes ni los anuncios `guests` avisan.
 - **Cuándo**: al crearlo activo, al activarlo o al cambiar su fecha de inicio. Si tiene una fecha de inicio futura, el aviso se encola hasta esa fecha. Se avisa una sola vez por anuncio (tabla `announcements_notices`): cambiar el texto, desactivarlo y volver a activarlo o moverlo de fecha no avisa otra vez.
 - **A quién**: a todas las cuentas activas salvo a quien lo guarda. Al entregarlo se comprueba con la misma regla que la banda: si el anuncio ya no está activo, ha caducado o la cuenta no entra en su visibilidad (por ejemplo, «Solo socios»), no se guarda nada.
 - **Preferencia**: categoría `announcements.new-announcements` («Anuncios nuevos»), opcional, solo para la web y activada por defecto. Cada persona la apaga en sus preferencias de avisos.
@@ -158,8 +160,8 @@ Por defecto el banner está activado, con rotación automática cada 5000 ms.
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
-| `GET` | `/anuncios` | Anuncios vigentes visibles para el usuario actual, de los dos formatos (JSON, con `format` y `popup`) |
-| `GET` | `/anuncios/{id}` | Un anuncio (JSON); 404 si no está vigente o el usuario no puede verlo |
+| `GET` | `/anuncios` | Banners vigentes visibles para el usuario actual (JSON); las ventanas emergentes no se listan |
+| `GET` | `/anuncios/{id}` | Un banner (JSON); 404 si no está vigente, el usuario no puede verlo o es una ventana emergente |
 
 ### Imagen de la ventana
 

@@ -30,17 +30,25 @@ export function detectEnvironment(win: Window, pageViews: number): PopupEnvironm
     };
 }
 
+/** Scroll positions can be fractional: this close to the bottom counts as the bottom */
+const BOTTOM_TOLERANCE_PX = 1;
+
 /** How far down the page is scrolled, in %; null when the page cannot be scrolled */
 function scrolledPercent(win: Window): number | null {
     const scrollable = win.document.documentElement.scrollHeight - win.innerHeight;
 
-    return scrollable > 0 ? (win.scrollY / scrollable) * 100 : null;
+    if (scrollable <= 0) {
+        return null;
+    }
+
+    return scrollable - win.scrollY <= BOTTOM_TOLERANCE_PX ? 100 : (win.scrollY / scrollable) * 100;
 }
 
 /**
  * Waits for the first trigger of a window and calls `open` once. The triggers combine: whichever
  * is met first wins. Aborting the signal (navigation, unmount) removes every timer and listener.
- * A page that cannot be scrolled never meets the scroll trigger: only scrolling counts.
+ * Only scrolling down meets the scroll trigger: not a page that cannot be scrolled, nor one that
+ * loads already scrolled (a restored position) until the visitor goes further down.
  */
 export function armPopupTriggers(
     triggers: PopupTriggers,
@@ -93,7 +101,16 @@ export function armPopupTriggers(
     const percent = triggers.scroll_percent;
 
     if (percent !== null) {
+        let lastY = win.scrollY;
+
         const onScroll = (): void => {
+            const goingDown = win.scrollY > lastY;
+            lastY = win.scrollY;
+
+            if (!goingDown) {
+                return;
+            }
+
             const scrolled = scrolledPercent(win);
 
             if (scrolled !== null && scrolled >= percent) {
