@@ -65,7 +65,7 @@ final class AnnouncementsSettings extends Page implements HasForms
 
     public function mount(): void
     {
-        abort_unless(static::canAccess(), 403);
+        abort_unless(self::canAccess(), 403);
 
         $this->form->fill(app(ModuleManagerServiceInterface::class)->getSettings(new ModuleName('announcements')));
     }
@@ -106,7 +106,7 @@ final class AnnouncementsSettings extends Page implements HasForms
     public function save(): void
     {
         // Livewire methods can be called without the page's own checks
-        abort_unless(static::canAccess(), 403);
+        abort_unless(self::canAccess(), 403);
 
         app(ModuleManagerServiceInterface::class)->updateSettings(
             new ModuleName('announcements'),
