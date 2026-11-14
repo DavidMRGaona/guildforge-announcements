@@ -80,6 +80,8 @@ final readonly class AnnouncementResponseDTO
             'pages' => $popup->pages->value,
             'paths' => $popup->paths,
             'device' => $popup->device->value,
+            'frequency' => $popup->frequency->value,
+            'frequency_days' => $popup->frequencyDays,
         ];
     }
 

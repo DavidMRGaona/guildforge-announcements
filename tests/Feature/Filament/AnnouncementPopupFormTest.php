@@ -42,6 +42,7 @@ final class AnnouncementPopupFormTest extends ModuleTestCase
         'popup_trigger_page_views',
         'popup_pages',
         'popup_device',
+        'popup_frequency',
     ];
 
     protected ?string $moduleName = 'announcements';
@@ -75,14 +76,16 @@ final class AnnouncementPopupFormTest extends ModuleTestCase
             ->assertFormFieldIsHidden('position')
             ->assertFormFieldIsHidden('is_dismissible')
             ->assertFormFieldIsHidden('background_color')
-            // The paths only once the window is limited to them
-            ->assertFormFieldIsHidden('popup_paths');
+            // The paths only once the window is limited to them, and the days once it returns every few
+            ->assertFormFieldIsHidden('popup_paths')
+            ->assertFormFieldIsHidden('popup_frequency_days');
 
         foreach (self::POPUP_FIELDS as $field) {
             $form->assertFormFieldIsVisible($field);
         }
 
         $form->fillForm(['popup_pages' => 'paths'])->assertFormFieldIsVisible('popup_paths');
+        $form->fillForm(['popup_frequency' => 'days'])->assertFormFieldIsVisible('popup_frequency_days');
     }
 
     public function test_a_window_is_created_with_all_its_settings(): void
@@ -100,6 +103,8 @@ final class AnnouncementPopupFormTest extends ModuleTestCase
             'popup_pages' => 'paths',
             'popup_paths' => ['/eventos*', '/articulos'],
             'popup_device' => 'desktop',
+            'popup_frequency' => 'days',
+            'popup_frequency_days' => 14,
         ])
             ->call('create')
             ->assertHasNoFormErrors();
@@ -115,6 +120,27 @@ final class AnnouncementPopupFormTest extends ModuleTestCase
         $this->assertSame('paths', $model->popup_pages);
         $this->assertSame(['/eventos*', '/articulos'], $model->popup_paths);
         $this->assertSame('desktop', $model->popup_device);
+        $this->assertSame('days', $model->popup_frequency);
+        $this->assertSame(14, $model->popup_frequency_days);
+    }
+
+    public function test_a_new_window_opens_once_unless_told_otherwise(): void
+    {
+        $this->popupForm()->assertFormSet(['popup_frequency' => 'once'])->call('create')->assertHasNoFormErrors();
+
+        $model = AnnouncementModel::query()->sole();
+        $this->assertSame('once', $model->popup_frequency);
+        $this->assertNull($model->popup_frequency_days);
+    }
+
+    public function test_a_window_that_returns_every_session_needs_no_days(): void
+    {
+        $this->popupForm(['popup_frequency' => 'session'])
+            ->assertFormFieldIsHidden('popup_frequency_days')
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $this->assertSame('session', AnnouncementModel::query()->sole()->popup_frequency);
     }
 
     public function test_a_window_with_only_the_defaults_opens_on_load(): void
@@ -144,6 +170,11 @@ final class AnnouncementPopupFormTest extends ModuleTestCase
             'a path with a host' => [['popup_pages' => 'paths', 'popup_paths' => ['https://example.org/eventos']], 'popup_paths.0'],
             'a star in the middle' => [['popup_pages' => 'paths', 'popup_paths' => ['/eventos/*/fotos']], 'popup_paths.0'],
             'unknown shape' => [['popup_shape' => 'fullscreen'], 'popup_shape'],
+            'unknown frequency' => [['popup_frequency' => 'always'], 'popup_frequency'],
+            'every few days without the days' => [['popup_frequency' => 'days', 'popup_frequency_days' => null], 'popup_frequency_days'],
+            'zero days' => [['popup_frequency' => 'days', 'popup_frequency_days' => 0], 'popup_frequency_days'],
+            'more than a year' => [['popup_frequency' => 'days', 'popup_frequency_days' => 366], 'popup_frequency_days'],
+            'days that are not a number' => [['popup_frequency' => 'days', 'popup_frequency_days' => 'una semana'], 'popup_frequency_days'],
         ];
     }
 
@@ -202,12 +233,15 @@ final class AnnouncementPopupFormTest extends ModuleTestCase
             'format' => 'popup',
             'popup_pages' => 'paths',
             'popup_paths' => ['/eventos*'],
+            'popup_frequency' => 'days',
+            'popup_frequency_days' => 30,
         ]);
 
         Livewire::test(EditAnnouncement::class, ['record' => $model->getRouteKey()])
             ->assertOk()
-            ->assertFormSet(['format' => 'popup', 'popup_pages' => 'paths', 'popup_paths' => ['/eventos*']])
-            ->assertFormFieldIsVisible('popup_paths');
+            ->assertFormSet(['format' => 'popup', 'popup_pages' => 'paths', 'popup_paths' => ['/eventos*'], 'popup_frequency' => 'days', 'popup_frequency_days' => 30])
+            ->assertFormFieldIsVisible('popup_paths')
+            ->assertFormFieldIsVisible('popup_frequency_days');
     }
 
     public function test_the_list_can_be_filtered_by_format(): void

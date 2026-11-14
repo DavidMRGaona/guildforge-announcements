@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Modules\Announcements\Application\Services;
 
 use App\Application\Authorization\Services\AssociationMembershipServiceInterface;
+use Carbon\CarbonImmutable;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Modules\Announcements\Application\DTOs\AnnouncementResponseDTO;
 use Modules\Announcements\Application\DTOs\CreateAnnouncementDTO;
 use Modules\Announcements\Application\DTOs\UpdateAnnouncementDTO;
@@ -12,14 +14,18 @@ use Modules\Announcements\Domain\Entities\Announcement;
 use Modules\Announcements\Domain\Enums\AnnouncementFormat;
 use Modules\Announcements\Domain\Enums\AnnouncementVisibility;
 use Modules\Announcements\Domain\Repositories\AnnouncementRepositoryInterface;
+use Modules\Announcements\Domain\Repositories\PopupViewRepositoryInterface;
 use Modules\Announcements\Domain\ValueObjects\AnnouncementId;
+use Modules\Announcements\Domain\ValueObjects\AnnouncementPopup;
 use Modules\Announcements\Domain\ValueObjects\AnnouncementPriority;
+use Modules\Announcements\Domain\ValueObjects\PopupView;
 
 final readonly class AnnouncementService implements AnnouncementServiceInterface
 {
     public function __construct(
         private AnnouncementRepositoryInterface $repository,
         private AssociationMembershipServiceInterface $associationMembership,
+        private PopupViewRepositoryInterface $popupViews,
     ) {}
 
     public function create(CreateAnnouncementDTO $dto): AnnouncementResponseDTO
@@ -145,8 +151,53 @@ final readonly class AnnouncementService implements AnnouncementServiceInterface
 
         return array_map(
             AnnouncementResponseDTO::fromEntity(...),
-            $visibleAnnouncements
+            $this->withoutWindowsAlreadySeen($visibleAnnouncements, $user)
         );
+    }
+
+    /**
+     * A signed-in account does not get again a window its memory says is not due (announcements#68:
+     * seen once, or seen less than N days ago). Guests are left alone: only their browser knows.
+     * Banners never go through it, and the memory is read once, only when there are windows.
+     *
+     * @param  list<Announcement>  $announcements
+     * @return list<Announcement>
+     */
+    private function withoutWindowsAlreadySeen(array $announcements, ?object $user): array
+    {
+        if (! $user instanceof Authenticatable) {
+            return $announcements;
+        }
+
+        $windowIds = [];
+
+        foreach ($announcements as $announcement) {
+            if ($announcement->isPopup()) {
+                $windowIds[] = $announcement->id()->value;
+            }
+        }
+
+        if ($windowIds === []) {
+            return $announcements;
+        }
+
+        $views = $this->popupViews->forUser((string) $user->getAuthIdentifier(), $windowIds);
+
+        if ($views === []) {
+            return $announcements;
+        }
+
+        $now = CarbonImmutable::now();
+
+        return array_values(array_filter(
+            $announcements,
+            static function (Announcement $announcement) use ($views, $now): bool {
+                $popup = $announcement->popup();
+
+                return ! $popup instanceof AnnouncementPopup
+                    || PopupView::isDue($popup, $views[$announcement->id()->value] ?? null, $now);
+            },
+        ));
     }
 
     public function findVisibleForUser(string $id, ?object $user): ?AnnouncementResponseDTO

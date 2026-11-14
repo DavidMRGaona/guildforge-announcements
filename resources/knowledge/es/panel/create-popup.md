@@ -5,7 +5,7 @@ summary: Convierte un anuncio en una ventana que se abre encima de la página, y
 category: content
 audience: panel
 order: 84
-keywords: [ventana emergente, ventana, emergente, popup, pop-up, modal, ventana modal, tarjeta, aviso destacado, captación de socios, hazte socio, botón, llamada a la acción, imagen, disparador, retardo, segundos, desplazamiento, bajar, al ir a salir, intención de salida, páginas vistas, portada, rutas, móvil, escritorio, dispositivo, solo visitas sin sesión, banner de cookies]
+keywords: [frecuencia, una sola vez, una vez por sesión, cada cierto número de días, cada cuánto sale, volver a salir, ventana emergente, ventana, emergente, popup, pop-up, modal, ventana modal, tarjeta, aviso destacado, captación de socios, hazte socio, botón, llamada a la acción, imagen, disparador, retardo, segundos, desplazamiento, bajar, al ir a salir, intención de salida, páginas vistas, portada, rutas, móvil, escritorio, dispositivo, solo visitas sin sesión, banner de cookies]
 related: [announcements.panel.create-announcement, announcements.panel.overview, announcements.panel.manage-announcements]
 conditions:
   permissions:
@@ -19,7 +19,7 @@ Una ventana emergente es un anuncio que se abre encima de la página en lugar de
 2. Pulsa **Crear anuncio** y escribe el **Título** y el **Contenido**. En la ventana el contenido sale entero, con su formato: negritas, listas y enlaces.
 3. En **Visualización**, elige el **Formato** **Ventana emergente**. Desaparecen la **Posición**, **Permite cerrar** y el **Estilo personalizado**, que son solo de las bandas, y salen las secciones de la ventana.
 4. Elige la **Visibilidad** y la **Prioridad**, como en cualquier anuncio.
-5. Rellena **Ventana emergente**, **Cuándo se abre** y **Dónde se abre**, como se explica abajo.
+5. Rellena **Ventana emergente**, **Cuándo se abre** (que incluye la **Frecuencia**) y **Dónde se abre**, como se explica abajo.
 6. Pulsa **Crear**.
 
 ## Cómo es la ventana
@@ -29,7 +29,7 @@ Una ventana emergente es un anuncio que se abre encima de la página en lugar de
 - **Texto alternativo de la imagen**: qué muestra la imagen, para quien usa un lector de pantalla o no la ve cargar. Déjalo vacío si la imagen es solo decoración.
 - **Texto del botón** y **Enlace del botón**: opcionales, pero van juntos. El enlace puede ser una dirección que empiece por `https://` o una página de la web que empiece por `/`, como `/eventos`. No se aceptan direcciones `http://` sin cifrar ni nada que no sea un enlace.
 
-La ventana siempre se puede cerrar, con su ✕, con la tecla Esc o, en la centrada, pulsando fuera de ella. La tarjeta se cierra con Esc cuando se está usando, para no cerrarse al pulsar Esc en otra cosa de la página. Quien la cierra o pulsa su botón no la vuelve a ver en ese navegador.
+La ventana siempre se puede cerrar, con su ✕, con la tecla Esc o, en la centrada, pulsando fuera de ella. La tarjeta se cierra con Esc cuando se está usando, para no cerrarse al pulsar Esc en otra cosa de la página. Cerrarla o pulsar su botón cuenta como haberla visto: cuándo vuelve a salir lo decide la **Frecuencia**.
 
 ## Cuándo se abre
 
@@ -44,6 +44,23 @@ Si no rellenas ninguno, se abre nada más cargar la página.
 
 > [!TIP]
 > Un retardo de 0 gana siempre a los demás disparadores. Si quieres que la ventana espere a que alguien baje por la página o vaya a salir, deja el retardo vacío.
+
+## Cada cuánto vuelve: la frecuencia
+
+La **Frecuencia** decide cada cuánto vuelve a salir la ventana a la misma persona. Abrirla y cerrarla cuentan como haberla visto.
+
+- **Una sola vez**: no vuelve a salir una vez vista. Es lo que tienen las ventanas nuevas.
+- **Una vez por sesión**: vuelve a salir la próxima vez que la persona visite la web en una sesión nueva del navegador, es decir, tras cerrar la pestaña o la ventana y abrirla de nuevo.
+- **Cada cierto número de días**: vuelve a salir pasados de 1 a 365 días desde la última vez que se mostró. Cerrarla no retrasa la vuelta.
+
+Cómo se recuerda:
+
+- **Visitas sin sesión**: el recuerdo está en el navegador. Si borran los datos del navegador, o entran desde otro, la ventana vuelve a salir.
+- **Quien ha iniciado sesión**: el recuerdo está también en su cuenta, así que no vuelve a ver la ventana en otro dispositivo o navegador. Con la frecuencia **Una vez por sesión**, la cuenta no decide nada: cada sesión nueva del navegador la vuelve a mostrar.
+- Aunque la frecuencia deje volver a una ventana, nunca sale más de una vez por visita.
+- Al editar una ventana no se borra lo que ya se ha visto: si cambias la frecuencia, se aplica sobre cuándo la vio cada persona por última vez. Para que vuelva a salir a todo el mundo, crea una ventana nueva.
+- Si el navegador no deja guardar datos, la ventana sale una vez por cada carga de página.
+- Cuando un administrador mira la web como otra persona (**Impersonar**), no se guarda nada: ni en la cuenta de esa persona ni en el navegador del administrador. La ventana sale en cada carga de página.
 
 ## Dónde se abre
 
@@ -68,7 +85,7 @@ Además de **Público**, **Usuarios autenticados** y **Solo socios** (quien tien
 
 ## Si algo no sale bien
 
-- **La ventana no sale**: comprueba que está **Activo**, que estás dentro de sus fechas, que tu cuenta entra en su **Visibilidad** y que la página y el dispositivo encajan. Si la cerraste antes, en tu navegador ya no sale; si ya salió en esta visita, no vuelve hasta la próxima. Prueba en una ventana privada del navegador.
+- **La ventana no sale**: comprueba que está **Activo**, que estás dentro de sus fechas, que tu cuenta entra en su **Visibilidad** y que la página y el dispositivo encajan. Si ya la viste, la **Frecuencia** decide cuándo vuelve: con **Una sola vez** ya no sale, y con los otros modos, no hasta la próxima sesión o hasta pasados los días. Si ya salió en esta visita, no vuelve hasta la próxima. Para probarla, usa una ventana privada del navegador y, si has iniciado sesión, ciérrala o prueba con otra cuenta, porque tu cuenta también la recuerda.
 - **Sale otra ventana en lugar de la mía**: otra con más prioridad, o con la misma y más reciente, encaja en esa página.
 - **El enlace del botón no se acepta**: tiene que empezar por `https://` o por `/`.
 - **Una ruta no se acepta**: empieza por `/`, sin el nombre de la web delante ni `?`, y solo puede llevar un `*` al final.

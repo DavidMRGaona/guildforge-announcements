@@ -166,6 +166,16 @@ return [
         'trigger_page_views' => 'Tras ver varias páginas',
         'trigger_page_views_help' => 'De 2 a 20 páginas en la misma visita.',
         'seconds' => 's',
+        'days' => 'días',
+        'frequency' => [
+            'label' => 'Frecuencia',
+            'help' => 'Cada cuánto vuelve a salir a la misma persona. Abrirla y cerrarla cuentan como haberla visto. Quien tiene sesión no la ve de nuevo en otro dispositivo.',
+            'once' => 'Una sola vez',
+            'session' => 'Una vez por sesión',
+            'days' => 'Cada cierto número de días',
+            'days_label' => 'Días entre una vez y la siguiente',
+            'days_help' => 'De 1 a 365. Vuelve a salir pasados esos días desde la última vez que se mostró.',
+        ],
         'pages' => [
             'label' => 'Páginas',
             'help' => 'Nunca se abre en el panel, al entrar o registrarse, en las páginas legales, en mantenimiento, en /newsletter ni en las páginas de error.',
