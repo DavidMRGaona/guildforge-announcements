@@ -7,6 +7,7 @@ namespace Modules\Announcements\Tests\Feature\Filament;
 use App\Application\Modules\Services\ModuleManagerServiceInterface;
 use App\Domain\Modules\ValueObjects\ModuleName;
 use App\Filament\Clusters\SettingsCluster;
+use App\Filament\Pages\ModuleSettingsPage;
 use App\Filament\Support\ModuleSettingsPages;
 use App\Infrastructure\Persistence\Eloquent\Models\PermissionModel;
 use App\Infrastructure\Persistence\Eloquent\Models\RoleModel;
@@ -152,6 +153,19 @@ final class AnnouncementsSettingsPageTest extends ModuleTestCase
             ->fillForm(['auto_rotate' => true, 'rotate_interval' => 500])
             ->call('save')
             ->assertHasFormErrors(['rotate_interval']);
+    }
+
+    public function test_the_generic_settings_page_hands_over_to_the_module_page(): void
+    {
+        // Since core#666 the generic page of «Módulos» no longer edits the module: it redirects here
+        $this->actingAsPanelAdmin();
+
+        Livewire::test(ModuleSettingsPage::class, ['module' => 'announcements'])
+            ->assertRedirect(AnnouncementsSettings::getUrl());
+
+        $page = app(ModuleSettingsPage::class);
+        $page->module = 'announcements';
+        $this->assertFalse($page->hasSettings());
     }
 
     /**
