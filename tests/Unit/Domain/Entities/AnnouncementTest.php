@@ -6,9 +6,13 @@ namespace Modules\Announcements\Tests\Unit\Domain\Entities;
 
 use DateTimeImmutable;
 use Modules\Announcements\Domain\Entities\Announcement;
+use Modules\Announcements\Domain\Enums\AnnouncementFormat;
 use Modules\Announcements\Domain\Enums\AnnouncementPosition;
 use Modules\Announcements\Domain\Enums\AnnouncementVisibility;
+use Modules\Announcements\Domain\Enums\PopupDevice;
+use Modules\Announcements\Domain\Enums\PopupShape;
 use Modules\Announcements\Domain\ValueObjects\AnnouncementId;
+use Modules\Announcements\Domain\ValueObjects\AnnouncementPopup;
 use Modules\Announcements\Domain\ValueObjects\AnnouncementPriority;
 use PHPUnit\Framework\TestCase;
 use stdClass;
@@ -287,6 +291,103 @@ final class AnnouncementTest extends TestCase
             startsAt: $startsAt,
             endsAt: $endsAt,
             isActive: $isActive,
+        );
+    }
+
+    public function test_a_new_announcement_is_a_banner_without_window(): void
+    {
+        $announcement = $this->announcement();
+
+        $this->assertSame(AnnouncementFormat::Banner, $announcement->format());
+        $this->assertFalse($announcement->isPopup());
+        $this->assertNull($announcement->popup());
+    }
+
+    public function test_a_window_has_its_popup_settings(): void
+    {
+        $popup = new AnnouncementPopup(shape: PopupShape::Corner);
+        $announcement = $this->announcement(format: AnnouncementFormat::Popup, popup: $popup);
+
+        $this->assertTrue($announcement->isPopup());
+        $this->assertSame($popup, $announcement->popup());
+    }
+
+    public function test_a_window_whose_settings_could_not_be_read_is_never_shown(): void
+    {
+        $announcement = $this->announcement(format: AnnouncementFormat::Popup);
+
+        $this->assertNull($announcement->popup());
+        $this->assertFalse($announcement->isCurrentlyValid());
+        $this->assertTrue($this->announcement(format: AnnouncementFormat::Popup, popup: new AnnouncementPopup)->isCurrentlyValid());
+    }
+
+    public function test_a_banner_drops_window_settings(): void
+    {
+        $announcement = $this->announcement(popup: new AnnouncementPopup(shape: PopupShape::Corner));
+
+        $this->assertNull($announcement->popup());
+    }
+
+    public function test_a_window_can_always_be_closed(): void
+    {
+        $banner = $this->announcement(isDismissible: false);
+        $popup = $this->announcement(format: AnnouncementFormat::Popup, popup: new AnnouncementPopup, isDismissible: false);
+
+        $this->assertFalse($banner->canBeDismissed());
+        $this->assertTrue($popup->canBeDismissed());
+        // What was saved is kept, so the banner keeps it when the format goes back
+        $this->assertFalse($popup->isDismissible());
+    }
+
+    public function test_it_started_at_its_start_date_or_else_when_it_was_created(): void
+    {
+        $created = new DateTimeImmutable('2026-11-01 10:00:00');
+        $starts = new DateTimeImmutable('2026-11-10 09:00:00');
+
+        $this->assertEquals($starts, $this->announcement(startsAt: $starts, createdAt: $created)->startedAt());
+        $this->assertEquals($created, $this->announcement(createdAt: $created)->startedAt());
+        $this->assertNull($this->announcement()->startedAt());
+    }
+
+    public function test_update_changes_the_format_and_the_window(): void
+    {
+        $announcement = $this->announcement();
+        $popup = new AnnouncementPopup(device: PopupDevice::Desktop);
+
+        $announcement->update(
+            title: 'Ventana',
+            content: '<p>Texto</p>',
+            visibility: AnnouncementVisibility::Guests,
+            position: AnnouncementPosition::BeforeHeader,
+            priority: new AnnouncementPriority(7),
+            format: AnnouncementFormat::Popup,
+            popup: $popup,
+        );
+
+        $this->assertSame(AnnouncementFormat::Popup, $announcement->format());
+        $this->assertSame($popup, $announcement->popup());
+        $this->assertSame(AnnouncementVisibility::Guests, $announcement->visibility());
+    }
+
+    private function announcement(
+        AnnouncementFormat $format = AnnouncementFormat::Banner,
+        ?AnnouncementPopup $popup = null,
+        bool $isDismissible = true,
+        ?DateTimeImmutable $startsAt = null,
+        ?DateTimeImmutable $createdAt = null,
+    ): Announcement {
+        return new Announcement(
+            id: AnnouncementId::generate(),
+            title: 'Anuncio',
+            content: '<p>Texto</p>',
+            visibility: AnnouncementVisibility::Public,
+            position: AnnouncementPosition::BeforeHeader,
+            priority: new AnnouncementPriority(5),
+            startsAt: $startsAt,
+            isDismissible: $isDismissible,
+            createdAt: $createdAt,
+            format: $format,
+            popup: $popup,
         );
     }
 }

@@ -9,6 +9,7 @@ use Modules\Announcements\Application\DTOs\AnnouncementResponseDTO;
 use Modules\Announcements\Application\DTOs\CreateAnnouncementDTO;
 use Modules\Announcements\Application\DTOs\UpdateAnnouncementDTO;
 use Modules\Announcements\Domain\Entities\Announcement;
+use Modules\Announcements\Domain\Enums\AnnouncementFormat;
 use Modules\Announcements\Domain\Enums\AnnouncementVisibility;
 use Modules\Announcements\Domain\Repositories\AnnouncementRepositoryInterface;
 use Modules\Announcements\Domain\ValueObjects\AnnouncementId;
@@ -36,6 +37,8 @@ final readonly class AnnouncementService implements AnnouncementServiceInterface
             endsAt: $dto->endsAt,
             isActive: $dto->isActive,
             isDismissible: $dto->isDismissible,
+            format: $dto->format,
+            popup: $dto->popup,
         );
 
         $this->repository->save($announcement);
@@ -58,6 +61,8 @@ final readonly class AnnouncementService implements AnnouncementServiceInterface
             startsAt: $dto->startsAt,
             endsAt: $dto->endsAt,
             isDismissible: $dto->isDismissible,
+            format: $dto->format,
+            popup: $dto->popup,
         );
 
         if ($dto->isActive !== $announcement->isActive()) {
@@ -110,9 +115,16 @@ final readonly class AnnouncementService implements AnnouncementServiceInterface
     /**
      * @return array<AnnouncementResponseDTO>
      */
-    public function getActiveForUser(?object $user): array
+    public function getActiveForUser(?object $user, ?AnnouncementFormat $format = null): array
     {
         $activeAnnouncements = $this->repository->findActive();
+
+        if ($format instanceof AnnouncementFormat) {
+            $activeAnnouncements = array_values(array_filter(
+                $activeAnnouncements,
+                static fn (Announcement $announcement): bool => $announcement->format() === $format,
+            ));
+        }
 
         $isMember = $this->isMemberIfNeeded($user, $activeAnnouncements);
 
@@ -122,11 +134,13 @@ final readonly class AnnouncementService implements AnnouncementServiceInterface
             fn (Announcement $announcement) => $this->isShownTo($announcement, $user, $isMember)
         );
 
-        // Re-index after filter and sort by priority (highest first)
+        // Highest priority first; on a tie, the one that started most recently (the browser opens
+        // the first window that fits the page, so this order is also which window wins)
         $visibleAnnouncements = array_values($visibleAnnouncements);
         usort(
             $visibleAnnouncements,
-            fn (Announcement $a, Announcement $b) => $b->priority()->value <=> $a->priority()->value
+            static fn (Announcement $a, Announcement $b): int => [$b->priority()->value, $b->startedAt()?->getTimestamp() ?? PHP_INT_MIN]
+                <=> [$a->priority()->value, $a->startedAt()?->getTimestamp() ?? PHP_INT_MIN]
         );
 
         return array_map(

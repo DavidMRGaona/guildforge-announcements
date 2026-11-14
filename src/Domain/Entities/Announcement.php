@@ -5,13 +5,17 @@ declare(strict_types=1);
 namespace Modules\Announcements\Domain\Entities;
 
 use DateTimeImmutable;
+use Modules\Announcements\Domain\Enums\AnnouncementFormat;
 use Modules\Announcements\Domain\Enums\AnnouncementPosition;
 use Modules\Announcements\Domain\Enums\AnnouncementVisibility;
 use Modules\Announcements\Domain\ValueObjects\AnnouncementId;
+use Modules\Announcements\Domain\ValueObjects\AnnouncementPopup;
 use Modules\Announcements\Domain\ValueObjects\AnnouncementPriority;
 
 final class Announcement
 {
+    private ?AnnouncementPopup $popup;
+
     public function __construct(
         private readonly AnnouncementId $id,
         private string $title,
@@ -27,7 +31,11 @@ final class Announcement
         private bool $isDismissible = true,
         private readonly ?DateTimeImmutable $createdAt = null,
         private readonly ?DateTimeImmutable $updatedAt = null,
-    ) {}
+        private AnnouncementFormat $format = AnnouncementFormat::Banner,
+        ?AnnouncementPopup $popup = null,
+    ) {
+        $this->popup = $this->popupFor($format, $popup);
+    }
 
     public function id(): AnnouncementId
     {
@@ -84,9 +92,50 @@ final class Announcement
         return $this->isActive;
     }
 
+    /**
+     * What was saved in «Permite cerrar». Kept as it is for a window, so the banner gets it back
+     * when the format changes again; ask canBeDismissed() for what the site does.
+     */
     public function isDismissible(): bool
     {
         return $this->isDismissible;
+    }
+
+    /**
+     * A window can always be closed, whatever «Permite cerrar» says: one that could not be closed
+     * would lock the page.
+     */
+    public function canBeDismissed(): bool
+    {
+        return $this->isPopup() || $this->isDismissible;
+    }
+
+    public function format(): AnnouncementFormat
+    {
+        return $this->format;
+    }
+
+    public function isPopup(): bool
+    {
+        return $this->format === AnnouncementFormat::Popup;
+    }
+
+    /**
+     * How the window opens; null for a banner, and for a window whose settings could not be read
+     * (such a window is never shown).
+     */
+    public function popup(): ?AnnouncementPopup
+    {
+        return $this->popup;
+    }
+
+    /**
+     * When it began to be shown: its start date, or else when it was created. Breaks ties between
+     * windows of the same priority (the most recent one wins).
+     */
+    public function startedAt(): ?DateTimeImmutable
+    {
+        return $this->startsAt ?? $this->createdAt;
     }
 
     public function createdAt(): ?DateTimeImmutable
@@ -115,6 +164,11 @@ final class Announcement
             return false;
         }
 
+        // A window that cannot say where and when it opens is never shown
+        if ($this->isPopup() && ! $this->popup instanceof AnnouncementPopup) {
+            return false;
+        }
+
         $now ??= new DateTimeImmutable;
 
         if ($this->startsAt instanceof DateTimeImmutable && $now < $this->startsAt) {
@@ -140,6 +194,8 @@ final class Announcement
         ?DateTimeImmutable $startsAt = null,
         ?DateTimeImmutable $endsAt = null,
         bool $isDismissible = true,
+        AnnouncementFormat $format = AnnouncementFormat::Banner,
+        ?AnnouncementPopup $popup = null,
     ): void {
         $this->title = $title;
         $this->content = $content;
@@ -151,5 +207,12 @@ final class Announcement
         $this->startsAt = $startsAt;
         $this->endsAt = $endsAt;
         $this->isDismissible = $isDismissible;
+        $this->format = $format;
+        $this->popup = $this->popupFor($format, $popup);
+    }
+
+    private function popupFor(AnnouncementFormat $format, ?AnnouncementPopup $popup): ?AnnouncementPopup
+    {
+        return $format === AnnouncementFormat::Popup ? $popup : null;
     }
 }

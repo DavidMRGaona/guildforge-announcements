@@ -9,6 +9,7 @@ enum AnnouncementVisibility: string
     case Public = 'public';
     case Authenticated = 'authenticated';
     case Members = 'members';
+    case Guests = 'guests';
 
     /**
      * Whether a user (null for a guest) may see an announcement with this visibility.
@@ -20,6 +21,7 @@ enum AnnouncementVisibility: string
             self::Public => true,
             self::Authenticated => $user !== null,
             self::Members => $user !== null && $isMember,
+            self::Guests => $user === null,
         };
     }
 
@@ -29,6 +31,21 @@ enum AnnouncementVisibility: string
             self::Public => __('announcements::announcements.visibility.public'),
             self::Authenticated => __('announcements::announcements.visibility.authenticated'),
             self::Members => __('announcements::announcements.visibility.members'),
+            self::Guests => __('announcements::announcements.visibility.guests'),
         };
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function options(): array
+    {
+        $options = [];
+
+        foreach (self::cases() as $case) {
+            $options[$case->value] = $case->label();
+        }
+
+        return $options;
     }
 }

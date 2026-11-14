@@ -9,6 +9,8 @@ use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Modules\Announcements\Domain\Enums\AnnouncementFormat;
+use Modules\Announcements\Domain\Enums\AnnouncementVisibility;
 use Modules\Announcements\Infrastructure\Notifications\Jobs\AnnounceAnnouncementJob;
 use Modules\Announcements\Infrastructure\Persistence\Eloquent\Models\AnnouncementModel;
 use Modules\Announcements\Notifications\AnnouncementPublishedNotification;
@@ -18,6 +20,7 @@ use Throwable;
  * Queues the bell notice of an announcement (announcements#63) when a save may have made it
  * shown: created active, turned on, or its start moved. A scheduled one is queued until its
  * start. Edits of text, colours or position say nothing, and the job tells it only once.
+ * Windows (announcements#67) and announcements for visitors without a session are never told.
  *
  * Queued once the save commits, so a rolled back save tells nobody. The "created" and "updated"
  * events are used, not "saved": wasRecentlyCreated stays true for the instance's whole life.
@@ -43,6 +46,16 @@ final readonly class AnnouncementNoticeObserver
     private function queueWhenShown(AnnouncementModel $model): void
     {
         if ($model->is_active !== true) {
+            return;
+        }
+
+        // A window speaks for itself, and the notice would send people to a home page it may not open on
+        if ($model->format === AnnouncementFormat::Popup) {
+            return;
+        }
+
+        // Shown only to visitors without a session: there is no account to tell
+        if ($model->visibility === AnnouncementVisibility::Guests) {
             return;
         }
 

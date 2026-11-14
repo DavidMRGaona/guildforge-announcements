@@ -5,4 +5,7 @@ export default {
         close: 'Close announcements',
         goTo: 'Go to announcement {n}',
     },
+    announcementsPopup: {
+        close: 'Close the window',
+    },
 };

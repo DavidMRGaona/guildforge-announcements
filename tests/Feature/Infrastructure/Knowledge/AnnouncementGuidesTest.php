@@ -34,6 +34,7 @@ final class AnnouncementGuidesTest extends ModuleTestCase
     private const array PANEL_GUIDES = [
         'announcements.panel.banner-settings',
         'announcements.panel.create-announcement',
+        'announcements.panel.create-popup',
         'announcements.panel.manage-announcements',
         'announcements.panel.overview',
     ];
@@ -71,7 +72,7 @@ final class AnnouncementGuidesTest extends ModuleTestCase
             $this->visibleGuides($this->userWith('announcements:announcements.view_any'), GuideAudience::Panel),
         );
         $this->assertSame(
-            ['announcements.panel.create-announcement'],
+            ['announcements.panel.create-announcement', 'announcements.panel.create-popup'],
             $this->visibleGuides($this->userWith('announcements:announcements.create'), GuideAudience::Panel),
         );
         $this->assertSame(

@@ -1,12 +1,12 @@
 ---
 id: announcements.panel.create-announcement
 title: Crear un anuncio
-summary: Escribe un anuncio, elige quién lo ve, en qué parte de la página sale y durante cuánto tiempo.
+summary: Escribe un anuncio, elige si sale como banda o como ventana emergente, quién lo ve, en qué parte de la página sale y durante cuánto tiempo.
 category: content
 audience: panel
 order: 81
-keywords: [campana, aviso en la campana, crear anuncio, nuevo anuncio, publicar anuncio, poner un aviso, avisar, banner, banda, comunicado, visibilidad, posición, prioridad, color, fecha de inicio, fecha de fin, programar, solo socios, cerrar anuncio]
-related: [announcements.panel.overview, announcements.panel.manage-announcements]
+keywords: [formato, ventana emergente, popup, solo visitas sin sesión, campana, aviso en la campana, crear anuncio, nuevo anuncio, publicar anuncio, poner un aviso, avisar, banner, banda, comunicado, visibilidad, posición, prioridad, color, fecha de inicio, fecha de fin, programar, solo socios, cerrar anuncio]
+related: [announcements.panel.overview, announcements.panel.create-popup, announcements.panel.manage-announcements]
 conditions:
   permissions:
     all: ['announcements:announcements.create']
@@ -18,21 +18,22 @@ Un anuncio nuevo sale en la web en cuanto lo creas, si está activo y no tiene f
 1. En el menú lateral, abre **Comunicación** y elige **Anuncios**.
 2. Pulsa **Crear anuncio**.
 3. En **Contenido**, escribe el **Título** y el **Contenido**. En la banda de la web solo sale el título y el principio del contenido, en una línea y sin formato: pon lo importante al principio.
-4. En **Visualización**, revisa los interruptores:
+4. En **Visualización**, deja el **Formato** en **Banner** para que salga como una banda. Si eliges **Ventana emergente**, sigue la guía *Crear una ventana emergente*: los pasos de la posición, el cierre y los colores no valen para las ventanas.
+5. Revisa los interruptores:
    - **Activo**: marcado, el anuncio puede salir en la web.
    - **Permite cerrar**: marcado, cada persona puede cerrarlo con la ✕ y no lo vuelve a ver en ese navegador.
-5. Elige la **Visibilidad**: **Público**, **Usuarios autenticados** o **Solo socios** (quien tiene el rol {{association_role}}).
-6. Elige la **Posición**, la parte de la página donde sale. Por defecto, **Antes del header**, arriba del todo.
-7. Pon la **Prioridad**, de 1 a 10. Por defecto, 5. Con más prioridad sale antes que los demás de su posición, y su color cambia: de 8 a 10 usa el color de error del tema, de 5 a 7 el de aviso y de 1 a 4 el de información.
-8. Si quieres otros colores, abre **Estilo personalizado** y elige el **Color de fondo** y el **Color de texto**. Déjalos vacíos para usar los de la prioridad.
-9. Si el anuncio tiene plazo, abre **Programación** y elige la **Fecha de inicio**, la **Fecha de fin** o las dos.
-10. Pulsa **Crear**, o **Crear y crear otro** si vas a escribir varios.
+6. Elige la **Visibilidad**: **Público**, **Usuarios autenticados**, **Solo socios** (quien tiene el rol {{association_role}}) o **Solo visitas sin sesión** (quien no ha iniciado sesión).
+7. Elige la **Posición**, la parte de la página donde sale. Por defecto, **Antes del header**, arriba del todo.
+8. Pon la **Prioridad**, de 1 a 10. Por defecto, 5. Con más prioridad sale antes que los demás de su posición, y su color cambia: de 8 a 10 usa el color de error del tema, de 5 a 7 el de aviso y de 1 a 4 el de información.
+9. Si quieres otros colores, abre **Estilo personalizado** y elige el **Color de fondo** y el **Color de texto**. Déjalos vacíos para usar los de la prioridad.
+10. Si el anuncio tiene plazo, abre **Programación** y elige la **Fecha de inicio**, la **Fecha de fin** o las dos.
+11. Pulsa **Crear**, o **Crear y crear otro** si vas a escribir varios.
 
 Vuelves a la lista de anuncios. La gente lo ve en cuanto carga otra página.
 
 ## Aviso en la campana
 
-Cuando el anuncio empieza a salir en la web, quien puede verlo y tiene cuenta recibe además un aviso en la campana, con el texto del anuncio. Si tiene **Fecha de inicio**, el aviso llega ese día. Se avisa una sola vez por anuncio: cambiarlo, desactivarlo y volver a activarlo no avisa otra vez. Tú no lo recibes, porque ya lo sabes, y quien apagó «Anuncios nuevos» en sus preferencias de avisos tampoco.
+Cuando un banner empieza a salir en la web, quien puede verlo y tiene cuenta recibe además un aviso en la campana, con el texto del anuncio. Si tiene **Fecha de inicio**, el aviso llega ese día. Se avisa una sola vez por anuncio: cambiarlo, desactivarlo y volver a activarlo no avisa otra vez. Tú no lo recibes, porque ya lo sabes, y quien apagó «Anuncios nuevos» en sus preferencias de avisos tampoco. Las ventanas emergentes y los anuncios **Solo visitas sin sesión** no avisan en la campana.
 
 > [!TIP]
 > Si cambias los colores, elige los dos. Con uno solo, el otro deja de salir de la prioridad y el texto puede no leerse bien sobre el fondo.

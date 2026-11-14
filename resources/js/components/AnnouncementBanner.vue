@@ -68,7 +68,10 @@ function saveDismissedIds(): void {
 
 const visibleAnnouncements = computed(() =>
     props.announcements.filter(
-        (a) => !dismissedIds.value.has(a.id) && a.position === props.slotPosition
+        (a) =>
+            a.format !== 'popup' &&
+            !dismissedIds.value.has(a.id) &&
+            a.position === props.slotPosition
     )
 );
 

@@ -15,6 +15,7 @@ final class AnnouncementVisibilityTest extends TestCase
         $this->assertEquals('public', AnnouncementVisibility::Public->value);
         $this->assertEquals('authenticated', AnnouncementVisibility::Authenticated->value);
         $this->assertEquals('members', AnnouncementVisibility::Members->value);
+        $this->assertEquals('guests', AnnouncementVisibility::Guests->value);
     }
 
     public function test_public_is_visible_to_guest(): void
@@ -68,5 +69,12 @@ final class AnnouncementVisibilityTest extends TestCase
         $user->is_member = true;
 
         $this->assertFalse(AnnouncementVisibility::Members->isVisibleTo($user));
+    }
+
+    public function test_guests_only_is_visible_to_visitors_without_a_session(): void
+    {
+        $this->assertTrue(AnnouncementVisibility::Guests->isVisibleTo(null));
+        $this->assertFalse(AnnouncementVisibility::Guests->isVisibleTo(new stdClass));
+        $this->assertFalse(AnnouncementVisibility::Guests->isVisibleTo(new stdClass, isMember: true));
     }
 }
