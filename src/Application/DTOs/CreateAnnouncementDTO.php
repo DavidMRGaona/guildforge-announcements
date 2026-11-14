@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace Modules\Announcements\Application\DTOs;
 
 use DateTimeImmutable;
+use Modules\Announcements\Application\Support\PopupAttributes;
+use Modules\Announcements\Domain\Enums\AnnouncementFormat;
 use Modules\Announcements\Domain\Enums\AnnouncementPosition;
 use Modules\Announcements\Domain\Enums\AnnouncementVisibility;
+use Modules\Announcements\Domain\ValueObjects\AnnouncementPopup;
 
 final readonly class CreateAnnouncementDTO
 {
@@ -22,13 +25,19 @@ final readonly class CreateAnnouncementDTO
         public ?DateTimeImmutable $endsAt = null,
         public bool $isActive = true,
         public bool $isDismissible = true,
+        public AnnouncementFormat $format = AnnouncementFormat::Banner,
+        public ?AnnouncementPopup $popup = null,
     ) {}
 
     /**
+     * The window settings use the table's column names (`popup_shape`, `popup_paths`…).
+     *
      * @param  array<string, mixed>  $data
      */
     public static function fromArray(array $data): self
     {
+        $format = isset($data['format']) ? AnnouncementFormat::from($data['format']) : AnnouncementFormat::Banner;
+
         return new self(
             title: $data['title'],
             content: $data['content'],
@@ -45,6 +54,8 @@ final readonly class CreateAnnouncementDTO
             endsAt: self::parseDateTime($data['ends_at'] ?? null),
             isActive: $data['is_active'] ?? true,
             isDismissible: $data['is_dismissible'] ?? true,
+            format: $format,
+            popup: $format === AnnouncementFormat::Popup ? PopupAttributes::toPopup($data) : null,
         );
     }
 

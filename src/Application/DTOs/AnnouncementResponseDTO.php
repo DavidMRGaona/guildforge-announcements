@@ -6,6 +6,8 @@ namespace Modules\Announcements\Application\DTOs;
 
 use App\Application\Services\TimezoneServiceInterface;
 use Modules\Announcements\Domain\Entities\Announcement;
+use Modules\Announcements\Domain\ValueObjects\AnnouncementPopup;
+use Modules\Announcements\Domain\ValueObjects\PopupAction;
 
 final readonly class AnnouncementResponseDTO
 {
@@ -24,6 +26,9 @@ final readonly class AnnouncementResponseDTO
         public bool $isDismissible,
         public ?string $createdAt,
         public ?string $updatedAt,
+        public string $format = 'banner',
+        /** @var array<string, mixed>|null */
+        public ?array $popup = null,
     ) {}
 
     public static function fromEntity(Announcement $announcement): self
@@ -42,10 +47,39 @@ final readonly class AnnouncementResponseDTO
             startsAt: $timezone->iso($announcement->startsAt()),
             endsAt: $timezone->iso($announcement->endsAt()),
             isActive: $announcement->isActive(),
-            isDismissible: $announcement->isDismissible(),
+            isDismissible: $announcement->canBeDismissed(),
             createdAt: $timezone->iso($announcement->createdAt()),
             updatedAt: $timezone->iso($announcement->updatedAt()),
+            format: $announcement->format()->value,
+            popup: self::popupToArray($announcement->popup()),
         );
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private static function popupToArray(?AnnouncementPopup $popup): ?array
+    {
+        if (! $popup instanceof AnnouncementPopup) {
+            return null;
+        }
+
+        return [
+            'shape' => $popup->shape->value,
+            'image_public_id' => $popup->imagePublicId,
+            'action' => $popup->action instanceof PopupAction
+                ? ['label' => $popup->action->label, 'url' => $popup->action->url]
+                : null,
+            'triggers' => [
+                'delay_seconds' => $popup->triggers->delaySeconds,
+                'scroll_percent' => $popup->triggers->scrollPercent,
+                'exit_intent' => $popup->triggers->exitIntent,
+                'page_views' => $popup->triggers->pageViews,
+            ],
+            'pages' => $popup->pages->value,
+            'paths' => $popup->paths,
+            'device' => $popup->device->value,
+        ];
     }
 
     /**
@@ -68,6 +102,8 @@ final readonly class AnnouncementResponseDTO
             'is_dismissible' => $this->isDismissible,
             'created_at' => $this->createdAt,
             'updated_at' => $this->updatedAt,
+            'format' => $this->format,
+            'popup' => $this->popup,
         ];
     }
 }

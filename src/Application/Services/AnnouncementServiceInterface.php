@@ -7,6 +7,7 @@ namespace Modules\Announcements\Application\Services;
 use Modules\Announcements\Application\DTOs\AnnouncementResponseDTO;
 use Modules\Announcements\Application\DTOs\CreateAnnouncementDTO;
 use Modules\Announcements\Application\DTOs\UpdateAnnouncementDTO;
+use Modules\Announcements\Domain\Enums\AnnouncementFormat;
 
 interface AnnouncementServiceInterface
 {
@@ -24,11 +25,12 @@ interface AnnouncementServiceInterface
     public function all(): array;
 
     /**
-     * Get active announcements visible to the given user.
+     * Get active announcements visible to the given user, of one format or of both, by priority
+     * (highest first) and then by start (most recent first).
      *
      * @return array<AnnouncementResponseDTO>
      */
-    public function getActiveForUser(?object $user): array;
+    public function getActiveForUser(?object $user, ?AnnouncementFormat $format = null): array;
 
     /**
      * Get an announcement only if it is currently valid and visible to the given user.

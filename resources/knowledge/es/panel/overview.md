@@ -1,13 +1,13 @@
 ---
 id: announcements.panel.overview
 title: 'Anuncios: cómo funcionan'
-summary: Qué es un anuncio, dónde sale en la web, quién lo ve, cómo deciden su orden y su color, y quién puede hacer cada cosa.
+summary: Qué es un anuncio, si sale como banda o como ventana emergente, dónde sale en la web, quién lo ve, cómo deciden su orden y su color, y quién puede hacer cada cosa.
 category: content
 audience: panel
 order: 80
 featured: true
-keywords: [anuncios, anuncio, aviso, avisos, banner, banda, franja, cartel, comunicado, comunicación, cómo funciona, introducción, conceptos, visibilidad, posición, prioridad, colores, vigencia, socios, permisos, anuncio importante]
-related: [announcements.panel.create-announcement, announcements.panel.manage-announcements, announcements.panel.banner-settings, core.panel.association-role]
+keywords: [ventana emergente, popup, formato, solo visitas sin sesión, anuncios, anuncio, aviso, avisos, banner, banda, franja, cartel, comunicado, comunicación, cómo funciona, introducción, conceptos, visibilidad, posición, prioridad, colores, vigencia, socios, permisos, anuncio importante]
+related: [announcements.panel.create-announcement, announcements.panel.create-popup, announcements.panel.manage-announcements, announcements.panel.banner-settings, core.panel.association-role]
 conditions:
   permissions:
     all: ['announcements:announcements.view_any']
@@ -22,6 +22,13 @@ La banda sale en todas las páginas de la web, salvo en las de entrar, registrar
 
 Si hay varios anuncios en la misma posición, la banda los va pasando, el de más prioridad primero. Salen flechas a los lados y unos puntos debajo para ir de uno a otro. Mientras alguien deja el ratón encima, la banda se para.
 
+## Banda o ventana: el formato
+
+Cada anuncio tiene un **Formato**:
+
+- **Banner**: la banda de siempre, en la posición que elijas. Todo lo que sigue sobre posición, colores y cierre es de las bandas.
+- **Ventana emergente**: se abre encima de la página, con imagen y botón opcionales, cuando se cumple uno de sus disparadores (unos segundos, bajar por la página, ir a salir o haber visto varias páginas), en las páginas y dispositivos que elijas. Sale como mucho una por página, nunca encima del banner de cookies, y siempre se puede cerrar. Los detalles están en la guía *Crear una ventana emergente*.
+
 ## Quién lo ve: la visibilidad
 
 | **Visibilidad** | Quién lo ve |
@@ -29,6 +36,7 @@ Si hay varios anuncios en la misma posición, la banda los va pasando, el de má
 | **Público** | Cualquiera que visite la web, con cuenta o sin ella. |
 | **Usuarios autenticados** | Quien ha iniciado sesión. |
 | **Solo socios** | Quien ha iniciado sesión y tiene el rol {{association_role}}. |
+| **Solo visitas sin sesión** | Quien no ha iniciado sesión. Quien entra con su cuenta deja de verlo. |
 
 **Solo socios** se refiere a los miembros de la asociación, no a cualquier cuenta registrada. El rol que cuenta es el elegido en **Configuración del sitio → Autenticación**. No hay excepción para la administración: sin ese rol, tampoco ve estos anuncios.
 

@@ -17,7 +17,7 @@ Un anuncio se puede cambiar en cualquier momento, y los cambios se ven en la web
 
 En el menú lateral, abre **Comunicación** y elige **Anuncios**. La lista sale ordenada por **Prioridad**, de más a menos, y muestra si cada uno está **Activo**.
 
-Puedes filtrarla por **Visibilidad**, por **Posición** y por **Estado** (**Activos** o **Inactivos**). Las columnas de **Posición**, **Color de fondo**, las fechas y **Creado** están ocultas: puedes mostrarlas desde el selector de columnas de la tabla. En una ventana estrecha la lista también oculta **Visibilidad** y **Prioridad** para que quepa la fila; ábrela para verlas.
+Puedes filtrarla por **Formato** (**Banner** o **Ventana emergente**), por **Visibilidad**, por **Posición** y por **Estado** (**Activos** o **Inactivos**). En las ventanas, la **Posición** sale como «—». Las columnas de **Posición**, **Color de fondo**, las fechas y **Creado** están ocultas: puedes mostrarlas desde el selector de columnas de la tabla. En una pantalla estrecha la lista también oculta **Formato**, **Visibilidad** y **Prioridad** para que quepa la fila; ábrela para verlas.
 
 ## Cambiar un anuncio
 
@@ -26,7 +26,9 @@ Puedes filtrarla por **Visibilidad**, por **Posición** y por **Estado** (**Acti
 3. Pulsa **Guardar cambios**.
 
 > [!IMPORTANT]
-> Quien ya cerró un anuncio con la ✕ no lo vuelve a ver en su navegador, aunque lo cambies o desmarques **Permite cerrar**. Si tienes algo nuevo que contar, crea otro anuncio.
+> Quien ya cerró un anuncio con la ✕ no lo vuelve a ver en su navegador, aunque lo cambies o desmarques **Permite cerrar**. Con las ventanas emergentes pasa lo mismo al cerrarlas o pulsar su botón. Si tienes algo nuevo que contar, crea otro anuncio.
+
+Si cambias el **Formato** de una ventana a **Banner**, sus ajustes de ventana se guardan: al volver a **Ventana emergente** los encuentras como estaban.
 
 ## Programarlo
 

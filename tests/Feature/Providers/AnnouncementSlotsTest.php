@@ -78,11 +78,30 @@ final class AnnouncementSlotsTest extends ModuleTestCase
             ->assertFormFieldDoesNotExist('banner_position');
     }
 
+    public function test_one_window_component_is_registered_after_the_footer(): void
+    {
+        $windows = array_values(array_filter(
+            (new AnnouncementsServiceProvider($this->app))->registerSlots(),
+            static fn (SlotRegistrationDTO $slot): bool => $slot->component === 'components/AnnouncementPopup.vue',
+        ));
+
+        $this->assertCount(1, $windows);
+        $this->assertSame('after-footer', $windows[0]->slot);
+        $this->assertSame(['announcementPopups'], $windows[0]->dataKeys);
+        // The banner settings say nothing about windows
+        $this->assertArrayNotHasKey('settings', $windows[0]->props);
+    }
+
     /**
+     * The banner registrations, one per position.
+     *
      * @return array<SlotRegistrationDTO>
      */
     private function slots(): array
     {
-        return (new AnnouncementsServiceProvider($this->app))->registerSlots();
+        return array_values(array_filter(
+            (new AnnouncementsServiceProvider($this->app))->registerSlots(),
+            static fn (SlotRegistrationDTO $slot): bool => $slot->component === 'components/AnnouncementBanner.vue',
+        ));
     }
 }

@@ -21,7 +21,7 @@ Hace falta el permiso **Cambiar los ajustes del banner**, que un administrador d
 
 ## Qué decide cada ajuste
 
-- **Mostrar banner**: desactivado, no sale ningún anuncio en la web, en ninguna posición. Los anuncios no se borran ni se desactivan: vuelven a salir al activarlo.
+- **Mostrar banner**: desactivado, no sale ninguna banda en la web, en ninguna posición. Los anuncios no se borran ni se desactivan: vuelven a salir al activarlo. Las ventanas emergentes no dependen de este ajuste: para quitar una, desmarca **Activo** en el anuncio.
 - **Rotación automática**: activado, cuando hay varios anuncios en la misma posición la banda pasa sola de uno a otro. Desactivado, se quedan quietos y la gente pasa de uno a otro con las flechas o los puntos.
 - **Intervalo de rotación**: cuánto tarda en pasar al siguiente, en milisegundos (1000 son 1 segundo), entre 1000 y 30000. Solo sale con la **Rotación automática** activada.
 

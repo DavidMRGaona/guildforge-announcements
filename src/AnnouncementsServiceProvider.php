@@ -20,9 +20,11 @@ use Illuminate\Database\Eloquent\Model;
 use Inertia\Inertia;
 use Modules\Announcements\Application\Services\AnnouncementService;
 use Modules\Announcements\Application\Services\AnnouncementServiceInterface;
+use Modules\Announcements\Domain\Enums\AnnouncementFormat;
 use Modules\Announcements\Domain\Enums\AnnouncementPosition;
 use Modules\Announcements\Domain\Repositories\AnnouncementRepositoryInterface;
 use Modules\Announcements\Filament\Media\AnnouncementContentMediaSource;
+use Modules\Announcements\Filament\Media\AnnouncementPopupImageMediaSource;
 use Modules\Announcements\Filament\Pages\AnnouncementsSettings;
 use Modules\Announcements\Filament\Resources\AnnouncementResource;
 use Modules\Announcements\Infrastructure\Content\AnnouncementContentTextSource;
@@ -70,22 +72,31 @@ final class AnnouncementsServiceProvider extends ModuleServiceProvider
         // A new announcement is told in the bell once it is shown (announcements#63)
         AnnouncementModel::observe(AnnouncementNoticeObserver::class);
 
-        // Share announcements with Inertia if available
+        // Banners and windows go to the page apart: the banners keep the prop they always had
         if (class_exists(Inertia::class)) {
-            Inertia::share('announcements', function () {
-                if (! $this->app->bound(AnnouncementServiceInterface::class)) {
-                    return [];
-                }
-
-                $service = $this->app->make(AnnouncementServiceInterface::class);
-                $user = auth()->user();
-
-                return array_map(
-                    fn ($dto) => $dto->toArray(),
-                    $service->getActiveForUser($user)
-                );
-            });
+            Inertia::share('announcements', fn (): array => $this->sharedAnnouncements(AnnouncementFormat::Banner));
+            Inertia::share('announcementPopups', fn (): array => $this->sharedAnnouncements(AnnouncementFormat::Popup));
         }
+    }
+
+    /**
+     * The announcements of one format the current user may see now. For windows, the order is
+     * also which one wins: the browser opens the first that fits the page.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function sharedAnnouncements(AnnouncementFormat $format): array
+    {
+        if (! $this->app->bound(AnnouncementServiceInterface::class)) {
+            return [];
+        }
+
+        $service = $this->app->make(AnnouncementServiceInterface::class);
+
+        return array_values(array_map(
+            static fn ($dto): array => $dto->toArray(),
+            $service->getActiveForUser(auth()->user(), $format)
+        ));
     }
 
     /**
@@ -108,6 +119,19 @@ final class AnnouncementsServiceProvider extends ModuleServiceProvider
         AnnouncementModel::created($always->saved(...));
         AnnouncementModel::updated($whenShownChanges->saved(...));
         AnnouncementModel::deleted($always->deleted(...));
+
+        $image = new RefreshMediaUsagesObserver(
+            AnnouncementPopupImageMediaSource::TYPE,
+            static fn (Model $model): array => [(string) $model->getKey()],
+        );
+        $whenImageChanges = new RefreshMediaUsagesObserver(
+            AnnouncementPopupImageMediaSource::TYPE,
+            static fn (Model $model): array => $model->wasChanged(['title', 'popup_image_public_id']) ? [(string) $model->getKey()] : [],
+        );
+
+        AnnouncementModel::created($image->saved(...));
+        AnnouncementModel::updated($whenImageChanges->saved(...));
+        AnnouncementModel::deleted($image->deleted(...));
     }
 
     /**
@@ -115,7 +139,7 @@ final class AnnouncementsServiceProvider extends ModuleServiceProvider
      */
     public function registerMediaSources(): array
     {
-        return [AnnouncementContentMediaSource::class];
+        return [AnnouncementContentMediaSource::class, AnnouncementPopupImageMediaSource::class];
     }
 
     /**
@@ -236,8 +260,8 @@ final class AnnouncementsServiceProvider extends ModuleServiceProvider
     }
 
     /**
-     * Register slot components for the frontend layout.
-     * Register a banner component for each possible position.
+     * Register slot components for the frontend layout: a banner component for each possible
+     * position, and the window component once.
      *
      * @return array<SlotRegistrationDTO>
      */
@@ -263,6 +287,15 @@ final class AnnouncementsServiceProvider extends ModuleServiceProvider
                 dataKeys: ['announcements'],
             );
         }
+
+        // Windows float over the page: any slot of the layout would do, this one is drawn last
+        $slots[] = new SlotRegistrationDTO(
+            slot: AnnouncementPosition::AfterFooter->value,
+            component: 'components/AnnouncementPopup.vue',
+            module: $this->moduleName(),
+            order: 10,
+            dataKeys: ['announcementPopups'],
+        );
 
         return $slots;
     }

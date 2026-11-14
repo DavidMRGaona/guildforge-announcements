@@ -61,6 +61,47 @@ final class SharedAnnouncementsTest extends ModuleTestCase
                 ->where('announcements.0.title', 'Members Announcement'));
     }
 
+    public function test_windows_are_shared_apart_from_the_banners(): void
+    {
+        AnnouncementModel::create([
+            'title' => 'Ventana pública',
+            'content' => '<p>Ventana.</p>',
+            'visibility' => 'public',
+            'priority' => 5,
+            'is_active' => true,
+            'format' => 'popup',
+        ]);
+
+        $this->get('/')
+            ->assertOk()
+            ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+                ->has('announcements', 1)
+                ->where('announcements.0.title', 'Public Announcement')
+                ->has('announcementPopups', 1)
+                ->where('announcementPopups.0.title', 'Ventana pública')
+                ->where('announcementPopups.0.format', 'popup')
+                ->where('announcementPopups.0.popup.shape', 'centered'));
+    }
+
+    public function test_a_window_for_visitors_without_a_session_is_not_shared_with_a_signed_in_user(): void
+    {
+        AnnouncementModel::create([
+            'title' => 'Hazte socio',
+            'content' => '<p>Únete.</p>',
+            'visibility' => 'guests',
+            'priority' => 5,
+            'is_active' => true,
+            'format' => 'popup',
+        ]);
+
+        $this->get('/')
+            ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->has('announcementPopups', 1));
+
+        $this->actingAs($this->userWithRole(UserRole::Member->value))
+            ->get('/')
+            ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->has('announcementPopups', 0));
+    }
+
     private function userWithRole(string $roleName): UserModel
     {
         $role = RoleModel::firstOrCreate(['name' => $roleName], ['display_name' => ucfirst($roleName)]);

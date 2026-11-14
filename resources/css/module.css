@@ -76,3 +76,16 @@
 
 @source '../js/**/*.vue';
 @source '../js/**/*.ts';
+
+/* Windows of announcements (announcements#67): a short rise, only when motion is welcome
+ * (the class is used with `motion-safe:`) */
+@keyframes announcement-popup-in {
+    from {
+        opacity: 0;
+        transform: translateY(0.5rem);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

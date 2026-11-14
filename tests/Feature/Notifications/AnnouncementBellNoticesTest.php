@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
 use Modules\Announcements\Infrastructure\Notifications\Jobs\AnnounceAnnouncementJob;
+use Modules\Announcements\Infrastructure\Notifications\Jobs\DeliverAnnouncementNoticesJob;
 use Modules\Announcements\Infrastructure\Persistence\Eloquent\Models\AnnouncementModel;
 use Modules\Announcements\Notifications\AnnouncementMailCategories;
 use Tests\Support\Modules\ModuleTestCase;
@@ -106,6 +107,29 @@ final class AnnouncementBellNoticesTest extends ModuleTestCase
         $this->announcement(['starts_at' => now()->subDays(10), 'ends_at' => now()->subDay()]);
 
         $this->assertSame(0, $this->unread($reader));
+    }
+
+    public function test_a_window_tells_nobody(): void
+    {
+        $reader = UserModel::factory()->create();
+
+        $this->announcement(['format' => 'popup']);
+
+        $this->assertSame(0, $this->unread($reader));
+    }
+
+    public function test_a_scheduled_banner_turned_into_a_window_before_it_starts_tells_nobody(): void
+    {
+        UserModel::factory()->create();
+        Queue::fake();
+        $announcement = $this->announcement(['starts_at' => now()->addDay()]);
+        $announcement->update(['format' => 'popup']);
+
+        $this->travel(2)->days();
+        (new AnnounceAnnouncementJob($announcement->id))->handle();
+
+        Queue::assertNotPushed(DeliverAnnouncementNoticesJob::class);
+        $this->assertSame(0, DB::table('announcements_notices')->count());
     }
 
     public function test_an_announcement_is_told_once_however_often_it_is_saved_or_turned_on_again(): void

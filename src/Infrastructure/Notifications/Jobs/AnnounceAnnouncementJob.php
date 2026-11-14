@@ -47,8 +47,8 @@ final class AnnounceAnnouncementJob implements ShouldQueue
     {
         $announcement = app(AnnouncementRepositoryInterface::class)->find(AnnouncementId::fromString($this->announcementId));
 
-        // Deleted, turned off, expired or not started yet: nothing to tell now
-        if (! $announcement instanceof Announcement || ! $announcement->isCurrentlyValid()) {
+        // Deleted, turned off, expired, not started yet or turned into a window: nothing to tell now
+        if (! $announcement instanceof Announcement || ! $announcement->isCurrentlyValid() || $announcement->isPopup()) {
             return;
         }
 

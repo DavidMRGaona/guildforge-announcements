@@ -62,6 +62,7 @@ final class PanelTableFitsTest extends ModuleTestCase
             'title always shown' => ['title', null],
             'active always shown' => ['is_active', null],
             'priority' => ['priority', 'sm'],
+            'format' => ['format', 'sm'],
             'visibility' => ['visibility', 'md'],
         ];
     }

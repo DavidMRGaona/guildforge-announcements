@@ -6,12 +6,17 @@ namespace Modules\Announcements\Infrastructure\Persistence\Eloquent\Repositories
 
 use App\Infrastructure\Support\SanitizesHtml;
 use DateTimeImmutable;
+use Illuminate\Support\Facades\Log;
+use InvalidArgumentException;
+use Modules\Announcements\Application\Support\PopupAttributes;
 use Modules\Announcements\Domain\Entities\Announcement;
+use Modules\Announcements\Domain\Enums\AnnouncementFormat;
 use Modules\Announcements\Domain\Enums\AnnouncementPosition;
 use Modules\Announcements\Domain\Enums\AnnouncementVisibility;
 use Modules\Announcements\Domain\Exceptions\AnnouncementNotFoundException;
 use Modules\Announcements\Domain\Repositories\AnnouncementRepositoryInterface;
 use Modules\Announcements\Domain\ValueObjects\AnnouncementId;
+use Modules\Announcements\Domain\ValueObjects\AnnouncementPopup;
 use Modules\Announcements\Domain\ValueObjects\AnnouncementPriority;
 use Modules\Announcements\Infrastructure\Persistence\Eloquent\Models\AnnouncementModel;
 
@@ -19,11 +24,18 @@ final class EloquentAnnouncementRepository implements AnnouncementRepositoryInte
 {
     use SanitizesHtml;
 
+    /**
+     * A banner leaves the window settings as they are, so turning it back into a window finds them.
+     */
     public function save(Announcement $announcement): void
     {
+        $popup = $announcement->popup();
+
         AnnouncementModel::updateOrCreate(
             ['id' => $announcement->id()->value],
             [
+                'format' => $announcement->format()->value,
+                ...($popup instanceof AnnouncementPopup ? PopupAttributes::toAttributes($popup) : []),
                 'title' => $announcement->title(),
                 'content' => $announcement->content(),
                 'visibility' => $announcement->visibility()->value,
@@ -98,6 +110,7 @@ final class EloquentAnnouncementRepository implements AnnouncementRepositoryInte
         $visibility = $model->visibility;
         // Default to BeforeHeader if position is null (for legacy records)
         $position = $model->position ?? AnnouncementPosition::BeforeHeader;
+        $format = $model->format ?? AnnouncementFormat::Banner;
 
         return new Announcement(
             id: AnnouncementId::fromString($model->id),
@@ -123,6 +136,26 @@ final class EloquentAnnouncementRepository implements AnnouncementRepositoryInte
             updatedAt: $model->updated_at !== null
                 ? DateTimeImmutable::createFromMutable($model->updated_at->toDateTime())
                 : null,
+            format: $format,
+            popup: $format === AnnouncementFormat::Popup ? $this->popupOf($model) : null,
         );
+    }
+
+    /**
+     * The panel validates every window setting, but a row edited by hand can hold anything: such
+     * a window gets no settings, and a window without settings is never shown.
+     */
+    private function popupOf(AnnouncementModel $model): ?AnnouncementPopup
+    {
+        try {
+            return PopupAttributes::toPopup($model->only(PopupAttributes::COLUMNS));
+        } catch (InvalidArgumentException $exception) {
+            Log::warning('An announcement window has settings it cannot use and is not shown.', [
+                'announcement_id' => $model->id,
+                'reason' => $exception->getMessage(),
+            ]);
+
+            return null;
+        }
     }
 }

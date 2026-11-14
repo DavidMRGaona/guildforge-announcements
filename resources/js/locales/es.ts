@@ -5,4 +5,7 @@ export default {
         close: 'Cerrar anuncios',
         goTo: 'Ir al anuncio {n}',
     },
+    announcementsPopup: {
+        close: 'Cerrar la ventana',
+    },
 };
