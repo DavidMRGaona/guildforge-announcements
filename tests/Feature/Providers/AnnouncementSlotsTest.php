@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Modules\Announcements\Tests\Feature\Providers;
 
 use App\Application\Modules\DTOs\SlotRegistrationDTO;
-use App\Filament\Pages\ModuleSettingsPage;
 use Livewire\Livewire;
 use Modules\Announcements\AnnouncementsServiceProvider;
 use Modules\Announcements\Domain\Enums\AnnouncementPosition;
+use Modules\Announcements\Filament\Pages\AnnouncementsSettings;
 use Tests\Support\Modules\InteractsWithModulePanel;
 use Tests\Support\Modules\ModuleTestCase;
 
@@ -72,7 +72,7 @@ final class AnnouncementSlotsTest extends ModuleTestCase
     {
         $this->actingAsPanelAdmin();
 
-        Livewire::test(ModuleSettingsPage::class, ['module' => 'announcements'])
+        Livewire::test(AnnouncementsSettings::class)
             ->assertOk()
             ->assertFormFieldExists('show_banner')
             ->assertFormFieldDoesNotExist('banner_position');
