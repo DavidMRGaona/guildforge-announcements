@@ -18,6 +18,8 @@ function popup(overrides: Partial<AnnouncementPopup> = {}): AnnouncementPopup {
         pages: 'all',
         paths: [],
         device: 'all',
+        frequency: 'once',
+        frequency_days: null,
         ...overrides,
     };
 }
