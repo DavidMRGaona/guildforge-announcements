@@ -75,9 +75,16 @@ describe('PopupDialog', () => {
 
         // Stands in for the core's SiteBlock.vue, which loads the module's component
         const SiteBlockStub = {
-            props: { block: { type: Object, required: true } },
-            render(this: { block: ResolvedSiteBlock }): VNode {
-                return h('div', { 'data-testid': 'site-block' }, JSON.stringify(this.block));
+            props: {
+                block: { type: Object, required: true },
+                placement: { type: String, default: null },
+            },
+            render(this: { block: ResolvedSiteBlock; placement: string | null }): VNode {
+                return h(
+                    'div',
+                    { 'data-testid': 'site-block', 'data-placement': this.placement },
+                    JSON.stringify(this.block)
+                );
             },
         };
 
@@ -105,6 +112,7 @@ describe('PopupDialog', () => {
                 const drawn = document.body.querySelectorAll('[data-testid="site-block"]');
 
                 expect(drawn).toHaveLength(1);
+                expect(drawn[0]?.getAttribute('data-placement')).toBe('popup');
                 expect(drawn[0]?.textContent).toContain('example-module.subscribe');
             }
         );

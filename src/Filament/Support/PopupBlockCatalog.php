@@ -38,14 +38,16 @@ final class PopupBlockCatalog
         $options = [];
 
         foreach ($this->definitions() as $key => $block) {
-            if (in_array($key, $this->available(), true) || $key === $current) {
+            if (in_array($key, $this->available(), true)) {
                 $options[$key] = $this->label($block);
+            } elseif ($key === $current) {
+                $options[$key] = $this->label($block).' '.__('announcements::announcements.popup.block.unavailable_suffix');
             }
         }
 
         // A block nobody registers now (its module is off): shown by its key, never lost on saving
         if ($current !== null && $current !== '' && ! isset($options[$current])) {
-            $options[$current] = $current;
+            $options[$current] = $current.' '.__('announcements::announcements.popup.block.unavailable_suffix');
         }
 
         return $options;
@@ -90,6 +92,14 @@ final class PopupBlockCatalog
         }
 
         return true;
+    }
+
+    /**
+     * Whether the block can be offered and drawn now (false for one nobody registers).
+     */
+    public function isAvailable(?string $key): bool
+    {
+        return $key !== null && in_array($key, $this->available(), true);
     }
 
     /**

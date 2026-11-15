@@ -122,7 +122,7 @@ final class PopupAttributes
         $settings = $value['settings'] ?? [];
 
         if (! is_array($settings)) {
-            throw new InvalidArgumentException('The settings of the block of a window must be a list of values.');
+            throw new InvalidArgumentException('The settings of the block of a window must be named values.');
         }
 
         return new PopupBlock($key, $settings);

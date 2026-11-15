@@ -36,6 +36,9 @@
             @if ($blockName !== null)
                 {{-- Only a marker: the block is drawn by the site, for each person --}}
                 <div class="announcement-preview__block">{{ __('announcements::announcements.preview.block', ['name' => $blockName]) }}</div>
+                @if ($blockUnavailable)
+                    <p class="announcement-preview__target">{{ __('announcements::announcements.preview.block_unavailable') }}</p>
+                @endif
             @endif
 
             @if ($actionLabel !== null && $actionUrl !== null)

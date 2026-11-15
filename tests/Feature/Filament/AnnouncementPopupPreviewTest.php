@@ -186,6 +186,29 @@ final class AnnouncementPopupPreviewTest extends ModuleTestCase
         $this->assertStringNotContainsString('<b>gone', $html);
     }
 
+    public function test_the_preview_warns_when_the_block_is_not_available_now(): void
+    {
+        $block = new class extends FakeSiteBlock
+        {
+            public function key(): string
+            {
+                return 'example-module.subscribe';
+            }
+
+            public function isAvailable(): bool
+            {
+                return false;
+            }
+        };
+        app(SiteBlockRegistryInterface::class)->register($block::class, self::OWNER);
+
+        $hidden = $this->previewHtml($this->previewOf(['popup_block' => ['key' => self::KEY]]));
+        $shown = $this->previewHtml($this->previewOf(['popup_block' => ['key' => self::KEY], 'popup_block_hide_when_unavailable' => false]));
+
+        $this->assertStringContainsString('el bloque no está disponible', $hidden);
+        $this->assertStringNotContainsString('el bloque no está disponible', $shown);
+    }
+
     public function test_the_preview_has_no_marker_without_a_block(): void
     {
         $this->assertStringNotContainsString('Aquí irá el bloque', $this->previewHtml($this->previewOf(['title' => 'Hazte socio'])));

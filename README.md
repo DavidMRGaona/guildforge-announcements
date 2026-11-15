@@ -19,7 +19,7 @@ Anuncios para la web pública de GuildForge. Se crean en el panel de administrac
 
 ## Requisitos
 
-- GuildForge core `^3.75` (contrato de consentimiento con `whenConsentDecided()`, ajustes en el clúster «Configuración», avisos en la campana, imágenes del editor, biblioteca de medios, base de conocimiento, rol de socio configurable, fechas en UTC)
+- GuildForge core `^3.78` (contrato de consentimiento con `whenConsentDecided()`, ajustes en el clúster «Configuración», avisos en la campana, imágenes del editor, biblioteca de medios, base de conocimiento, rol de socio configurable, fechas en UTC)
 - PHP >= 8.5, Laravel >= 13, Filament 5
 
 El core rechaza el módulo si no se cumplen (`module.json` → `requires`).

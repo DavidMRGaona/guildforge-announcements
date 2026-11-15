@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Announcements\Tests\Feature\Providers;
 
+use App\Application\SiteBlocks\Exceptions\NothingToDrawException;
 use App\Application\SiteBlocks\Services\SiteBlockRegistryInterface;
 use App\Infrastructure\Persistence\Eloquent\Models\UserModel;
 use Filament\Forms\Components\TextInput;
@@ -31,7 +32,7 @@ final class PopupBlockSharingTest extends ModuleTestCase
     public function test_an_available_block_is_shared_resolved_inside_its_window(): void
     {
         $this->register($this->block());
-        $this->popup(['heading' => 'Suscríbete', 'secret' => 'no']);
+        $this->popup(['heading' => 'Suscríbete', 'secret' => 'valor-unico-xyz']);
 
         $this->get('/')
             ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
@@ -57,12 +58,14 @@ final class PopupBlockSharingTest extends ModuleTestCase
     public function test_the_stored_settings_and_the_flag_never_reach_the_browser(): void
     {
         $this->register($this->block());
-        $this->popup(['heading' => 'Suscríbete']);
+        $this->popup(['heading' => 'Suscríbete', 'secret' => 'valor-unico-xyz']);
 
         $content = (string) $this->get('/')->getContent();
 
+        $this->assertStringNotContainsString('valor-unico-xyz', $content);
         $this->assertStringNotContainsString('popup_block', $content);
         $this->assertStringNotContainsString('hide_when_block_unavailable', $content);
+        $this->assertStringNotContainsString('hideWhenBlockUnavailable', $content);
     }
 
     public function test_a_window_without_a_block_shares_none(): void
@@ -104,6 +107,30 @@ final class PopupBlockSharingTest extends ModuleTestCase
 
         $this->get('/')
             ->assertOk()
+            ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+                ->has('announcementPopups', 1)
+                ->where('announcementPopups.0.title', 'Sin bloque')
+                ->where('announcementPopups.0.popup.block', null));
+    }
+
+    public function test_a_block_with_nothing_to_draw_for_the_person_counts_as_not_available(): void
+    {
+        $this->register(new class extends FakeSiteBlock
+        {
+            public function key(): string
+            {
+                return 'example-module.subscribe';
+            }
+
+            public function props(array $settings, ?Authenticatable $user): array
+            {
+                throw new NothingToDrawException;
+            }
+        });
+        $this->popup([], title: 'Oculta');
+        $this->popup([], hide: false, title: 'Sin bloque');
+
+        $this->get('/')
             ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
                 ->has('announcementPopups', 1)
                 ->where('announcementPopups.0.title', 'Sin bloque')

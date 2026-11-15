@@ -172,9 +172,10 @@ return [
         'block' => [
             'label' => 'Block',
             'help' => 'Optional. Only the blocks that can go in a window and are available now are offered; the one the window already has is kept even if its module does not answer.',
+            'unavailable_suffix' => '(unavailable)',
             'none' => 'No block',
             'hide_when_unavailable' => 'Hide the window if the block is not available',
-            'hide_when_unavailable_help' => 'When ticked, the window is not shown while the block cannot be drawn (module off or provider not answering). When not, it is shown without the block.',
+            'hide_when_unavailable_help' => 'When ticked, the window is not shown to anyone who cannot see the block (module off, provider not answering or nothing to show that person). When not, it is shown without the block.',
         ],
         'frequency' => [
             'label' => 'Frequency',
@@ -218,6 +219,7 @@ return [
         'aria' => 'Picture of the popup window',
         'close' => 'Close',
         'block' => 'The block :name goes here',
+        'block_unavailable' => 'The block is not available right now: with the hide box ticked, the window would not be shown.',
         'goes_to' => 'Goes to:',
     ],
 ];

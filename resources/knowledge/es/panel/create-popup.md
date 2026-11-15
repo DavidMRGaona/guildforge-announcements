@@ -38,8 +38,8 @@ El **Bloque** es opcional: una pieza que aporta la propia web u otro módulo y q
 1. En **Bloque**, elige uno de la lista. **Sin bloque** deja la ventana como siempre.
 2. Debajo salen los ajustes de ese bloque (un título, un texto, un enlace…). Rellénalos: los comprueba el propio bloque.
 3. Decide con **Ocultar la ventana si el bloque no está disponible**, marcada por defecto:
-   - **Marcada**: mientras el bloque no se pueda mostrar (su módulo está desactivado o su proveedor no responde), la ventana no sale a nadie. Es lo que conviene si sin el bloque la ventana no tiene sentido.
-   - **Sin marcar**: la ventana sale igualmente, sin el bloque.
+   - **Marcada**: mientras el bloque no se pueda mostrar (su módulo está desactivado, su proveedor no responde o no tiene nada que mostrar a esa persona), la ventana no sale a quien no pueda verlo. Es lo que conviene si sin el bloque la ventana no tiene sentido.
+   - **Sin marcar**: la ventana sale igualmente, sin el bloque. También sale sin él si el bloque no llega a pintarse en el navegador.
 
 En la lista solo salen los bloques que se pueden poner en una ventana y están disponibles ahora. Si una ventana guardada tiene un bloque que ahora no está disponible, sigue en la lista y se conserva con sus ajustes al guardar, para no perderlo por una caída pasajera.
 

@@ -146,7 +146,7 @@ final class AnnouncementPopupPersistenceTest extends ModuleTestCase
         $this->assertNull($dto->popup?->block);
     }
 
-    public function test_a_window_saved_before_blocks_existed_has_none(): void
+    public function test_the_block_columns_default_to_no_block_and_hiding_the_window(): void
     {
         $id = (string) Str::uuid();
         DB::table('announcements_announcements')->insert([

@@ -30,6 +30,7 @@ use Filament\Forms\Components\ToggleButtons;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\IconColumn;
@@ -286,9 +287,20 @@ class AnnouncementResource extends BaseResource
                         ->native(false)
                         ->live()
                         ->nullable()
+                        // The settings of the block left behind do not travel to the new one, and the new
+                        // one starts with its own defaults (a toggle that defaults to on starts on)
+                        ->afterStateUpdated(function (Select $component, Set $set): void {
+                            $set('popup_block.settings', []);
+                            $settings = $component->getContainer()->getComponent('popupBlockSettings');
+
+                            if ($settings instanceof Group) {
+                                $settings->getChildSchema()?->fill();
+                            }
+                        })
                         ->columnSpanFull(),
 
                     Group::make(fn (Get $get): array => resolve(PopupBlockCatalog::class)->settingsSchema(self::blockKey($get)))
+                        ->key('popupBlockSettings')
                         ->statePath('popup_block.settings')
                         ->columns(2)
                         ->columnSpanFull(),

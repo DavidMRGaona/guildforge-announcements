@@ -172,9 +172,10 @@ return [
         'block' => [
             'label' => 'Bloque',
             'help' => 'Opcional. Solo salen los que se pueden poner en una ventana y están disponibles ahora; el que ya tiene la ventana se conserva aunque su módulo no responda.',
+            'unavailable_suffix' => '(no disponible)',
             'none' => 'Sin bloque',
             'hide_when_unavailable' => 'Ocultar la ventana si el bloque no está disponible',
-            'hide_when_unavailable_help' => 'Marcada, la ventana no sale mientras el bloque no se pueda mostrar (módulo desactivado o proveedor sin responder). Sin marcar, sale sin el bloque.',
+            'hide_when_unavailable_help' => 'Marcada, la ventana no sale a quien no pueda ver el bloque (módulo desactivado, proveedor sin responder o nada que mostrar a esa persona). Sin marcar, sale sin el bloque.',
         ],
         'frequency' => [
             'label' => 'Frecuencia',
@@ -218,6 +219,7 @@ return [
         'aria' => 'Imagen de la ventana emergente',
         'close' => 'Cerrar',
         'block' => 'Aquí irá el bloque :name',
+        'block_unavailable' => 'Ahora mismo el bloque no está disponible: con la casilla de ocultar marcada, la ventana no saldría.',
         'goes_to' => 'Va a:',
     ],
 ];

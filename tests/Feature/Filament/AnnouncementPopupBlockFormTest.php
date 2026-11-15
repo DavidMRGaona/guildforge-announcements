@@ -7,6 +7,7 @@ namespace Modules\Announcements\Tests\Feature\Filament;
 use App\Application\SiteBlocks\Services\SiteBlockRegistryInterface;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
@@ -138,7 +139,7 @@ final class AnnouncementPopupBlockFormTest extends ModuleTestCase
         $window = $this->window(['key' => self::KEY, 'settings' => ['heading' => 'Suscríbete']]);
 
         $page = Livewire::test(EditAnnouncement::class, ['record' => $window->getKey()]);
-        $this->assertSame([self::KEY => 'Bloque de ejemplo'], $this->blockOptions($page));
+        $this->assertSame([self::KEY => 'Bloque de ejemplo (no disponible)'], $this->blockOptions($page));
 
         $page->fillForm(['title' => 'Otro título'])->call('save')->assertHasNoFormErrors();
 
@@ -152,7 +153,7 @@ final class AnnouncementPopupBlockFormTest extends ModuleTestCase
         $window = $this->window(['key' => 'gone-module.subscribe', 'settings' => ['heading' => 'Suscríbete', 'list' => 3]]);
 
         $page = Livewire::test(EditAnnouncement::class, ['record' => $window->getKey()]);
-        $this->assertArrayHasKey('gone-module.subscribe', $this->blockOptions($page));
+        $this->assertSame(['gone-module.subscribe' => 'gone-module.subscribe (no disponible)'], $this->blockOptions($page));
 
         $page->fillForm(['title' => 'Otro título'])->call('save')->assertHasNoFormErrors();
 
@@ -186,6 +187,71 @@ final class AnnouncementPopupBlockFormTest extends ModuleTestCase
             ])
             ->call('create')
             ->assertHasFormErrors(['popup_block.settings.heading']);
+    }
+
+    public function test_choosing_a_block_fills_its_defaults(): void
+    {
+        $this->registerClass(new class extends FakeSiteBlock
+        {
+            public function key(): string
+            {
+                return 'example-module.subscribe';
+            }
+
+            public function settingsSchema(): array
+            {
+                return [Toggle::make('x')->default(true)];
+            }
+        });
+
+        Livewire::test(CreateAnnouncement::class)
+            ->fillForm(['format' => 'popup'])
+            ->fillForm(['popup_block' => ['key' => self::KEY]])
+            ->assertFormSet(['popup_block.settings.x' => true]);
+    }
+
+    public function test_changing_the_block_leaves_the_settings_of_the_old_one_behind(): void
+    {
+        $this->registerClass(new class extends FakeSiteBlock
+        {
+            public function key(): string
+            {
+                return 'example-module.a';
+            }
+
+            public function settingsSchema(): array
+            {
+                return [TextInput::make('heading')];
+            }
+        });
+        $this->registerClass(new class extends FakeSiteBlock
+        {
+            public function key(): string
+            {
+                return 'example-module.b';
+            }
+
+            public function settingsSchema(): array
+            {
+                return [Toggle::make('x')->default(true)];
+            }
+        });
+
+        Livewire::test(CreateAnnouncement::class)
+            ->fillForm(['title' => 'Hazte socio', 'content' => '<p>Texto</p>', 'format' => 'popup'])
+            ->fillForm(['popup_block' => ['key' => 'example-module.a']])
+            ->fillForm(['popup_block.settings.heading' => 'Antiguo'])
+            ->fillForm(['popup_block' => ['key' => 'example-module.b']])
+            ->assertFormSet(['popup_block.settings.x' => true])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $this->assertSame(['key' => 'example-module.b', 'settings' => ['x' => true]], AnnouncementModel::query()->sole()->popup_block);
+    }
+
+    private function registerClass(FakeSiteBlock $block): void
+    {
+        app(SiteBlockRegistryInterface::class)->register($block::class, self::OWNER);
     }
 
     private function register(bool $available): void

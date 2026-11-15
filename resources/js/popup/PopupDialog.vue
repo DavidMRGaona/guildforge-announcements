@@ -176,7 +176,7 @@ onBeforeUnmount(() => {
                     />
                     <!-- eslint-enable vue/no-v-html -->
                     <div v-if="block" class="mt-4">
-                        <SiteBlock :block="block" />
+                        <SiteBlock :block="block" placement="popup" />
                     </div>
                     <a
                         v-if="action"
@@ -225,7 +225,7 @@ onBeforeUnmount(() => {
                 />
                 <!-- eslint-enable vue/no-v-html -->
                 <div v-if="block" class="mt-3">
-                    <SiteBlock :block="block" />
+                    <SiteBlock :block="block" placement="popup" />
                 </div>
                 <a
                     v-if="action"
