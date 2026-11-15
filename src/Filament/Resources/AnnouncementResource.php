@@ -17,6 +17,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
@@ -26,8 +27,10 @@ use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\ToggleButtons;
+use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\IconColumn;
@@ -35,6 +38,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Modules\Announcements\Domain\Enums\AnnouncementFormat;
@@ -52,6 +56,7 @@ use Modules\Announcements\Filament\Media\AnnouncementPopupImageMediaSource;
 use Modules\Announcements\Filament\Resources\AnnouncementResource\Pages\CreateAnnouncement;
 use Modules\Announcements\Filament\Resources\AnnouncementResource\Pages\EditAnnouncement;
 use Modules\Announcements\Filament\Resources\AnnouncementResource\Pages\ListAnnouncements;
+use Modules\Announcements\Filament\Support\PopupBlockCatalog;
 use Modules\Announcements\Infrastructure\Persistence\Eloquent\Models\AnnouncementModel;
 
 class AnnouncementResource extends BaseResource
@@ -269,6 +274,46 @@ class AnnouncementResource extends BaseResource
                 ->columns(2)
                 ->visible($isPopup),
 
+            Section::make(__('announcements::announcements.sections.popup_block'))
+                ->description(__('announcements::announcements.sections.popup_block_description'))
+                ->schema([
+                    Select::make('popup_block.key')
+                        ->label(__('announcements::announcements.popup.block.label'))
+                        ->helperText(__('announcements::announcements.popup.block.help'))
+                        ->placeholder(__('announcements::announcements.popup.block.none'))
+                        // Only what can be added now, plus the block the window has SAVED (never the one just
+                        // submitted): it stays listed while its provider is down, so saving does not lose it
+                        ->options(fn (?Model $record): array => resolve(PopupBlockCatalog::class)->options(self::storedBlockKey($record)))
+                        ->native(false)
+                        ->live()
+                        ->nullable()
+                        // The settings of the block left behind do not travel to the new one, and the new
+                        // one starts with its own defaults (a toggle that defaults to on starts on)
+                        ->afterStateUpdated(function (Select $component, Set $set): void {
+                            $set('popup_block.settings', []);
+                            $settings = $component->getContainer()->getComponent('popupBlockSettings');
+
+                            if ($settings instanceof Group) {
+                                $settings->getChildSchema()?->fill();
+                            }
+                        })
+                        ->columnSpanFull(),
+
+                    Group::make(fn (Get $get): array => resolve(PopupBlockCatalog::class)->settingsSchema(self::blockKey($get)))
+                        ->key('popupBlockSettings')
+                        ->statePath('popup_block.settings')
+                        ->columns(2)
+                        ->columnSpanFull(),
+
+                    Checkbox::make('popup_block_hide_when_unavailable')
+                        ->label(__('announcements::announcements.popup.block.hide_when_unavailable'))
+                        ->helperText(__('announcements::announcements.popup.block.hide_when_unavailable_help'))
+                        ->default(true)
+                        ->visible(fn (Get $get): bool => self::blockKey($get) !== null)
+                        ->columnSpanFull(),
+                ])
+                ->visible($isPopup),
+
             Section::make(__('announcements::announcements.sections.popup_triggers'))
                 ->description(__('announcements::announcements.sections.popup_triggers_description'))
                 ->schema([
@@ -367,6 +412,23 @@ class AnnouncementResource extends BaseResource
                 ->columns(2)
                 ->visible($isPopup),
         ];
+    }
+
+    private static function storedBlockKey(?Model $record): ?string
+    {
+        $key = $record instanceof AnnouncementModel ? ($record->popup_block['key'] ?? null) : null;
+
+        return is_string($key) && trim($key) !== '' ? trim($key) : null;
+    }
+
+    /**
+     * The block chosen in the form, if any (the state is read from the root of the form).
+     */
+    private static function blockKey(Get $get): ?string
+    {
+        $key = $get('popup_block.key');
+
+        return is_string($key) && trim($key) !== '' ? trim($key) : null;
     }
 
     private static function isPopup(Get $get): bool

@@ -24,7 +24,7 @@ final class PopupPreview
 
     /**
      * @param  array<string, mixed>  $state
-     * @return array{title: string, contentHtml: string, shape: string, imageUrl: string|null, imageAlt: string, actionLabel: string|null, actionUrl: string|null}
+     * @return array{title: string, contentHtml: string, shape: string, imageUrl: string|null, imageAlt: string, actionLabel: string|null, actionUrl: string|null, blockName: string|null, blockUnavailable: bool}
      */
     public function fromState(array $state): array
     {
@@ -41,7 +41,35 @@ final class PopupPreview
             'imageAlt' => $this->text($state['popup_image_alt'] ?? null) ?? '',
             'actionLabel' => $hasButton ? $label : null,
             'actionUrl' => $hasButton ? $url : null,
+            'blockName' => $this->blockName($state['popup_block'] ?? null),
+            'blockUnavailable' => $this->blockUnavailable($state),
         ];
+    }
+
+    /**
+     * Only says where the block goes: it is never resolved nor run here (its provider may be a
+     * mail service or a form that sends), so what it would show is never part of the preview.
+     */
+    private function blockName(mixed $block): ?string
+    {
+        $key = is_array($block) ? $this->text($block['key'] ?? null) : null;
+
+        return $key === null ? null : resolve(PopupBlockCatalog::class)->labelOf(trim($key));
+    }
+
+    /**
+     * A block that cannot be drawn now keeps the window from being shown, unless told otherwise.
+     *
+     * @param  array<string, mixed>  $state
+     */
+    private function blockUnavailable(array $state): bool
+    {
+        $block = $state['popup_block'] ?? null;
+        $key = is_array($block) ? $this->text($block['key'] ?? null) : null;
+
+        return $key !== null
+            && ($state['popup_block_hide_when_unavailable'] ?? true) !== false
+            && ! resolve(PopupBlockCatalog::class)->isAvailable(trim($key));
     }
 
     private function text(mixed $value): ?string

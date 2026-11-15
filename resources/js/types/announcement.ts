@@ -1,3 +1,5 @@
+import type { ResolvedSiteBlock } from '@/types/siteBlocks';
+
 export type AnnouncementVisibility = 'public' | 'authenticated' | 'members' | 'guests';
 
 export type AnnouncementPosition =
@@ -50,6 +52,12 @@ export interface AnnouncementPopup {
     frequency: PopupFrequency;
     /** Only with frequency "days": 1–365 */
     frequency_days: number | null;
+    /**
+     * A site block of the core or of another module, resolved by the server for this person
+     * (announcements#70); null for a window without one, or when it cannot be drawn and the window
+     * is offered anyway
+     */
+    block: ResolvedSiteBlock | null;
 }
 
 export interface Announcement {

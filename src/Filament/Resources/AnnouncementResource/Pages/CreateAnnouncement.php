@@ -9,6 +9,7 @@ use Filament\Actions\Action;
 use Filament\Resources\Pages\CreateRecord;
 use Modules\Announcements\Filament\Actions\PopupPreviewAction;
 use Modules\Announcements\Filament\Resources\AnnouncementResource;
+use Modules\Announcements\Filament\Support\PopupBlockFormData;
 
 class CreateAnnouncement extends CreateRecord
 {
@@ -25,6 +26,15 @@ class CreateAnnouncement extends CreateRecord
             PopupPreviewAction::make(),
             $this->knowledgeGuideAction('announcements.panel.create-announcement'),
         ]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        return PopupBlockFormData::normalise($data);
     }
 
     protected function getRedirectUrl(): string

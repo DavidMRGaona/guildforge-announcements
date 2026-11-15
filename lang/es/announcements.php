@@ -22,6 +22,8 @@ return [
         'scheduling' => 'Programación',
         'popup' => 'Ventana emergente',
         'popup_description' => 'Cómo es la ventana. Se puede cerrar siempre, con la ✕ o con la tecla Esc.',
+        'popup_block' => 'Bloque',
+        'popup_block_description' => 'Un bloque que aportan el sitio u otros módulos (por ejemplo, la suscripción al boletín) y que se muestra dentro de la ventana.',
         'popup_triggers' => 'Cuándo se abre',
         'popup_triggers_description' => 'Se abre con el primero que se cumpla. Sin ninguno, nada más cargar la página.',
         'popup_where' => 'Dónde se abre',
@@ -167,6 +169,14 @@ return [
         'trigger_page_views_help' => 'De 2 a 20 páginas en la misma visita.',
         'seconds' => 's',
         'days' => 'días',
+        'block' => [
+            'label' => 'Bloque',
+            'help' => 'Opcional. Solo salen los que se pueden poner en una ventana y están disponibles ahora; el que ya tiene la ventana se conserva aunque su módulo no responda.',
+            'unavailable_suffix' => '(no disponible)',
+            'none' => 'Sin bloque',
+            'hide_when_unavailable' => 'Ocultar la ventana si el bloque no está disponible',
+            'hide_when_unavailable_help' => 'Marcada, la ventana no sale a quien no pueda ver el bloque (módulo desactivado, proveedor sin responder o nada que mostrar a esa persona). Sin marcar, sale sin el bloque.',
+        ],
         'frequency' => [
             'label' => 'Frecuencia',
             'help' => 'Cada cuánto vuelve a salir a la misma persona. Abrirla y cerrarla cuentan como haberla visto. Quien tiene sesión no la ve de nuevo en otro dispositivo. «Una vez por sesión» cuenta por pestaña del navegador: vuelve a salir al abrir una pestaña nueva.',
@@ -208,6 +218,8 @@ return [
         'description' => 'Así se vería con lo que hay ahora en el formulario, guardado o no. No cuenta ni se recuerda como vista, y no recoge lo que cambien las reglas de cuándo y dónde sale.',
         'aria' => 'Imagen de la ventana emergente',
         'close' => 'Cerrar',
+        'block' => 'Aquí irá el bloque :name',
+        'block_unavailable' => 'Ahora mismo el bloque no está disponible: con la casilla de ocultar marcada, la ventana no saldría.',
         'goes_to' => 'Va a:',
     ],
 ];

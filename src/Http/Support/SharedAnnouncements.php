@@ -7,12 +7,15 @@ namespace Modules\Announcements\Http\Support;
 use Illuminate\Http\Request;
 use Modules\Announcements\Application\DTOs\AnnouncementResponseDTO;
 use Modules\Announcements\Application\Services\AnnouncementServiceInterface;
+use Modules\Announcements\Application\Services\PopupBlockResolver;
 use Modules\Announcements\Domain\Enums\AnnouncementFormat;
+use Modules\Announcements\Domain\ValueObjects\PopupBlock;
 use WeakMap;
 
 /**
  * The announcements shared with every Inertia page (banners in `announcements`, windows in
  * `announcementPopups`), read once per request for the signed-in user and split by format.
+ * A window's block is resolved here, for the person viewing the page (announcements#70).
  * Kept per request object, so a container that serves several requests (tests, long-running
  * workers) never hands one request what another read.
  */
@@ -39,9 +42,29 @@ final class SharedAnnouncements
         $shared = [];
 
         foreach ($this->read[$request] as $announcement) {
-            if ($announcement->format === $format->value) {
-                $shared[] = $announcement->toArray();
+            if ($announcement->format !== $format->value) {
+                continue;
             }
+
+            $data = $announcement->toArray();
+
+            if ($announcement->block instanceof PopupBlock) {
+                $block = app(PopupBlockResolver::class)->resolve($announcement->block, $request->user());
+
+                // A window that depends on its block is not offered while the block cannot be drawn
+                if ($block === null && $announcement->hideWhenBlockUnavailable) {
+                    continue;
+                }
+
+                $popup = $data['popup'] ?? null;
+
+                if (is_array($popup)) {
+                    $popup['block'] = $block;
+                    $data['popup'] = $popup;
+                }
+            }
+
+            $shared[] = $data;
         }
 
         return $shared;

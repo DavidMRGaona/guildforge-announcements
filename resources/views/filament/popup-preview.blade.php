@@ -17,6 +17,7 @@
     .announcement-preview__content ol { list-style: decimal; padding-left: 1.25rem; }
     .announcement-preview__content a { text-decoration: underline; }
     .announcement-preview__button { display: inline-block; margin-top: 1rem; padding: .5rem 1rem; border-radius: .375rem; background: var(--primary-600, #4f46e5); color: #fff; font-size: .875rem; font-weight: 500; text-decoration: none; }
+    .announcement-preview__block { margin-top: 1rem; padding: .75rem 1rem; border: 1px dashed currentColor; border-radius: .375rem; font-size: .875rem; opacity: .75; }
     .announcement-preview__target { margin: .5rem 0 0; font-size: .75rem; opacity: .65; word-break: break-all; }
     .announcement-preview__close { position: absolute; top: .5rem; right: .5rem; width: 1.75rem; height: 1.75rem; border-radius: 9999px; background: rgb(0 0 0 / .08); text-align: center; line-height: 1.75rem; }
 </style>
@@ -31,6 +32,14 @@
             <h3 class="announcement-preview__title">{{ $title }}</h3>
             {{-- Cleaned by the same sanitizer as the saved content (PopupPreview) --}}
             <div class="announcement-preview__content">{!! $contentHtml !!}</div>
+
+            @if ($blockName !== null)
+                {{-- Only a marker: the block is drawn by the site, for each person --}}
+                <div class="announcement-preview__block">{{ __('announcements::announcements.preview.block', ['name' => $blockName]) }}</div>
+                @if ($blockUnavailable)
+                    <p class="announcement-preview__target">{{ __('announcements::announcements.preview.block_unavailable') }}</p>
+                @endif
+            @endif
 
             @if ($actionLabel !== null && $actionUrl !== null)
                 {{-- Not a link: the preview only shows where it would go --}}

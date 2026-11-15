@@ -22,6 +22,7 @@ use Modules\Announcements\Domain\Repositories\AnnouncementRepositoryInterface;
 use Modules\Announcements\Domain\ValueObjects\AnnouncementId;
 use Modules\Announcements\Domain\ValueObjects\AnnouncementPopup;
 use Modules\Announcements\Domain\ValueObjects\PopupAction;
+use Modules\Announcements\Domain\ValueObjects\PopupBlock;
 use Modules\Announcements\Domain\ValueObjects\PopupTriggers;
 use Modules\Announcements\Infrastructure\Persistence\Eloquent\Models\AnnouncementModel;
 use Tests\Support\Modules\ModuleTestCase;
@@ -96,6 +97,70 @@ final class AnnouncementPopupPersistenceTest extends ModuleTestCase
 
         $read = $this->repository()->findOrFail(AnnouncementId::fromString($created->id));
         $this->assertEquals($popup, $read->popup());
+    }
+
+    public function test_a_window_keeps_its_block_and_whether_it_hides_without_it(): void
+    {
+        $popup = new AnnouncementPopup(
+            block: new PopupBlock('newsletter.subscribe', ['heading' => 'Suscríbete', 'list' => 3]),
+            hideWhenBlockUnavailable: false,
+        );
+
+        $created = $this->service()->create(new CreateAnnouncementDTO(
+            title: 'Únete',
+            content: '<p>Texto</p>',
+            format: AnnouncementFormat::Popup,
+            popup: $popup,
+        ));
+
+        $model = AnnouncementModel::findOrFail($created->id);
+        $this->assertSame(['key' => 'newsletter.subscribe', 'settings' => ['heading' => 'Suscríbete', 'list' => 3]], $model->popup_block);
+        $this->assertFalse($model->popup_block_hide_when_unavailable);
+        $this->assertEquals($popup, $this->repository()->findOrFail(AnnouncementId::fromString($created->id))->popup());
+    }
+
+    public function test_a_window_without_a_block_stores_none_and_hides_without_one(): void
+    {
+        $created = $this->service()->create(new CreateAnnouncementDTO(
+            title: 'Únete',
+            content: '<p>Texto</p>',
+            format: AnnouncementFormat::Popup,
+            popup: new AnnouncementPopup,
+        ));
+
+        $model = AnnouncementModel::findOrFail($created->id);
+        $this->assertNull($model->popup_block);
+        $this->assertTrue($model->popup_block_hide_when_unavailable);
+        $this->assertNull($this->repository()->findOrFail(AnnouncementId::fromString($created->id))->popup()?->block);
+    }
+
+    public function test_the_form_state_of_a_block_without_a_key_is_no_block(): void
+    {
+        $dto = CreateAnnouncementDTO::fromArray([
+            'title' => 'Únete',
+            'content' => '<p>Texto</p>',
+            'format' => 'popup',
+            'popup_block' => ['key' => null, 'settings' => ['heading' => 'Suscríbete']],
+        ]);
+
+        $this->assertNull($dto->popup?->block);
+    }
+
+    public function test_the_block_columns_default_to_no_block_and_hiding_the_window(): void
+    {
+        $id = (string) Str::uuid();
+        DB::table('announcements_announcements')->insert([
+            'id' => $id,
+            'title' => 'Antigua',
+            'content' => '<p>Texto</p>',
+            'format' => 'popup',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $row = DB::table('announcements_announcements')->where('id', $id)->first();
+        $this->assertNull($row?->popup_block);
+        $this->assertTrue((bool) $row?->popup_block_hide_when_unavailable);
     }
 
     public function test_switching_a_window_back_to_a_banner_keeps_its_window_settings(): void
@@ -209,6 +274,7 @@ final class AnnouncementPopupPersistenceTest extends ModuleTestCase
             'device' => 'mobile',
             'frequency' => 'once',
             'frequency_days' => null,
+            'block' => null,
         ], $popup['popup']);
 
         $this->assertSame('banner', $banner['format']);

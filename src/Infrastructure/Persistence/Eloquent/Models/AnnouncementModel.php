@@ -41,6 +41,8 @@ use Modules\Announcements\Domain\Enums\AnnouncementVisibility;
  * @property string $popup_device
  * @property string $popup_frequency
  * @property int|null $popup_frequency_days
+ * @property array{key?: string|null, settings?: array<string, mixed>}|null $popup_block
+ * @property bool $popup_block_hide_when_unavailable
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
@@ -76,6 +78,7 @@ final class AnnouncementModel extends Model
         'popup_pages' => 'all',
         'popup_device' => 'all',
         'popup_frequency' => 'once',
+        'popup_block_hide_when_unavailable' => true,
     ];
 
     /**
@@ -109,6 +112,8 @@ final class AnnouncementModel extends Model
         'popup_device',
         'popup_frequency',
         'popup_frequency_days',
+        'popup_block',
+        'popup_block_hide_when_unavailable',
     ];
 
     /**
@@ -131,6 +136,8 @@ final class AnnouncementModel extends Model
             'popup_trigger_page_views' => 'integer',
             'popup_frequency_days' => 'integer',
             'popup_paths' => 'array',
+            'popup_block' => 'array',
+            'popup_block_hide_when_unavailable' => 'boolean',
         ];
     }
 }

@@ -2,6 +2,7 @@
 import { X } from '@lucide/vue';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import SiteBlock from '@/components/layout/SiteBlock.vue';
 import { buildImageUrl } from '@/utils/cloudinary';
 import type { PopupAnnouncement, PopupCloseReason } from '../types/announcement';
 
@@ -9,6 +10,8 @@ import type { PopupAnnouncement, PopupCloseReason } from '../types/announcement'
  * One window of an announcement. The centred shape is modal: it covers the page, keeps the focus
  * inside and gives it back on closing. The corner card is not: it does not take the focus from
  * what the visitor is doing and the page stays usable. Both close with the ✕ and with Esc, always.
+ * A block of the core or of another module (a sign-up form, a button) goes between the text and the
+ * button; what it does, and what it counts, is its own: closing the window is all this one reports.
  */
 const props = defineProps<{
     announcement: PopupAnnouncement;
@@ -28,6 +31,8 @@ const imageUrl = computed(() =>
     buildImageUrl(props.announcement.popup.image_public_id, { width: 960, crop: 'fit' })
 );
 const action = computed(() => props.announcement.popup.action);
+// Resolved by the server for this person (announcements#70); SiteBlock leaves out one that fails
+const block = computed(() => props.announcement.popup.block);
 
 const FOCUSABLE =
     'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -170,6 +175,9 @@ onBeforeUnmount(() => {
                         v-html="announcement.content"
                     />
                     <!-- eslint-enable vue/no-v-html -->
+                    <div v-if="block" class="mt-4">
+                        <SiteBlock :block="block" placement="popup" />
+                    </div>
                     <a
                         v-if="action"
                         :href="action.url"
@@ -216,6 +224,9 @@ onBeforeUnmount(() => {
                     v-html="announcement.content"
                 />
                 <!-- eslint-enable vue/no-v-html -->
+                <div v-if="block" class="mt-3">
+                    <SiteBlock :block="block" placement="popup" />
+                </div>
                 <a
                     v-if="action"
                     :href="action.url"

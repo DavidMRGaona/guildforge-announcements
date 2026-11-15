@@ -50,6 +50,10 @@ final readonly class AnnouncementPopup
         ?string $imageAlt = null,
         public PopupFrequency $frequency = PopupFrequency::Once,
         ?int $frequencyDays = null,
+        /** A site block of the core or of another module, drawn inside the window (announcements#70) */
+        public ?PopupBlock $block = null,
+        /** With a block: the window is not offered when the block cannot be drawn; otherwise it is, without it */
+        public bool $hideWhenBlockUnavailable = true,
     ) {
         $imagePublicId = $imagePublicId !== null ? trim($imagePublicId) : null;
         $this->imagePublicId = $imagePublicId === '' ? null : $imagePublicId;

@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Modules\Announcements\Tests\Feature\Filament;
 
+use App\Application\SiteBlocks\Services\SiteBlockRegistryInterface;
 use Filament\Actions\Action;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Support\Htmlable;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
@@ -16,6 +18,7 @@ use Modules\Announcements\Infrastructure\Persistence\Eloquent\Models\PopupMetric
 use Modules\Announcements\Infrastructure\Persistence\Eloquent\Models\PopupViewModel;
 use Tests\Support\Modules\InteractsWithModulePanel;
 use Tests\Support\Modules\ModuleTestCase;
+use Tests\Support\SiteBlocks\FakeSiteBlock;
 
 /**
  * «Vista previa» of the form (announcements#69): the window as it would look with what is in the
@@ -24,6 +27,10 @@ use Tests\Support\Modules\ModuleTestCase;
 final class AnnouncementPopupPreviewTest extends ModuleTestCase
 {
     use InteractsWithModulePanel;
+
+    private const string OWNER = 'example-module';
+
+    private const string KEY = 'example-module.subscribe';
 
     protected ?string $moduleName = 'announcements';
 
@@ -136,6 +143,75 @@ final class AnnouncementPopupPreviewTest extends ModuleTestCase
 
         Livewire::test(EditAnnouncement::class, ['record' => $model->getKey()])
             ->assertActionVisible('popupPreview');
+    }
+
+    public function test_the_preview_marks_where_the_block_goes_without_running_it(): void
+    {
+        $block = new class extends FakeSiteBlock
+        {
+            public function key(): string
+            {
+                return 'example-module.subscribe';
+            }
+
+            public static int $asked = 0;
+
+            public function props(array $settings, ?Authenticatable $user): array
+            {
+                self::$asked++;
+
+                return [];
+            }
+        };
+        app(SiteBlockRegistryInterface::class)->register($block::class, self::OWNER);
+
+        $html = $this->previewHtml($this->previewOf([
+            'title' => 'Hazte socio',
+            'popup_block' => ['key' => self::KEY, 'settings' => ['heading' => 'Suscríbete']],
+        ]));
+
+        $this->assertStringContainsString('Aquí irá el bloque Bloque de ejemplo', $html);
+        $this->assertStringNotContainsString('Suscríbete', $html);
+        $this->assertSame(0, $block::$asked);
+    }
+
+    public function test_the_preview_names_a_block_nobody_registers_by_its_key_and_escapes_it(): void
+    {
+        $html = $this->previewHtml($this->previewOf([
+            'title' => 'Hazte socio',
+            'popup_block' => ['key' => '<b>gone</b>.subscribe'],
+        ]));
+
+        $this->assertStringContainsString('Aquí irá el bloque &lt;b&gt;gone&lt;/b&gt;.subscribe', $html);
+        $this->assertStringNotContainsString('<b>gone', $html);
+    }
+
+    public function test_the_preview_warns_when_the_block_is_not_available_now(): void
+    {
+        $block = new class extends FakeSiteBlock
+        {
+            public function key(): string
+            {
+                return 'example-module.subscribe';
+            }
+
+            public function isAvailable(): bool
+            {
+                return false;
+            }
+        };
+        app(SiteBlockRegistryInterface::class)->register($block::class, self::OWNER);
+
+        $hidden = $this->previewHtml($this->previewOf(['popup_block' => ['key' => self::KEY]]));
+        $shown = $this->previewHtml($this->previewOf(['popup_block' => ['key' => self::KEY], 'popup_block_hide_when_unavailable' => false]));
+
+        $this->assertStringContainsString('el bloque no está disponible', $hidden);
+        $this->assertStringNotContainsString('el bloque no está disponible', $shown);
+    }
+
+    public function test_the_preview_has_no_marker_without_a_block(): void
+    {
+        $this->assertStringNotContainsString('Aquí irá el bloque', $this->previewHtml($this->previewOf(['title' => 'Hazte socio'])));
     }
 
     /**
