@@ -7,12 +7,16 @@ namespace Modules\Announcements\Tests\Feature\Http;
 use App\Application\Impersonation\Services\ImpersonationContextInterface;
 use App\Domain\Impersonation\Enums\ImpersonationMode;
 use App\Infrastructure\Persistence\Eloquent\Models\UserModel;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Route as IlluminateRoute;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use Modules\Announcements\Http\Support\PopupMetricLimits;
 use Modules\Announcements\Infrastructure\Persistence\Eloquent\Models\AnnouncementModel;
 use Modules\Announcements\Infrastructure\Persistence\Eloquent\Models\PopupMetricModel;
 use Tests\Support\Modules\ModuleTestCase;
@@ -173,6 +177,47 @@ final class PopupMetricControllerTest extends ModuleTestCase
         $this->assertContains('web', $route->gatherMiddleware());
         $this->assertNotContains('auth', $route->gatherMiddleware());
         $this->assertTrue(collect($route->gatherMiddleware())->contains(fn (string $m): bool => str_starts_with($m, 'throttle:')));
+    }
+
+    public function test_the_limits_are_fixed(): void
+    {
+        $request = Request::create('/', 'POST', server: ['REMOTE_ADDR' => '203.0.113.7']);
+        $limit = RateLimiter::limiter(PopupMetricLimits::PER_ADDRESS);
+        $this->assertIsCallable($limit);
+        $result = $limit($request);
+        $this->assertInstanceOf(Limit::class, $result);
+        $this->assertSame(30, $result->maxAttempts);
+        $this->assertSame(60, $result->decaySeconds);
+    }
+
+    public function test_the_same_event_on_the_same_window_is_limited_per_minute(): void
+    {
+        $popup = $this->popup();
+
+        for ($i = 0; $i < 5; $i++) {
+            $this->postJson($this->url($popup, 'shown'))->assertNoContent();
+        }
+
+        $this->postJson($this->url($popup, 'shown'))->assertTooManyRequests();
+        // Another event on the same window is its own count
+        $this->postJson($this->url($popup, 'dismissed'))->assertNoContent();
+        $this->assertSame(5, $this->counted($popup, 'shown'));
+    }
+
+    public function test_every_counter_together_is_limited_per_address(): void
+    {
+        $status = [];
+
+        for ($i = 0; $i < 7; $i++) {
+            $popup = $this->popup();
+
+            for ($j = 0; $j < 5; $j++) {
+                $status[] = $this->postJson($this->url($popup, 'shown'))->status();
+            }
+        }
+
+        $this->assertSame(30, count(array_filter($status, static fn (int $code): bool => $code === 204)));
+        $this->assertSame(5, count(array_filter($status, static fn (int $code): bool => $code === 429)));
     }
 
     public function test_the_counters_go_with_the_announcement(): void

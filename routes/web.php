@@ -7,6 +7,7 @@ use Modules\Announcements\Domain\Enums\PopupMetric;
 use Modules\Announcements\Http\Controllers\AnnouncementController;
 use Modules\Announcements\Http\Controllers\PopupMetricController;
 use Modules\Announcements\Http\Controllers\PopupViewController;
+use Modules\Announcements\Http\Support\PopupMetricLimits;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,10 +49,10 @@ Route::prefix('anuncios/ventanas')
 
 /*
  * Anonymous counters of what happens to a window (announcements#69): open to visitors without a
- * session, CSRF-protected by the web group, and limited per address.
+ * session, CSRF-protected by the web group, and limited per address and per window and event.
  */
 Route::post('anuncios/ventanas/{id}/metrica/{metric}', [PopupMetricController::class, 'store'])
-    ->middleware('throttle:120,1,announcement-popup-metrics')
+    ->middleware(['throttle:'.PopupMetricLimits::PER_ADDRESS, 'throttle:'.PopupMetricLimits::PER_WINDOW])
     ->name('announcements.popups.metric')
     ->whereUuid('id')
     ->where('metric', PopupMetric::routePattern());

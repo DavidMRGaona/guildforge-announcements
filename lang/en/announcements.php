@@ -208,5 +208,6 @@ return [
         'description' => 'This is how it would look with what is in the form now, saved or not. It is not counted or remembered as a view, and it does not apply the rules for when and where it appears.',
         'aria' => 'Picture of the popup window',
         'close' => 'Close',
+        'goes_to' => 'Goes to:',
     ],
 ];

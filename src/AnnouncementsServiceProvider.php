@@ -37,6 +37,7 @@ use Modules\Announcements\Filament\Media\AnnouncementContentMediaSource;
 use Modules\Announcements\Filament\Media\AnnouncementPopupImageMediaSource;
 use Modules\Announcements\Filament\Pages\AnnouncementsSettings;
 use Modules\Announcements\Filament\Resources\AnnouncementResource;
+use Modules\Announcements\Http\Support\PopupMetricLimits;
 use Modules\Announcements\Http\Support\SharedAnnouncements;
 use Modules\Announcements\Infrastructure\Content\AnnouncementContentTextSource;
 use Modules\Announcements\Infrastructure\Notifications\AnnouncementNoticeObserver;
@@ -117,6 +118,8 @@ final class AnnouncementsServiceProvider extends ModuleServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([PrunePopupMetricsCommand::class]);
         }
+
+        PopupMetricLimits::register();
 
         // Old counters only matter for a while
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {

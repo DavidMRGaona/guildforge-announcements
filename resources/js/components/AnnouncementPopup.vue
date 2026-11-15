@@ -51,6 +51,8 @@ let stopConsentWatch: (() => void) | null = null;
 // A window opened (or closed) on this page: no other opens until the path changes
 let handledThisPage = false;
 let offeredIds = idsOf(props.announcementPopups);
+// Windows already counted as shown on this page: one that is retired and reopened counts once
+const countedShown = new Set<string>();
 // What the browser remembered of the open window before it opened, to give it back if it is retired
 let rememberedBefore: PopupRecord | null = null;
 
@@ -200,7 +202,10 @@ function open(announcement: PopupAnnouncement, answeredWhenArmed: boolean): void
     handledThisPage = true;
     rememberedBefore = markShown(announcement.id);
     tellServer(announcement, 'shown');
-    count(announcement, 'shown');
+    if (!countedShown.has(announcement.id)) {
+        countedShown.add(announcement.id);
+        count(announcement, 'shown');
+    }
 }
 
 /**
@@ -267,6 +272,7 @@ function onClose(reason: PopupCloseReason): void {
 }
 
 function visitPage(): void {
+    countedShown.clear();
     pageViews = countPageView(pathname.value);
 
     const shown = current.value;

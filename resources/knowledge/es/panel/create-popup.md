@@ -75,7 +75,7 @@ Además de **Público**, **Usuarios autenticados** y **Solo socios** (quien tien
 
 ## Ver cómo queda: la vista previa
 
-Pulsa **Vista previa** arriba, junto al título de la página, para ver la ventana con lo que hay ahora en el formulario, sin guardar. Enseña la forma, la imagen, el título, el contenido y el botón. Es un dibujo de la ventana dentro del panel: no aplica los disparadores, las páginas ni la frecuencia, y no cuenta como una vista ni deja ningún recuerdo. El botón «Vista previa» solo sale con el formato **Ventana emergente**.
+Pulsa **Vista previa** arriba, junto al título de la página, para ver la ventana con lo que hay ahora en el formulario, sin guardar. Enseña la forma, la imagen, el título, el contenido y el botón (que no es un enlace: debajo dice a dónde iría). Es un dibujo de la ventana dentro del panel: no aplica los disparadores, las páginas ni la frecuencia, y no cuenta como una vista ni deja ningún recuerdo. El botón «Vista previa» solo sale con el formato **Ventana emergente**.
 
 ## Ver si funciona: los resultados
 
@@ -84,12 +84,12 @@ Al editar una ventana ya guardada, arriba salen sus **Resultados de los últimos
 - **Mostrada**: cuántas veces se abrió.
 - **Cerrada**: cuántas veces se cerró con el ✕, la tecla Esc o pulsando fuera.
 - **Clics en el botón**: cuántas veces se pulsó el botón. Pulsarlo no cuenta como cerrarla.
-- **Tasa de clic**: los clics por cada 100 veces que se mostró. Hasta que se muestra por primera vez, sale un guion.
+- **Tasa de clic**: los clics por cada 100 veces que se mostró. Nunca pasa del 100 %. Hasta que se muestra por primera vez, sale un guion.
 
 Los días son los de la web, no los del servidor. Son contadores anónimos: guardan cuántas veces ocurrió cada cosa cada día, nunca quién la vio, ni su cuenta, sesión o dirección. Los cuentan también las visitas sin sesión, pero no la vista previa ni quien mira la web como otra persona (**Impersonar**). Los contadores de más de 400 días se borran solos, y los de una ventana se borran con ella. Solo los ve quien puede editar anuncios.
 
 > [!IMPORTANT]
-> Una ventana que se abre y luego se retira porque el banner de cookies vuelve a preguntar ya contó como mostrada. Con visitas bloqueando contadores o sin conexión, los números pueden quedarse algo por debajo de la realidad.
+> Una ventana que se retira porque el banner de cookies vuelve a preguntar y se abre de nuevo en la misma página cuenta como mostrada una sola vez. Los números son orientativos: pueden quedarse algo por debajo de la realidad (bloqueadores, sin conexión) o ser inflados a propósito, así que sirven para comparar ventanas, no como cifra exacta.
 
 ## Reglas que no cambian
 

@@ -16,7 +16,8 @@
     .announcement-preview__content ul { list-style: disc; padding-left: 1.25rem; }
     .announcement-preview__content ol { list-style: decimal; padding-left: 1.25rem; }
     .announcement-preview__content a { text-decoration: underline; }
-    .announcement-preview__button { display: inline-block; margin-top: 1rem; padding: .5rem 1rem; border-radius: .375rem; background: rgb(var(--primary-600, 79 70 229)); color: #fff; font-size: .875rem; font-weight: 500; text-decoration: none; }
+    .announcement-preview__button { display: inline-block; margin-top: 1rem; padding: .5rem 1rem; border-radius: .375rem; background: var(--primary-600, #4f46e5); color: #fff; font-size: .875rem; font-weight: 500; text-decoration: none; }
+    .announcement-preview__target { margin: .5rem 0 0; font-size: .75rem; opacity: .65; word-break: break-all; }
     .announcement-preview__close { position: absolute; top: .5rem; right: .5rem; width: 1.75rem; height: 1.75rem; border-radius: 9999px; background: rgb(0 0 0 / .08); text-align: center; line-height: 1.75rem; }
 </style>
 
@@ -32,8 +33,9 @@
             <div class="announcement-preview__content">{!! $contentHtml !!}</div>
 
             @if ($actionLabel !== null && $actionUrl !== null)
-                {{-- Not a link to follow from here: the preview only shows where it would go --}}
-                <a class="announcement-preview__button" href="{{ $actionUrl }}" target="_blank" rel="noopener noreferrer">{{ $actionLabel }}</a>
+                {{-- Not a link: the preview only shows where it would go --}}
+                <span class="announcement-preview__button">{{ $actionLabel }}</span>
+                <p class="announcement-preview__target">{{ __('announcements::announcements.preview.goes_to') }} {{ $actionUrl }}</p>
             @endif
         </div>
 

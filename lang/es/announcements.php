@@ -208,5 +208,6 @@ return [
         'description' => 'Así se vería con lo que hay ahora en el formulario, guardado o no. No cuenta ni se recuerda como vista, y no recoge lo que cambien las reglas de cuándo y dónde sale.',
         'aria' => 'Imagen de la ventana emergente',
         'close' => 'Cerrar',
+        'goes_to' => 'Va a:',
     ],
 ];

@@ -52,7 +52,9 @@ final class AnnouncementPopupPreviewTest extends ModuleTestCase
         $this->assertStringContainsString('Hazte socio', $html);
         $this->assertStringContainsString('<strong>asociación</strong>', $html);
         $this->assertStringContainsString('Apúntate', $html);
-        $this->assertStringContainsString('href="/socios"', $html);
+        // Shown, not a link to follow
+        $this->assertStringContainsString('/socios', $html);
+        $this->assertStringNotContainsString('href=', $html);
         $this->assertStringContainsString('data-shape="corner"', $html);
         $this->assertSame(0, AnnouncementModel::query()->count());
     }
@@ -62,7 +64,7 @@ final class AnnouncementPopupPreviewTest extends ModuleTestCase
         $html = $this->previewHtml($this->previewOf(['title' => 'Hola', 'content' => '<p>x</p>']));
 
         $this->assertStringContainsString('data-shape="centered"', $html);
-        $this->assertStringNotContainsString('<a ', $html);
+        $this->assertStringNotContainsString('announcement-preview__button"', $html);
     }
 
     public function test_the_content_is_sanitized_as_the_site_does(): void
@@ -90,6 +92,15 @@ final class AnnouncementPopupPreviewTest extends ModuleTestCase
 
         $this->assertStringNotContainsString('javascript:', $html);
         $this->assertStringNotContainsString('Pulsa', $html);
+    }
+
+    public function test_the_button_colour_is_the_panel_colour_as_it_is(): void
+    {
+        $view = file_get_contents(dirname(__DIR__, 3).'/resources/views/filament/popup-preview.blade.php');
+
+        // Filament 5 colours are complete values: wrapping one in rgb() makes it invalid
+        $this->assertStringContainsString('background: var(--primary-600', (string) $view);
+        $this->assertStringNotContainsString('rgb(var(', (string) $view);
     }
 
     public function test_the_preview_counts_nothing_and_remembers_nothing(): void

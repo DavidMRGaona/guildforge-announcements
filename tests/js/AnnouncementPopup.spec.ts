@@ -427,6 +427,35 @@ describe('AnnouncementPopup', () => {
         expect(dialog()).not.toBeNull();
     });
 
+    it('counts a window once when the banner retires it and it opens again on the same page', async () => {
+        const fetchMock = vi.fn(() => Promise.resolve(new Response(null, { status: 204 })));
+        vi.stubGlobal('fetch', fetchMock);
+        page.props = { cookieConsentModule: true };
+        let decided = true;
+        registerCookieConsentProvider({ hasConsent: () => decided, hasDecided: () => decided });
+
+        mountPopups([popup('a')]);
+        await settle();
+        expect(dialog()).not.toBeNull();
+
+        decided = false;
+        notifyCookieConsentChanged();
+        await settle();
+        expect(dialog()).toBeNull();
+
+        decided = true;
+        notifyCookieConsentDecided();
+        await settle();
+        expect(dialog()).not.toBeNull();
+
+        const urls = (fetchMock.mock.calls as unknown as [string][]).map(([url]) => url);
+        expect(urls).toEqual(['/anuncios/ventanas/a/metrica/shown']);
+
+        // Another page is another showing
+        wrapper?.unmount();
+        wrapper = null;
+    });
+
     it('opens no other window after a visit to the same path brings the same windows again', async () => {
         const offered = [popup('a'), popup('b')];
         const wrapped = mountPopups(offered);

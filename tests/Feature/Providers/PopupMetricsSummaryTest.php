@@ -88,6 +88,15 @@ final class PopupMetricsSummaryTest extends ModuleTestCase
         $this->assertNull($summary->clickRate);
     }
 
+    public function test_the_click_rate_never_goes_above_100(): void
+    {
+        $popup = $this->popup();
+        $this->row($popup, '2026-11-15', PopupMetric::Shown, 3);
+        $this->row($popup, '2026-11-15', PopupMetric::ActionClicked, 9);
+
+        $this->assertSame(100.0, $this->service()->summary($popup->id)->clickRate);
+    }
+
     public function test_it_only_counts_its_own_window(): void
     {
         $popup = $this->popup();
