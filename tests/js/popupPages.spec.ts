@@ -20,6 +20,7 @@ function popup(overrides: Partial<AnnouncementPopup> = {}): AnnouncementPopup {
         device: 'all',
         frequency: 'once',
         frequency_days: null,
+        block: null,
         ...overrides,
     };
 }

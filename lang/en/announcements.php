@@ -22,6 +22,8 @@ return [
         'scheduling' => 'Scheduling',
         'popup' => 'Popup window',
         'popup_description' => 'What the window looks like. It can always be closed, with the ✕ or the Esc key.',
+        'popup_block' => 'Block',
+        'popup_block_description' => 'A block offered by the site or by other modules (for example, the newsletter sign-up) shown inside the window.',
         'popup_triggers' => 'When it opens',
         'popup_triggers_description' => 'It opens with the first one met. With none, as soon as the page loads.',
         'popup_where' => 'Where it opens',
@@ -167,6 +169,13 @@ return [
         'trigger_page_views_help' => 'From 2 to 20 pages in the same visit.',
         'seconds' => 's',
         'days' => 'days',
+        'block' => [
+            'label' => 'Block',
+            'help' => 'Optional. Only the blocks that can go in a window and are available now are offered; the one the window already has is kept even if its module does not answer.',
+            'none' => 'No block',
+            'hide_when_unavailable' => 'Hide the window if the block is not available',
+            'hide_when_unavailable_help' => 'When ticked, the window is not shown while the block cannot be drawn (module off or provider not answering). When not, it is shown without the block.',
+        ],
         'frequency' => [
             'label' => 'Frequency',
             'help' => 'How often it comes back to the same person. Opening it and closing it both count as having seen it. Someone signed in does not see it again on another device. «Once per session» counts per browser tab: it comes back when a new tab is opened.',
@@ -208,6 +217,7 @@ return [
         'description' => 'This is how it would look with what is in the form now, saved or not. It is not counted or remembered as a view, and it does not apply the rules for when and where it appears.',
         'aria' => 'Picture of the popup window',
         'close' => 'Close',
+        'block' => 'The block :name goes here',
         'goes_to' => 'Goes to:',
     ],
 ];

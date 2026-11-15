@@ -12,6 +12,7 @@ use Modules\Announcements\Domain\Enums\PopupPages;
 use Modules\Announcements\Domain\Enums\PopupShape;
 use Modules\Announcements\Domain\ValueObjects\AnnouncementPopup;
 use Modules\Announcements\Domain\ValueObjects\PopupAction;
+use Modules\Announcements\Domain\ValueObjects\PopupBlock;
 use Modules\Announcements\Domain\ValueObjects\PopupTriggers;
 
 /**
@@ -36,6 +37,8 @@ final class PopupAttributes
         'popup_device',
         'popup_frequency',
         'popup_frequency_days',
+        'popup_block',
+        'popup_block_hide_when_unavailable',
     ];
 
     /**
@@ -65,6 +68,8 @@ final class PopupAttributes
             frequency: PopupFrequency::tryFrom(self::enumValue($attributes['popup_frequency'] ?? null, PopupFrequency::Once->value))
                 ?? throw new InvalidArgumentException('Unknown window frequency.'),
             frequencyDays: self::intOrNull($attributes['popup_frequency_days'] ?? null),
+            block: self::block($attributes['popup_block'] ?? null),
+            hideWhenBlockUnavailable: (bool) ($attributes['popup_block_hide_when_unavailable'] ?? true),
         );
     }
 
@@ -88,7 +93,39 @@ final class PopupAttributes
             'popup_device' => $popup->device->value,
             'popup_frequency' => $popup->frequency->value,
             'popup_frequency_days' => $popup->frequencyDays,
+            'popup_block' => $popup->block instanceof PopupBlock
+                ? ['key' => $popup->block->key, 'settings' => $popup->block->settings]
+                : null,
+            'popup_block_hide_when_unavailable' => $popup->hideWhenBlockUnavailable,
         ];
+    }
+
+    /**
+     * The form keeps `{key, settings}` even with nothing chosen (a key that is empty): that is no block.
+     */
+    private static function block(mixed $value): ?PopupBlock
+    {
+        if (is_string($value)) {
+            $value = json_decode($value, true);
+        }
+
+        if (! is_array($value)) {
+            return null;
+        }
+
+        $key = self::stringOrNull($value['key'] ?? null);
+
+        if ($key === null) {
+            return null;
+        }
+
+        $settings = $value['settings'] ?? [];
+
+        if (! is_array($settings)) {
+            throw new InvalidArgumentException('The settings of the block of a window must be a list of values.');
+        }
+
+        return new PopupBlock($key, $settings);
     }
 
     /**

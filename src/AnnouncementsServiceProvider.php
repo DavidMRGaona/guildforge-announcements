@@ -37,6 +37,7 @@ use Modules\Announcements\Filament\Media\AnnouncementContentMediaSource;
 use Modules\Announcements\Filament\Media\AnnouncementPopupImageMediaSource;
 use Modules\Announcements\Filament\Pages\AnnouncementsSettings;
 use Modules\Announcements\Filament\Resources\AnnouncementResource;
+use Modules\Announcements\Filament\Support\PopupBlockCatalog;
 use Modules\Announcements\Http\Support\PopupMetricLimits;
 use Modules\Announcements\Http\Support\SharedAnnouncements;
 use Modules\Announcements\Infrastructure\Content\AnnouncementContentTextSource;
@@ -101,6 +102,9 @@ final class AnnouncementsServiceProvider extends ModuleServiceProvider
 
         // Banners and windows of the page, read once per request
         $this->app->singleton(SharedAnnouncements::class);
+
+        // The blocks the form can offer, worked out once per request (announcements#70)
+        $this->app->scoped(PopupBlockCatalog::class);
     }
 
     public function boot(): void

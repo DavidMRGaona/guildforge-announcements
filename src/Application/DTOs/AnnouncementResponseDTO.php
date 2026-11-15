@@ -8,6 +8,7 @@ use App\Application\Services\TimezoneServiceInterface;
 use Modules\Announcements\Domain\Entities\Announcement;
 use Modules\Announcements\Domain\ValueObjects\AnnouncementPopup;
 use Modules\Announcements\Domain\ValueObjects\PopupAction;
+use Modules\Announcements\Domain\ValueObjects\PopupBlock;
 
 final readonly class AnnouncementResponseDTO
 {
@@ -31,11 +32,15 @@ final readonly class AnnouncementResponseDTO
         public ?array $popup = null,
         /** A window this account has already seen and that is not due again: still shared, so the page keeps one that is open */
         public bool $seen = false,
+        /** The block of a window, still as stored: it never leaves with `toArray()`, the page gets it resolved for the person (announcements#70) */
+        public ?PopupBlock $block = null,
+        public bool $hideWhenBlockUnavailable = true,
     ) {}
 
     public static function fromEntity(Announcement $announcement, bool $seen = false): self
     {
         $timezone = app(TimezoneServiceInterface::class);
+        $popup = $announcement->popup();
 
         return new self(
             id: $announcement->id()->value,
@@ -53,8 +58,10 @@ final readonly class AnnouncementResponseDTO
             createdAt: $timezone->iso($announcement->createdAt()),
             updatedAt: $timezone->iso($announcement->updatedAt()),
             format: $announcement->format()->value,
-            popup: self::popupToArray($announcement->popup()),
+            popup: self::popupToArray($popup),
             seen: $seen,
+            block: $popup?->block,
+            hideWhenBlockUnavailable: $popup instanceof AnnouncementPopup ? $popup->hideWhenBlockUnavailable : true,
         );
     }
 
@@ -85,6 +92,8 @@ final readonly class AnnouncementResponseDTO
             'device' => $popup->device->value,
             'frequency' => $popup->frequency->value,
             'frequency_days' => $popup->frequencyDays,
+            // Filled when the page is shared, for the person viewing it
+            'block' => null,
         ];
     }
 

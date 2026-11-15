@@ -5,7 +5,7 @@ summary: Convierte un anuncio en una ventana que se abre encima de la página, y
 category: content
 audience: panel
 order: 84
-keywords: [frecuencia, una sola vez, una vez por sesión, cada cierto número de días, cada cuánto sale, volver a salir, ventana emergente, ventana, emergente, popup, pop-up, modal, ventana modal, tarjeta, aviso destacado, captación de socios, hazte socio, botón, llamada a la acción, imagen, disparador, retardo, segundos, desplazamiento, bajar, al ir a salir, intención de salida, páginas vistas, portada, rutas, móvil, escritorio, dispositivo, solo visitas sin sesión, banner de cookies, vista previa, previsualizar, métricas, estadísticas, resultados, tasa de clic, clics, cuántas veces se ha visto]
+keywords: [bloque, bloque dentro de la ventana, suscripción al boletín, boletín, ocultar la ventana si el bloque no está disponible, bloque no disponible, frecuencia, una sola vez, una vez por sesión, cada cierto número de días, cada cuánto sale, volver a salir, ventana emergente, ventana, emergente, popup, pop-up, modal, ventana modal, tarjeta, aviso destacado, captación de socios, hazte socio, botón, llamada a la acción, imagen, disparador, retardo, segundos, desplazamiento, bajar, al ir a salir, intención de salida, páginas vistas, portada, rutas, móvil, escritorio, dispositivo, solo visitas sin sesión, banner de cookies, vista previa, previsualizar, métricas, estadísticas, resultados, tasa de clic, clics, cuántas veces se ha visto]
 related: [announcements.panel.create-announcement, announcements.panel.overview, announcements.panel.manage-announcements]
 conditions:
   permissions:
@@ -19,7 +19,7 @@ Una ventana emergente es un anuncio que se abre encima de la página en lugar de
 2. Pulsa **Crear anuncio** y escribe el **Título** y el **Contenido**. En la ventana el contenido sale entero, con su formato: negritas, listas y enlaces.
 3. En **Visualización**, elige el **Formato** **Ventana emergente**. Desaparecen la **Posición**, **Permite cerrar** y el **Estilo personalizado**, que son solo de las bandas, y salen las secciones de la ventana.
 4. Elige la **Visibilidad** y la **Prioridad**, como en cualquier anuncio.
-5. Rellena **Ventana emergente**, **Cuándo se abre** (que incluye la **Frecuencia**) y **Dónde se abre**, como se explica abajo.
+5. Rellena **Ventana emergente**, **Bloque** (opcional), **Cuándo se abre** (que incluye la **Frecuencia**) y **Dónde se abre**, como se explica abajo.
 6. Pulsa **Crear**.
 
 ## Cómo es la ventana
@@ -30,6 +30,20 @@ Una ventana emergente es un anuncio que se abre encima de la página en lugar de
 - **Texto del botón** y **Enlace del botón**: opcionales, pero van juntos. El enlace puede ser una dirección que empiece por `https://` o una página de la web que empiece por `/`, como `/eventos`. No se aceptan direcciones `http://` sin cifrar ni nada que no sea un enlace.
 
 La ventana siempre se puede cerrar, con su ✕, con la tecla Esc o, en la centrada, pulsando fuera de ella. La tarjeta se cierra con Esc cuando se está usando, para no cerrarse al pulsar Esc en otra cosa de la página. Cerrarla o pulsar su botón cuenta como haberla visto: cuándo vuelve a salir lo decide la **Frecuencia**.
+
+## Un bloque dentro de la ventana
+
+El **Bloque** es opcional: una pieza que aporta la propia web u otro módulo y que se dibuja dentro de la ventana, entre el contenido y el botón. Por ejemplo, el formulario de suscripción al boletín si ese módulo está instalado. Esta sección no sabe qué módulos hay: lista lo que la web ofrece para las ventanas.
+
+1. En **Bloque**, elige uno de la lista. **Sin bloque** deja la ventana como siempre.
+2. Debajo salen los ajustes de ese bloque (un título, un texto, un enlace…). Rellénalos: los comprueba el propio bloque.
+3. Decide con **Ocultar la ventana si el bloque no está disponible**, marcada por defecto:
+   - **Marcada**: mientras el bloque no se pueda mostrar (su módulo está desactivado o su proveedor no responde), la ventana no sale a nadie. Es lo que conviene si sin el bloque la ventana no tiene sentido.
+   - **Sin marcar**: la ventana sale igualmente, sin el bloque.
+
+En la lista solo salen los bloques que se pueden poner en una ventana y están disponibles ahora. Si una ventana guardada tiene un bloque que ahora no está disponible, sigue en la lista y se conserva con sus ajustes al guardar, para no perderlo por una caída pasajera.
+
+Lo que haga el bloque (apuntar a alguien a una lista, por ejemplo) es cosa suya: los **Resultados** de la ventana cuentan lo mismo de siempre y no cuentan el envío del bloque. El bloque se decide para cada persona: dos visitas pueden ver la misma ventana con el bloque distinto, o una con él y otra sin él.
 
 ## Cuándo se abre
 
@@ -75,7 +89,7 @@ Además de **Público**, **Usuarios autenticados** y **Solo socios** (quien tien
 
 ## Ver cómo queda: la vista previa
 
-Pulsa **Vista previa** arriba, junto al título de la página, para ver la ventana con lo que hay ahora en el formulario, sin guardar. Enseña la forma, la imagen, el título, el contenido y el botón (que no es un enlace: debajo dice a dónde iría). Es un dibujo de la ventana dentro del panel: no aplica los disparadores, las páginas ni la frecuencia, y no cuenta como una vista ni deja ningún recuerdo. El botón «Vista previa» solo sale con el formato **Ventana emergente**.
+Pulsa **Vista previa** arriba, junto al título de la página, para ver la ventana con lo que hay ahora en el formulario, sin guardar. Enseña la forma, la imagen, el título, el contenido y el botón (que no es un enlace: debajo dice a dónde iría). Del bloque solo pone un marcador, «Aquí irá el bloque…», con su nombre: no lo ejecuta, así que no ves lo que dibujaría ni se envía nada. Es un dibujo de la ventana dentro del panel: no aplica los disparadores, las páginas ni la frecuencia, y no cuenta como una vista ni deja ningún recuerdo. El botón «Vista previa» solo sale con el formato **Ventana emergente**.
 
 ## Ver si funciona: los resultados
 
@@ -103,7 +117,7 @@ Los días son los de la web, no los del servidor. Son contadores anónimos: guar
 
 ## Si algo no sale bien
 
-- **La ventana no sale**: comprueba que está **Activo**, que estás dentro de sus fechas, que tu cuenta entra en su **Visibilidad** y que la página y el dispositivo encajan. Si ya la viste, la **Frecuencia** decide cuándo vuelve: con **Una sola vez** ya no sale, y con los otros modos, no hasta la próxima sesión o hasta pasados los días. Si ya salió en esta visita, no vuelve hasta la próxima. Para probarla, usa una ventana privada del navegador y, si has iniciado sesión, ciérrala o prueba con otra cuenta, porque tu cuenta también la recuerda.
+- **La ventana no sale**: si lleva un **Bloque** y tiene marcado **Ocultar la ventana si el bloque no está disponible**, mira si el módulo del bloque está activado y funcionando. Después, comprueba que está **Activo**, que estás dentro de sus fechas, que tu cuenta entra en su **Visibilidad** y que la página y el dispositivo encajan. Si ya la viste, la **Frecuencia** decide cuándo vuelve: con **Una sola vez** ya no sale, y con los otros modos, no hasta la próxima sesión o hasta pasados los días. Si ya salió en esta visita, no vuelve hasta la próxima. Para probarla, usa una ventana privada del navegador y, si has iniciado sesión, ciérrala o prueba con otra cuenta, porque tu cuenta también la recuerda.
 - **Sale otra ventana en lugar de la mía**: otra con más prioridad, o con la misma y más reciente, encaja en esa página.
 - **El enlace del botón no se acepta**: tiene que empezar por `https://` o por `/`.
 - **Una ruta no se acepta**: empieza por `/`, sin el nombre de la web delante ni `?`, y solo puede llevar un `*` al final.

@@ -75,6 +75,7 @@ function popup(
             device: 'all',
             frequency: 'once',
             frequency_days: null,
+            block: null,
             ...settings,
         },
         seen: false,

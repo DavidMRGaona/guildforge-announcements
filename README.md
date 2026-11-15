@@ -5,7 +5,7 @@ Anuncios para la web pública de GuildForge. Se crean en el panel de administrac
 ## Características
 
 - Gestión de anuncios desde el panel (grupo **Comunicación** → **Anuncios**): crear, editar, eliminar, filtrar por visibilidad, posición y estado
-- Dos formatos: banner y ventana emergente (centrada o tarjeta en la esquina, con imagen y botón opcionales, disparadores, páginas y dispositivo)
+- Dos formatos: banner y ventana emergente (centrada o tarjeta en la esquina, con imagen y botón opcionales, disparadores, páginas y dispositivo, y opcionalmente un bloque del sitio o de otro módulo dentro)
 - Cuatro niveles de visibilidad: público, usuarios autenticados, solo socios y solo visitas sin sesión
 - Seis posiciones en el layout público para los banners (antes y después de la cabecera, el contenido y el pie)
 - Prioridad de 1 a 10: ordena los anuncios y fija el color por defecto del banner

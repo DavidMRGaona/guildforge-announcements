@@ -11,6 +11,7 @@ use Modules\Announcements\Domain\Enums\AnnouncementFormat;
 use Modules\Announcements\Filament\Actions\PopupPreviewAction;
 use Modules\Announcements\Filament\Resources\AnnouncementResource;
 use Modules\Announcements\Filament\Resources\AnnouncementResource\Widgets\PopupMetricsWidget;
+use Modules\Announcements\Filament\Support\PopupBlockFormData;
 use Modules\Announcements\Infrastructure\Persistence\Eloquent\Models\AnnouncementModel;
 
 class EditAnnouncement extends EditRecord
@@ -40,6 +41,17 @@ class EditAnnouncement extends EditRecord
         return $record instanceof AnnouncementModel && $record->format === AnnouncementFormat::Popup
             ? [PopupMetricsWidget::class]
             : [];
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        $record = $this->getRecord();
+
+        return PopupBlockFormData::normalise($data, $record instanceof AnnouncementModel ? $record->popup_block : null);
     }
 
     protected function getRedirectUrl(): string
