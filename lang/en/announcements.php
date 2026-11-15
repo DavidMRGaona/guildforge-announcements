@@ -169,9 +169,9 @@ return [
         'days' => 'days',
         'frequency' => [
             'label' => 'Frequency',
-            'help' => 'How often it comes back to the same person. Opening it and closing it both count as having seen it. Someone signed in does not see it again on another device.',
+            'help' => 'How often it comes back to the same person. Opening it and closing it both count as having seen it. Someone signed in does not see it again on another device. «Once per session» counts per browser tab: it comes back when a new tab is opened.',
             'once' => 'Only once',
-            'session' => 'Once per session',
+            'session' => 'Once per session (per tab)',
             'days' => 'Every few days',
             'days_label' => 'Days between one time and the next',
             'days_help' => 'From 1 to 365. It comes back once that many days have passed since it was last shown.',

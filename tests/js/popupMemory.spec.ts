@@ -255,6 +255,22 @@ describe('popupMemory', () => {
         });
     });
 
+    it('gives the administrator back their own windows when an impersonation ends', () => {
+        setVolatileMemory(true);
+        markShown('a', NOW);
+        markDismissed('b', NOW);
+        expect(countPageView('/')).toBe(1);
+        expect(isDue('a', once, NOW)).toBe(false);
+
+        setVolatileMemory(false);
+
+        // Nothing of what the person they looked as saw is left
+        expect(wasShownThisVisit('a')).toBe(false);
+        expect(isDue('a', once, NOW)).toBe(true);
+        expect(isDue('b', once, NOW)).toBe(true);
+        expect(countPageView('/eventos')).toBe(1);
+    });
+
     it('counts the pages of the visit, not the same page twice in a row', () => {
         expect(countPageView('/')).toBe(1);
         expect(countPageView('/')).toBe(1);

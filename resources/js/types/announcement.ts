@@ -73,7 +73,15 @@ export interface Announcement {
 }
 
 /** An announcement in the popup format, as the server shares them (prop `announcementPopups`) */
-export type PopupAnnouncement = Announcement & { format: 'popup'; popup: AnnouncementPopup };
+export type PopupAnnouncement = Announcement & {
+    format: 'popup';
+    popup: AnnouncementPopup;
+    /**
+     * This account has already seen it and it is not due again. The server keeps sharing it so the
+     * windows offered do not change when one opens; the browser just does not open it.
+     */
+    seen: boolean;
+};
 
 /** How a window was closed: its ✕, Esc or the backdrop, or its button */
 export type PopupCloseReason = 'dismiss' | 'action';

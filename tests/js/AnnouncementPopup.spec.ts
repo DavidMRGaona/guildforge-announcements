@@ -77,6 +77,7 @@ function popup(
             frequency_days: null,
             ...settings,
         },
+        seen: false,
         ...overrides,
     };
 }
@@ -703,6 +704,50 @@ describe('AnnouncementPopup', () => {
             await visit('/', 'Home');
             await settle(60_000);
             expect(dialog()).toBeNull();
+        });
+    });
+
+    describe('windows the account has already seen (announcements#68)', () => {
+        it('does not open a window the server marks as seen', async () => {
+            mountPopups([popup('vista', {}, { seen: true }), popup('nueva')]);
+            await settle();
+
+            expect(dialog()?.textContent).toContain('Ventana nueva');
+        });
+
+        it('keeps an open window while the visits bring it back marked as seen', async () => {
+            const offered = [popup('a', { shape: 'corner' })];
+            const wrapped = mountPopups(offered);
+            await settle();
+            expect(dialog()).not.toBeNull();
+
+            // The server now knows it was shown: the next visit shares it as seen
+            page.url = '/eventos';
+            page.component = 'Events/Index';
+            await wrapped.setProps({ announcementPopups: [{ ...offered[0]!, seen: true }] });
+            await settle();
+
+            expect(dialog()?.textContent).toContain('Ventana a');
+
+            // And the same path again (filters, pages of results)
+            await wrapped.setProps({ announcementPopups: [{ ...offered[0]!, seen: true }] });
+            await settle();
+            expect(dialog()).not.toBeNull();
+        });
+
+        it('does not open it again on a later page once it was closed', async () => {
+            const offered = [popup('a'), popup('b')];
+            const wrapped = mountPopups(offered);
+            await settle();
+            dialog()?.querySelector<HTMLButtonElement>('button')?.click();
+            await settle();
+
+            await wrapped.setProps({
+                announcementPopups: [{ ...offered[0]!, seen: true }, offered[1]!],
+            });
+            await visit('/eventos', 'Events/Index');
+
+            expect(dialog()?.textContent).toContain('Ventana b');
         });
     });
 });

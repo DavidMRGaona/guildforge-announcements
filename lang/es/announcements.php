@@ -169,9 +169,9 @@ return [
         'days' => 'días',
         'frequency' => [
             'label' => 'Frecuencia',
-            'help' => 'Cada cuánto vuelve a salir a la misma persona. Abrirla y cerrarla cuentan como haberla visto. Quien tiene sesión no la ve de nuevo en otro dispositivo.',
+            'help' => 'Cada cuánto vuelve a salir a la misma persona. Abrirla y cerrarla cuentan como haberla visto. Quien tiene sesión no la ve de nuevo en otro dispositivo. «Una vez por sesión» cuenta por pestaña del navegador: vuelve a salir al abrir una pestaña nueva.',
             'once' => 'Una sola vez',
-            'session' => 'Una vez por sesión',
+            'session' => 'Una vez por sesión (por pestaña)',
             'days' => 'Cada cierto número de días',
             'days_label' => 'Días entre una vez y la siguiente',
             'days_help' => 'De 1 a 365. Vuelve a salir pasados esos días desde la última vez que se mostró.',

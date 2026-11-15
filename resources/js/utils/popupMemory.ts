@@ -36,6 +36,14 @@ const pageShown = new Set<string>();
 
 /** Leaves the browser's storage alone (an impersonation) or goes back to using it */
 export function setVolatileMemory(on: boolean): void {
+    if (on !== volatile) {
+        // What the page kept in one mode is not for the other: after an impersonation the
+        // administrator's own windows must not stay hidden by what the person they looked as saw
+        pageRecords.clear();
+        pageShown.clear();
+        keptPageViews = null;
+    }
+
     volatile = on;
 }
 

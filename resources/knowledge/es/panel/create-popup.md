@@ -50,13 +50,13 @@ Si no rellenas ninguno, se abre nada más cargar la página.
 La **Frecuencia** decide cada cuánto vuelve a salir la ventana a la misma persona. Abrirla y cerrarla cuentan como haberla visto.
 
 - **Una sola vez**: no vuelve a salir una vez vista. Es lo que tienen las ventanas nuevas.
-- **Una vez por sesión**: vuelve a salir la próxima vez que la persona visite la web en una sesión nueva del navegador, es decir, tras cerrar la pestaña o la ventana y abrirla de nuevo.
+- **Una vez por sesión**: la sesión es la de la pestaña del navegador, no la de la persona. Vuelve a salir al abrir una pestaña o ventana nueva, o tras cerrar la pestaña y abrirla de nuevo, aunque sea el mismo navegador. No usa cookies.
 - **Cada cierto número de días**: vuelve a salir pasados de 1 a 365 días desde la última vez que se mostró. Cerrarla no retrasa la vuelta.
 
 Cómo se recuerda:
 
 - **Visitas sin sesión**: el recuerdo está en el navegador. Si borran los datos del navegador, o entran desde otro, la ventana vuelve a salir.
-- **Quien ha iniciado sesión**: el recuerdo está también en su cuenta, así que no vuelve a ver la ventana en otro dispositivo o navegador. Con la frecuencia **Una vez por sesión**, la cuenta no decide nada: cada sesión nueva del navegador la vuelve a mostrar.
+- **Quien ha iniciado sesión**: el recuerdo está también en su cuenta, así que no vuelve a ver la ventana en otro dispositivo o navegador. Con la frecuencia **Una vez por sesión**, la cuenta no decide nada: cada pestaña nueva la vuelve a mostrar.
 - Aunque la frecuencia deje volver a una ventana, nunca sale más de una vez por visita.
 - Al editar una ventana no se borra lo que ya se ha visto: si cambias la frecuencia, se aplica sobre cuándo la vio cada persona por última vez. Para que vuelva a salir a todo el mundo, crea una ventana nueva.
 - Si el navegador no deja guardar datos, la ventana sale una vez por cada carga de página.

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Announcements\Tests\Feature\Http;
 
 use App\Application\Impersonation\Services\ImpersonationContextInterface;
+use App\Application\Services\UserServiceInterface;
 use App\Domain\Events\UserAnonymized;
 use App\Domain\Impersonation\Enums\ImpersonationMode;
 use App\Infrastructure\Persistence\Eloquent\Models\UserModel;
@@ -219,6 +220,19 @@ final class PopupViewControllerTest extends ModuleTestCase
 
         // Anonymizing keeps the row of the account: the memory is dropped through the core's event
         event(new UserAnonymized($user->id));
+
+        $this->assertSame([$other->id], PopupViewModel::query()->pluck('user_id')->all());
+    }
+
+    public function test_anonymizing_through_the_core_drops_what_the_account_remembers(): void
+    {
+        $user = UserModel::factory()->create();
+        $other = UserModel::factory()->create();
+        $popup = $this->popup();
+        $this->actingAs($user)->postJson($this->url($popup, 'shown'))->assertNoContent();
+        $this->actingAs($other)->postJson($this->url($popup, 'shown'))->assertNoContent();
+
+        $this->app->make(UserServiceInterface::class)->anonymize($user->id);
 
         $this->assertSame([$other->id], PopupViewModel::query()->pluck('user_id')->all());
     }

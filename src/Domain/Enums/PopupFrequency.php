@@ -13,7 +13,10 @@ enum PopupFrequency: string
     /** Never again once it was seen */
     case Once = 'once';
 
-    /** Again in the next browser session (the tab or window is closed and opened anew) */
+    /**
+     * Again in the next session of the browser's tab: it is counted per tab (`sessionStorage`), so
+     * a new tab or window shows it again. No cookie is used.
+     */
     case Session = 'session';
 
     /** Again when a number of days has passed since it was last shown */

@@ -69,7 +69,8 @@ final class PopupFrequencyTest extends ModuleTestCase
 
         $this->get('/')
             ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
-                ->has('announcementPopups', 1));
+                ->has('announcementPopups', 1)
+                ->where('announcementPopups.0.seen', false));
     }
 
     public function test_closing_counts_as_seeing_it(): void
@@ -167,21 +168,49 @@ final class PopupFrequencyTest extends ModuleTestCase
         $this->assertSame(['Cada día'], $this->titlesFor($user));
     }
 
+    public function test_a_window_already_seen_is_still_shared_marked_as_seen(): void
+    {
+        // So the ids the page gets stay the same after the window opens: a window that is open
+        // is not taken away on the next visit of the page
+        $seenOnce = $this->popup('Vista', ['popup_frequency' => 'once']);
+        $this->popup('Nueva', ['popup_frequency' => 'once', 'priority' => 1]);
+        $user = $this->member();
+        $this->remembers($user, $seenOnce, shown: '-1 hour');
+
+        // A guest has no account memory: nothing is marked
+        $this->assertSame(['Vista' => false, 'Nueva' => false], $this->seenFor(null));
+
+        $this->assertSame(['Nueva'], $this->titlesFor($user));
+        $this->assertSame(['Vista' => true, 'Nueva' => false], $this->seenFor($user));
+    }
+
     /**
+     * What the browser may open: the windows not marked as seen.
+     *
      * @return list<string>
      */
     private function titlesFor(UserModel $user): array
     {
-        $titles = [];
+        return array_keys(array_filter($this->seenFor($user), static fn (bool $seen): bool => ! $seen));
+    }
 
-        $this->actingAs($user)->get('/')->assertInertia(function (AssertableInertia $page) use (&$titles): AssertableInertia {
-            $popups = $page->toArray()['props']['announcementPopups'] ?? [];
-            $titles = array_values(array_map(static fn (array $popup): string => (string) $popup['title'], $popups));
+    /**
+     * @return array<string, bool>
+     */
+    private function seenFor(?UserModel $user): array
+    {
+        $seen = [];
+        $request = $user instanceof UserModel ? $this->actingAs($user)->get('/') : $this->get('/');
+
+        $request->assertInertia(function (AssertableInertia $page) use (&$seen): AssertableInertia {
+            foreach ($page->toArray()['props']['announcementPopups'] ?? [] as $popup) {
+                $seen[(string) $popup['title']] = (bool) $popup['seen'];
+            }
 
             return $page;
         });
 
-        return $titles;
+        return $seen;
     }
 
     private function member(): UserModel

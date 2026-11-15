@@ -107,7 +107,9 @@ function candidate(): PopupAnnouncement | null {
     return (
         props.announcementPopups.find(
             (announcement) =>
-                fits(announcement, context, isMobile) && isDue(announcement.id, announcement.popup)
+                !announcement.seen &&
+                fits(announcement, context, isMobile) &&
+                isDue(announcement.id, announcement.popup)
         ) ?? null
     );
 }

@@ -149,24 +149,31 @@ final readonly class AnnouncementService implements AnnouncementServiceInterface
                 <=> [$a->priority()->value, $a->startedAt()?->getTimestamp() ?? PHP_INT_MIN]
         );
 
+        $seen = $this->idsOfWindowsAlreadySeen($visibleAnnouncements, $user);
+
         return array_map(
-            AnnouncementResponseDTO::fromEntity(...),
-            $this->withoutWindowsAlreadySeen($visibleAnnouncements, $user)
+            static fn (Announcement $announcement): AnnouncementResponseDTO => AnnouncementResponseDTO::fromEntity(
+                $announcement,
+                isset($seen[$announcement->id()->value]),
+            ),
+            $visibleAnnouncements
         );
     }
 
     /**
-     * A signed-in account does not get again a window its memory says is not due (announcements#68:
-     * seen once, or seen less than N days ago). Guests are left alone: only their browser knows.
+     * The windows a signed-in account does not get again because its memory says they are not due
+     * (announcements#68: seen once, or seen less than N days ago), by id. They are still shared,
+     * marked as seen: a window that is open keeps being offered while the person moves around, and
+     * the browser just does not open it again. Guests are left alone: only their browser knows.
      * Banners never go through it, and the memory is read once, only when there are windows.
      *
      * @param  list<Announcement>  $announcements
-     * @return list<Announcement>
+     * @return array<string, true>
      */
-    private function withoutWindowsAlreadySeen(array $announcements, ?object $user): array
+    private function idsOfWindowsAlreadySeen(array $announcements, ?object $user): array
     {
         if (! $user instanceof Authenticatable) {
-            return $announcements;
+            return [];
         }
 
         $windowIds = [];
@@ -178,26 +185,28 @@ final readonly class AnnouncementService implements AnnouncementServiceInterface
         }
 
         if ($windowIds === []) {
-            return $announcements;
+            return [];
         }
 
         $views = $this->popupViews->forUser((string) $user->getAuthIdentifier(), $windowIds);
 
         if ($views === []) {
-            return $announcements;
+            return [];
         }
 
         $now = CarbonImmutable::now();
+        $seen = [];
 
-        return array_values(array_filter(
-            $announcements,
-            static function (Announcement $announcement) use ($views, $now): bool {
-                $popup = $announcement->popup();
+        foreach ($announcements as $announcement) {
+            $popup = $announcement->popup();
+            $id = $announcement->id()->value;
 
-                return ! $popup instanceof AnnouncementPopup
-                    || PopupView::isDue($popup, $views[$announcement->id()->value] ?? null, $now);
-            },
-        ));
+            if ($popup instanceof AnnouncementPopup && ! PopupView::isDue($popup, $views[$id] ?? null, $now)) {
+                $seen[$id] = true;
+            }
+        }
+
+        return $seen;
     }
 
     public function findVisibleForUser(string $id, ?object $user): ?AnnouncementResponseDTO
