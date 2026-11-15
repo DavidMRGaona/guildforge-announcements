@@ -15,6 +15,7 @@ use Modules\Announcements\Domain\Enums\AnnouncementFormat;
 use Modules\Announcements\Domain\Enums\AnnouncementPosition;
 use Modules\Announcements\Domain\Enums\AnnouncementVisibility;
 use Modules\Announcements\Domain\Enums\PopupDevice;
+use Modules\Announcements\Domain\Enums\PopupFrequency;
 use Modules\Announcements\Domain\Enums\PopupPages;
 use Modules\Announcements\Domain\Enums\PopupShape;
 use Modules\Announcements\Domain\Repositories\AnnouncementRepositoryInterface;
@@ -55,6 +56,9 @@ final class AnnouncementPopupPersistenceTest extends ModuleTestCase
         $this->assertSame('centered', $row->popup_shape);
         $this->assertSame('all', $row->popup_pages);
         $this->assertSame('all', $row->popup_device);
+        // Windows saved before the frequency existed open once
+        $this->assertSame('once', $row->popup_frequency);
+        $this->assertNull($row->popup_frequency_days);
 
         $announcement = $this->repository()->findOrFail(AnnouncementId::fromString($id));
         $this->assertSame(AnnouncementFormat::Banner, $announcement->format());
@@ -72,6 +76,8 @@ final class AnnouncementPopupPersistenceTest extends ModuleTestCase
             paths: ['/eventos*', '/articulos'],
             device: PopupDevice::Desktop,
             imageAlt: 'Cartel de la campaña de socios',
+            frequency: PopupFrequency::Days,
+            frequencyDays: 14,
         );
 
         $created = $this->service()->create(new CreateAnnouncementDTO(
@@ -85,6 +91,8 @@ final class AnnouncementPopupPersistenceTest extends ModuleTestCase
         $this->assertSame(AnnouncementFormat::Popup, $model->format);
         $this->assertSame(['/eventos*', '/articulos'], $model->popup_paths);
         $this->assertSame(8, $model->popup_trigger_delay);
+        $this->assertSame('days', $model->popup_frequency);
+        $this->assertSame(14, $model->popup_frequency_days);
 
         $read = $this->repository()->findOrFail(AnnouncementId::fromString($created->id));
         $this->assertEquals($popup, $read->popup());
@@ -119,6 +127,9 @@ final class AnnouncementPopupPersistenceTest extends ModuleTestCase
         $this->popupRow('Rota', ['popup_pages' => 'paths', 'popup_paths' => null]);
         $this->popupRow('Retardo imposible', ['popup_trigger_delay' => 500]);
         $this->popupRow('Enlace peligroso', ['popup_action_label' => 'Pulsa', 'popup_action_url' => 'javascript:alert(1)']);
+        $this->popupRow('Frecuencia desconocida', ['popup_frequency' => 'always']);
+        $this->popupRow('Sin días', ['popup_frequency' => 'days', 'popup_frequency_days' => null]);
+        $this->popupRow('Demasiados días', ['popup_frequency' => 'days', 'popup_frequency_days' => 400]);
         $this->popupRow('Buena');
 
         $titles = array_map(
@@ -196,6 +207,8 @@ final class AnnouncementPopupPersistenceTest extends ModuleTestCase
             'pages' => 'home',
             'paths' => [],
             'device' => 'mobile',
+            'frequency' => 'once',
+            'frequency_days' => null,
         ], $popup['popup']);
 
         $this->assertSame('banner', $banner['format']);
@@ -249,5 +262,20 @@ final class AnnouncementPopupPersistenceTest extends ModuleTestCase
     private function repository(): AnnouncementRepositoryInterface
     {
         return $this->app->make(AnnouncementRepositoryInterface::class);
+    }
+
+    public function test_the_response_carries_the_frequency_and_its_days(): void
+    {
+        $this->popupRow('Cada semana', ['popup_frequency' => 'days', 'popup_frequency_days' => 7]);
+        $this->popupRow('Cada sesión', ['popup_frequency' => 'session', 'popup_frequency_days' => 7, 'priority' => 1]);
+
+        [$weekly, $session] = $this->service()->getActiveForUser(null, AnnouncementFormat::Popup);
+
+        $this->assertSame('days', $weekly->popup['frequency'] ?? null);
+        $this->assertSame(7, $weekly->popup['frequency_days'] ?? null);
+        // The days of a window that returns every session are not kept
+        $this->assertSame('session', $session->popup['frequency'] ?? null);
+        $this->assertArrayHasKey('frequency_days', $session->popup ?? []);
+        $this->assertNull($session->popup['frequency_days'] ?? null);
     }
 }

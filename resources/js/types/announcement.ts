@@ -16,6 +16,9 @@ export type PopupPages = 'all' | 'home' | 'paths';
 
 export type PopupDevice = 'all' | 'mobile' | 'desktop';
 
+/** How often a window returns to the same person (announcements#68) */
+export type PopupFrequency = 'once' | 'session' | 'days';
+
 export interface PopupTriggers {
     /** Seconds after the page loads (0–60); null when not used */
     delay_seconds: number | null;
@@ -44,6 +47,9 @@ export interface AnnouncementPopup {
     /** Only with pages "paths": "/eventos", or "/eventos*" for everything that starts so */
     paths: string[];
     device: PopupDevice;
+    frequency: PopupFrequency;
+    /** Only with frequency "days": 1–365 */
+    frequency_days: number | null;
 }
 
 export interface Announcement {
@@ -67,7 +73,15 @@ export interface Announcement {
 }
 
 /** An announcement in the popup format, as the server shares them (prop `announcementPopups`) */
-export type PopupAnnouncement = Announcement & { format: 'popup'; popup: AnnouncementPopup };
+export type PopupAnnouncement = Announcement & {
+    format: 'popup';
+    popup: AnnouncementPopup;
+    /**
+     * This account has already seen it and it is not due again. The server keeps sharing it so the
+     * windows offered do not change when one opens; the browser just does not open it.
+     */
+    seen: boolean;
+};
 
 /** How a window was closed: its ✕, Esc or the backdrop, or its button */
 export type PopupCloseReason = 'dismiss' | 'action';

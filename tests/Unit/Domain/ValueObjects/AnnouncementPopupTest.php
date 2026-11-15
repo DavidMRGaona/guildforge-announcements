@@ -6,6 +6,7 @@ namespace Modules\Announcements\Tests\Unit\Domain\ValueObjects;
 
 use InvalidArgumentException;
 use Modules\Announcements\Domain\Enums\PopupDevice;
+use Modules\Announcements\Domain\Enums\PopupFrequency;
 use Modules\Announcements\Domain\Enums\PopupPages;
 use Modules\Announcements\Domain\Enums\PopupShape;
 use Modules\Announcements\Domain\ValueObjects\AnnouncementPopup;
@@ -91,5 +92,50 @@ final class AnnouncementPopupTest extends TestCase
     public function test_a_blank_image_is_no_image(): void
     {
         $this->assertNull((new AnnouncementPopup(imagePublicId: '  '))->imagePublicId);
+    }
+
+    public function test_by_default_a_window_opens_once(): void
+    {
+        $popup = new AnnouncementPopup;
+
+        $this->assertSame(PopupFrequency::Once, $popup->frequency);
+        $this->assertNull($popup->frequencyDays);
+    }
+
+    public function test_a_window_every_n_days_keeps_the_days(): void
+    {
+        $popup = new AnnouncementPopup(frequency: PopupFrequency::Days, frequencyDays: 30);
+
+        $this->assertSame(PopupFrequency::Days, $popup->frequency);
+        $this->assertSame(30, $popup->frequencyDays);
+    }
+
+    public function test_the_days_are_only_kept_when_the_window_returns_every_n_days(): void
+    {
+        $popup = new AnnouncementPopup(frequency: PopupFrequency::Session, frequencyDays: 30);
+
+        $this->assertNull($popup->frequencyDays);
+    }
+
+    public function test_a_window_every_n_days_needs_the_days(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        new AnnouncementPopup(frequency: PopupFrequency::Days);
+    }
+
+    public function test_the_days_are_between_one_and_a_year(): void
+    {
+        $this->assertSame(1, (new AnnouncementPopup(frequency: PopupFrequency::Days, frequencyDays: 1))->frequencyDays);
+        $this->assertSame(365, (new AnnouncementPopup(frequency: PopupFrequency::Days, frequencyDays: 365))->frequencyDays);
+
+        foreach ([0, -3, 366] as $days) {
+            try {
+                new AnnouncementPopup(frequency: PopupFrequency::Days, frequencyDays: $days);
+                $this->fail("{$days} days must be refused");
+            } catch (InvalidArgumentException) {
+                $this->addToAssertionCount(1);
+            }
+        }
     }
 }

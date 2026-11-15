@@ -29,9 +29,11 @@ final readonly class AnnouncementResponseDTO
         public string $format = 'banner',
         /** @var array<string, mixed>|null */
         public ?array $popup = null,
+        /** A window this account has already seen and that is not due again: still shared, so the page keeps one that is open */
+        public bool $seen = false,
     ) {}
 
-    public static function fromEntity(Announcement $announcement): self
+    public static function fromEntity(Announcement $announcement, bool $seen = false): self
     {
         $timezone = app(TimezoneServiceInterface::class);
 
@@ -52,6 +54,7 @@ final readonly class AnnouncementResponseDTO
             updatedAt: $timezone->iso($announcement->updatedAt()),
             format: $announcement->format()->value,
             popup: self::popupToArray($announcement->popup()),
+            seen: $seen,
         );
     }
 
@@ -80,6 +83,8 @@ final readonly class AnnouncementResponseDTO
             'pages' => $popup->pages->value,
             'paths' => $popup->paths,
             'device' => $popup->device->value,
+            'frequency' => $popup->frequency->value,
+            'frequency_days' => $popup->frequencyDays,
         ];
     }
 
@@ -105,6 +110,7 @@ final readonly class AnnouncementResponseDTO
             'updated_at' => $this->updatedAt,
             'format' => $this->format,
             'popup' => $this->popup,
+            'seen' => $this->seen,
         ];
     }
 }

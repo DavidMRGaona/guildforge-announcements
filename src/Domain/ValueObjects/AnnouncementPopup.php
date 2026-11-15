@@ -6,6 +6,7 @@ namespace Modules\Announcements\Domain\ValueObjects;
 
 use InvalidArgumentException;
 use Modules\Announcements\Domain\Enums\PopupDevice;
+use Modules\Announcements\Domain\Enums\PopupFrequency;
 use Modules\Announcements\Domain\Enums\PopupPages;
 use Modules\Announcements\Domain\Enums\PopupShape;
 
@@ -20,6 +21,10 @@ final readonly class AnnouncementPopup
 
     public const int IMAGE_ALT_MAX_LENGTH = 255;
 
+    public const int FREQUENCY_DAYS_MIN = 1;
+
+    public const int FREQUENCY_DAYS_MAX = 365;
+
     public ?string $imagePublicId;
 
     /** What the image shows, for people who cannot see it; null when it is only decoration */
@@ -27,6 +32,9 @@ final readonly class AnnouncementPopup
 
     /** @var list<string> */
     public array $paths;
+
+    /** Only for a window that returns every N days: between FREQUENCY_DAYS_MIN and FREQUENCY_DAYS_MAX */
+    public ?int $frequencyDays;
 
     /**
      * @param  list<string>  $paths  Kept only when the window is limited to them
@@ -40,6 +48,8 @@ final readonly class AnnouncementPopup
         array $paths = [],
         public PopupDevice $device = PopupDevice::All,
         ?string $imageAlt = null,
+        public PopupFrequency $frequency = PopupFrequency::Once,
+        ?int $frequencyDays = null,
     ) {
         $imagePublicId = $imagePublicId !== null ? trim($imagePublicId) : null;
         $this->imagePublicId = $imagePublicId === '' ? null : $imagePublicId;
@@ -52,6 +62,16 @@ final readonly class AnnouncementPopup
 
         $this->imageAlt = $imageAlt === '' ? null : $imageAlt;
         $this->paths = $pages === PopupPages::Paths ? $this->validPaths($paths) : [];
+        $this->frequencyDays = $frequency->needsDays() ? $this->validDays($frequencyDays) : null;
+    }
+
+    private function validDays(?int $days): int
+    {
+        if ($days === null || $days < self::FREQUENCY_DAYS_MIN || $days > self::FREQUENCY_DAYS_MAX) {
+            throw new InvalidArgumentException(sprintf('A window that returns every few days needs between %d and %d days.', self::FREQUENCY_DAYS_MIN, self::FREQUENCY_DAYS_MAX));
+        }
+
+        return $days;
     }
 
     /**

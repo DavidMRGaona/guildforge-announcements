@@ -41,6 +41,7 @@ use Modules\Announcements\Domain\Enums\AnnouncementFormat;
 use Modules\Announcements\Domain\Enums\AnnouncementPosition;
 use Modules\Announcements\Domain\Enums\AnnouncementVisibility;
 use Modules\Announcements\Domain\Enums\PopupDevice;
+use Modules\Announcements\Domain\Enums\PopupFrequency;
 use Modules\Announcements\Domain\Enums\PopupPages;
 use Modules\Announcements\Domain\Enums\PopupShape;
 use Modules\Announcements\Domain\ValueObjects\AnnouncementPopup;
@@ -301,6 +302,26 @@ class AnnouncementResource extends BaseResource
                         ->minValue(PopupTriggers::PAGE_VIEWS_MIN)
                         ->maxValue(PopupTriggers::PAGE_VIEWS_MAX)
                         ->nullable(),
+
+                    Select::make('popup_frequency')
+                        ->label(__('announcements::announcements.popup.frequency.label'))
+                        ->helperText(__('announcements::announcements.popup.frequency.help'))
+                        ->options(PopupFrequency::options())
+                        ->in(array_keys(PopupFrequency::options()))
+                        ->default(PopupFrequency::Once->value)
+                        ->native(false)
+                        ->live()
+                        ->required(),
+
+                    TextInput::make('popup_frequency_days')
+                        ->label(__('announcements::announcements.popup.frequency.days_label'))
+                        ->helperText(__('announcements::announcements.popup.frequency.days_help'))
+                        ->integer()
+                        ->minValue(AnnouncementPopup::FREQUENCY_DAYS_MIN)
+                        ->maxValue(AnnouncementPopup::FREQUENCY_DAYS_MAX)
+                        ->suffix(__('announcements::announcements.popup.days'))
+                        ->required()
+                        ->visible(fn (Get $get): bool => self::isPopup($get) && self::enumValue($get('popup_frequency')) === PopupFrequency::Days->value),
                 ])
                 ->columns(2)
                 ->visible($isPopup),

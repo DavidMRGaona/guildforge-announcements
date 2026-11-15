@@ -7,6 +7,7 @@ namespace Modules\Announcements\Application\Support;
 use BackedEnum;
 use InvalidArgumentException;
 use Modules\Announcements\Domain\Enums\PopupDevice;
+use Modules\Announcements\Domain\Enums\PopupFrequency;
 use Modules\Announcements\Domain\Enums\PopupPages;
 use Modules\Announcements\Domain\Enums\PopupShape;
 use Modules\Announcements\Domain\ValueObjects\AnnouncementPopup;
@@ -33,6 +34,8 @@ final class PopupAttributes
         'popup_pages',
         'popup_paths',
         'popup_device',
+        'popup_frequency',
+        'popup_frequency_days',
     ];
 
     /**
@@ -59,6 +62,9 @@ final class PopupAttributes
             device: PopupDevice::tryFrom(self::enumValue($attributes['popup_device'] ?? null, PopupDevice::All->value))
                 ?? throw new InvalidArgumentException('Unknown window device.'),
             imageAlt: self::stringOrNull($attributes['popup_image_alt'] ?? null),
+            frequency: PopupFrequency::tryFrom(self::enumValue($attributes['popup_frequency'] ?? null, PopupFrequency::Once->value))
+                ?? throw new InvalidArgumentException('Unknown window frequency.'),
+            frequencyDays: self::intOrNull($attributes['popup_frequency_days'] ?? null),
         );
     }
 
@@ -80,6 +86,8 @@ final class PopupAttributes
             'popup_pages' => $popup->pages->value,
             'popup_paths' => $popup->paths === [] ? null : $popup->paths,
             'popup_device' => $popup->device->value,
+            'popup_frequency' => $popup->frequency->value,
+            'popup_frequency_days' => $popup->frequencyDays,
         ];
     }
 

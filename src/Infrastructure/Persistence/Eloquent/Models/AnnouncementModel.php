@@ -39,6 +39,8 @@ use Modules\Announcements\Domain\Enums\AnnouncementVisibility;
  * @property string $popup_pages
  * @property list<string>|null $popup_paths
  * @property string $popup_device
+ * @property string $popup_frequency
+ * @property int|null $popup_frequency_days
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
@@ -73,6 +75,7 @@ final class AnnouncementModel extends Model
         'popup_trigger_exit_intent' => false,
         'popup_pages' => 'all',
         'popup_device' => 'all',
+        'popup_frequency' => 'once',
     ];
 
     /**
@@ -104,6 +107,8 @@ final class AnnouncementModel extends Model
         'popup_pages',
         'popup_paths',
         'popup_device',
+        'popup_frequency',
+        'popup_frequency_days',
     ];
 
     /**
@@ -124,6 +129,7 @@ final class AnnouncementModel extends Model
             'popup_trigger_scroll' => 'integer',
             'popup_trigger_exit_intent' => 'boolean',
             'popup_trigger_page_views' => 'integer',
+            'popup_frequency_days' => 'integer',
             'popup_paths' => 'array',
         ];
     }

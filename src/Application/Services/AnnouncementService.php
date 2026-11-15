@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Modules\Announcements\Application\Services;
 
 use App\Application\Authorization\Services\AssociationMembershipServiceInterface;
+use Carbon\CarbonImmutable;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Modules\Announcements\Application\DTOs\AnnouncementResponseDTO;
 use Modules\Announcements\Application\DTOs\CreateAnnouncementDTO;
 use Modules\Announcements\Application\DTOs\UpdateAnnouncementDTO;
@@ -12,14 +14,18 @@ use Modules\Announcements\Domain\Entities\Announcement;
 use Modules\Announcements\Domain\Enums\AnnouncementFormat;
 use Modules\Announcements\Domain\Enums\AnnouncementVisibility;
 use Modules\Announcements\Domain\Repositories\AnnouncementRepositoryInterface;
+use Modules\Announcements\Domain\Repositories\PopupViewRepositoryInterface;
 use Modules\Announcements\Domain\ValueObjects\AnnouncementId;
+use Modules\Announcements\Domain\ValueObjects\AnnouncementPopup;
 use Modules\Announcements\Domain\ValueObjects\AnnouncementPriority;
+use Modules\Announcements\Domain\ValueObjects\PopupView;
 
 final readonly class AnnouncementService implements AnnouncementServiceInterface
 {
     public function __construct(
         private AnnouncementRepositoryInterface $repository,
         private AssociationMembershipServiceInterface $associationMembership,
+        private PopupViewRepositoryInterface $popupViews,
     ) {}
 
     public function create(CreateAnnouncementDTO $dto): AnnouncementResponseDTO
@@ -143,10 +149,64 @@ final readonly class AnnouncementService implements AnnouncementServiceInterface
                 <=> [$a->priority()->value, $a->startedAt()?->getTimestamp() ?? PHP_INT_MIN]
         );
 
+        $seen = $this->idsOfWindowsAlreadySeen($visibleAnnouncements, $user);
+
         return array_map(
-            AnnouncementResponseDTO::fromEntity(...),
+            static fn (Announcement $announcement): AnnouncementResponseDTO => AnnouncementResponseDTO::fromEntity(
+                $announcement,
+                isset($seen[$announcement->id()->value]),
+            ),
             $visibleAnnouncements
         );
+    }
+
+    /**
+     * The windows a signed-in account does not get again because its memory says they are not due
+     * (announcements#68: seen once, or seen less than N days ago), by id. They are still shared,
+     * marked as seen: a window that is open keeps being offered while the person moves around, and
+     * the browser just does not open it again. Guests are left alone: only their browser knows.
+     * Banners never go through it, and the memory is read once, only when there are windows.
+     *
+     * @param  list<Announcement>  $announcements
+     * @return array<string, true>
+     */
+    private function idsOfWindowsAlreadySeen(array $announcements, ?object $user): array
+    {
+        if (! $user instanceof Authenticatable) {
+            return [];
+        }
+
+        $windowIds = [];
+
+        foreach ($announcements as $announcement) {
+            if ($announcement->isPopup()) {
+                $windowIds[] = $announcement->id()->value;
+            }
+        }
+
+        if ($windowIds === []) {
+            return [];
+        }
+
+        $views = $this->popupViews->forUser((string) $user->getAuthIdentifier(), $windowIds);
+
+        if ($views === []) {
+            return [];
+        }
+
+        $now = CarbonImmutable::now();
+        $seen = [];
+
+        foreach ($announcements as $announcement) {
+            $popup = $announcement->popup();
+            $id = $announcement->id()->value;
+
+            if ($popup instanceof AnnouncementPopup && ! PopupView::isDue($popup, $views[$id] ?? null, $now)) {
+                $seen[$id] = true;
+            }
+        }
+
+        return $seen;
     }
 
     public function findVisibleForUser(string $id, ?object $user): ?AnnouncementResponseDTO
