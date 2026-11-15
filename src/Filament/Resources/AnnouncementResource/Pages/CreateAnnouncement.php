@@ -7,6 +7,7 @@ namespace Modules\Announcements\Filament\Resources\AnnouncementResource\Pages;
 use App\Filament\Concerns\HasKnowledgeGuideAction;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\CreateRecord;
+use Modules\Announcements\Filament\Actions\PopupPreviewAction;
 use Modules\Announcements\Filament\Resources\AnnouncementResource;
 
 class CreateAnnouncement extends CreateRecord
@@ -21,6 +22,7 @@ class CreateAnnouncement extends CreateRecord
     protected function getHeaderActions(): array
     {
         return array_filter([
+            PopupPreviewAction::make(),
             $this->knowledgeGuideAction('announcements.panel.create-announcement'),
         ]);
     }

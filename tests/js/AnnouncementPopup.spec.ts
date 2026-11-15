@@ -122,6 +122,11 @@ describe('AnnouncementPopup', () => {
         resetPageMemory();
         mobileScreen = false;
         stubScreen();
+        // Every window now counts (announcements#69): no test reaches the network
+        vi.stubGlobal(
+            'fetch',
+            vi.fn(() => Promise.resolve(new Response(null, { status: 204 })))
+        );
         page.url = '/';
         page.component = 'Home';
         page.props = { cookieConsentModule: false };
@@ -422,6 +427,35 @@ describe('AnnouncementPopup', () => {
         expect(dialog()).not.toBeNull();
     });
 
+    it('counts a window once when the banner retires it and it opens again on the same page', async () => {
+        const fetchMock = vi.fn(() => Promise.resolve(new Response(null, { status: 204 })));
+        vi.stubGlobal('fetch', fetchMock);
+        page.props = { cookieConsentModule: true };
+        let decided = true;
+        registerCookieConsentProvider({ hasConsent: () => decided, hasDecided: () => decided });
+
+        mountPopups([popup('a')]);
+        await settle();
+        expect(dialog()).not.toBeNull();
+
+        decided = false;
+        notifyCookieConsentChanged();
+        await settle();
+        expect(dialog()).toBeNull();
+
+        decided = true;
+        notifyCookieConsentDecided();
+        await settle();
+        expect(dialog()).not.toBeNull();
+
+        const urls = (fetchMock.mock.calls as unknown as [string][]).map(([url]) => url);
+        expect(urls).toEqual(['/anuncios/ventanas/a/metrica/shown']);
+
+        // Another page is another showing
+        wrapper?.unmount();
+        wrapper = null;
+    });
+
     it('opens no other window after a visit to the same path brings the same windows again', async () => {
         const offered = [popup('a'), popup('b')];
         const wrapped = mountPopups(offered);
@@ -599,25 +633,58 @@ describe('AnnouncementPopup', () => {
             mountPopups([popup('a')]);
             await settle();
 
-            expect(lastCalls()).toEqual(['POST /anuncios/ventanas/a/mostrada']);
+            expect(lastCalls()).toEqual([
+                'POST /anuncios/ventanas/a/mostrada',
+                'POST /anuncios/ventanas/a/metrica/shown',
+            ]);
 
             dialog()?.querySelector<HTMLButtonElement>('button')?.click();
             await settle();
 
             expect(lastCalls()).toEqual([
                 'POST /anuncios/ventanas/a/mostrada',
+                'POST /anuncios/ventanas/a/metrica/shown',
                 'POST /anuncios/ventanas/a/cerrada',
+                'POST /anuncios/ventanas/a/metrica/dismissed',
             ]);
         });
 
-        it('keeps a guest’s memory in the browser alone', async () => {
+        it('keeps a guest’s memory in the browser alone, and only counts', async () => {
             mountPopups([popup('a')]);
             await settle();
             dialog()?.querySelector<HTMLButtonElement>('button')?.click();
             await settle();
 
-            expect(fetchMock).not.toHaveBeenCalled();
+            // No notice of what this person saw: just the anonymous counters
+            expect(lastCalls()).toEqual([
+                'POST /anuncios/ventanas/a/metrica/shown',
+                'POST /anuncios/ventanas/a/metrica/dismissed',
+            ]);
             expect(storedViews().a?.dismissed).toEqual(expect.any(Number));
+        });
+
+        it('counts a press of the button as a click, not as a closing (announcements#69)', async () => {
+            mountPopups([popup('a', { action: { label: 'Apúntate', url: '/socios' } })]);
+            await settle();
+
+            const link = dialog()?.querySelector<HTMLAnchorElement>('a[href="/socios"]');
+            link?.addEventListener('click', (event) => event.preventDefault());
+            link?.click();
+            await settle();
+
+            expect(lastCalls()).toEqual([
+                'POST /anuncios/ventanas/a/metrica/shown',
+                'POST /anuncios/ventanas/a/metrica/action_clicked',
+            ]);
+            expect(dialog()).toBeNull();
+        });
+
+        it('counts each window once per showing, and a window that never opens counts nothing', async () => {
+            mountPopups([popup('a', { pages: 'home' }), popup('b', { pages: 'home' })]);
+            page.url = '/eventos';
+            await settle();
+
+            expect(fetchMock).not.toHaveBeenCalled();
         });
 
         it('writes and sends nothing while an administrator views the site as someone else', async () => {

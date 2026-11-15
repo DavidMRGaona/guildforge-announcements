@@ -194,4 +194,20 @@ return [
             'desktop' => 'Solo escritorio',
         ],
     ],
+    'metrics' => [
+        'heading' => 'Resultados de los últimos :days días',
+        'description' => 'Contadores anónimos por día: no guardan quién la vio. No cuentan las visitas de quien mira el sitio como otra cuenta ni la vista previa.',
+        'shown' => 'Mostrada',
+        'dismissed' => 'Cerrada',
+        'action_clicked' => 'Clics en el botón',
+        'click_rate' => 'Tasa de clic',
+    ],
+    'preview' => [
+        'action' => 'Vista previa',
+        'heading' => 'Vista previa de la ventana',
+        'description' => 'Así se vería con lo que hay ahora en el formulario, guardado o no. No cuenta ni se recuerda como vista, y no recoge lo que cambien las reglas de cuándo y dónde sale.',
+        'aria' => 'Imagen de la ventana emergente',
+        'close' => 'Cerrar',
+        'goes_to' => 'Va a:',
+    ],
 ];

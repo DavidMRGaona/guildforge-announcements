@@ -194,4 +194,20 @@ return [
             'desktop' => 'Desktop only',
         ],
     ],
+    'metrics' => [
+        'heading' => 'Results of the last :days days',
+        'description' => 'Anonymous counters per day: they do not keep who saw it. Visits by someone viewing the site as another account and the preview are not counted.',
+        'shown' => 'Shown',
+        'dismissed' => 'Closed',
+        'action_clicked' => 'Button clicks',
+        'click_rate' => 'Click rate',
+    ],
+    'preview' => [
+        'action' => 'Preview',
+        'heading' => 'Window preview',
+        'description' => 'This is how it would look with what is in the form now, saved or not. It is not counted or remembered as a view, and it does not apply the rules for when and where it appears.',
+        'aria' => 'Picture of the popup window',
+        'close' => 'Close',
+        'goes_to' => 'Goes to:',
+    ],
 ];

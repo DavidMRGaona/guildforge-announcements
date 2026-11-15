@@ -1,0 +1,64 @@
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { mount, type VueWrapper } from '@vue/test-utils';
+import PopupDialog from '../../resources/js/popup/PopupDialog.vue';
+import type { PopupAnnouncement } from '../../resources/js/types/announcement';
+
+/**
+ * The dialog only draws the window and says how it was closed. Counting and remembering belong to
+ * AnnouncementPopup, so the dialog alone sends nothing (announcements#69): nothing it draws can
+ * count, which is why a preview of it never counts either.
+ */
+const announcement: PopupAnnouncement = {
+    id: 'a',
+    title: 'Hazte socio',
+    content: '<p>Texto</p>',
+    visibility: 'public',
+    position: 'before-header',
+    priority: 5,
+    background_color: null,
+    text_color: null,
+    starts_at: null,
+    ends_at: null,
+    is_active: true,
+    is_dismissible: true,
+    created_at: null,
+    updated_at: null,
+    format: 'popup',
+    popup: {
+        shape: 'centered',
+        image_public_id: null,
+        image_alt: null,
+        action: { label: 'Apúntate', url: '/socios' },
+        triggers: { delay_seconds: 0, scroll_percent: null, exit_intent: false, page_views: null },
+        pages: 'all',
+        paths: [],
+        device: 'all',
+        frequency: 'once',
+        frequency_days: null,
+    },
+    seen: false,
+};
+
+let wrapper: VueWrapper | null = null;
+
+afterEach(() => {
+    wrapper?.unmount();
+    wrapper = null;
+    vi.unstubAllGlobals();
+});
+
+describe('PopupDialog', () => {
+    it('sends nothing on its own and reports how it was closed', () => {
+        const fetchMock = vi.fn();
+        vi.stubGlobal('fetch', fetchMock);
+        wrapper = mount(PopupDialog, { props: { announcement }, attachTo: document.body });
+
+        const link = document.body.querySelector<HTMLAnchorElement>('a[href="/socios"]');
+        link?.addEventListener('click', (event) => event.preventDefault());
+        link?.click();
+        document.body.querySelector<HTMLButtonElement>('button')?.click();
+
+        expect(wrapper.emitted('close')).toEqual([['action'], ['dismiss']]);
+        expect(fetchMock).not.toHaveBeenCalled();
+    });
+});

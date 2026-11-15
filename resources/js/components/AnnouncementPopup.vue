@@ -7,7 +7,7 @@ import {
     whenConsentDecided,
 } from '@/contracts/cookieConsent';
 import PopupDialog from '../popup/PopupDialog.vue';
-import type { PopupAnnouncement } from '../types/announcement';
+import type { PopupAnnouncement, PopupCloseReason } from '../types/announcement';
 import {
     countPageView,
     forgetShown,
@@ -18,7 +18,7 @@ import {
     type PopupRecord,
 } from '../utils/popupMemory';
 import { fitsDevice, fitsPage, pathOf, type PopupPageContext } from '../utils/popupPages';
-import { reportPopup } from '../utils/popupReports';
+import { countPopup, reportPopup, type PopupMetric } from '../utils/popupReports';
 import { armPopupTriggers, detectEnvironment, type PopupEnvironment } from '../utils/popupTriggers';
 
 /**
@@ -51,6 +51,8 @@ let stopConsentWatch: (() => void) | null = null;
 // A window opened (or closed) on this page: no other opens until the path changes
 let handledThisPage = false;
 let offeredIds = idsOf(props.announcementPopups);
+// Windows already counted as shown on this page: one that is retired and reopened counts once
+const countedShown = new Set<string>();
 // What the browser remembered of the open window before it opened, to give it back if it is retired
 let rememberedBefore: PopupRecord | null = null;
 
@@ -73,6 +75,16 @@ function isSignedIn(): boolean {
 function tellServer(announcement: PopupAnnouncement, notice: 'shown' | 'dismissed'): void {
     if (isSignedIn() && !isImpersonating()) {
         reportPopup(announcement.id, notice);
+    }
+}
+
+/**
+ * Anonymous counters (announcements#69), for visitors with and without a session; never while an
+ * administrator views the site as someone else, nor from the preview (which is drawn by the panel).
+ */
+function count(announcement: PopupAnnouncement, metric: PopupMetric): void {
+    if (!isImpersonating()) {
+        countPopup(announcement.id, metric);
     }
 }
 
@@ -190,6 +202,10 @@ function open(announcement: PopupAnnouncement, answeredWhenArmed: boolean): void
     handledThisPage = true;
     rememberedBefore = markShown(announcement.id);
     tellServer(announcement, 'shown');
+    if (!countedShown.has(announcement.id)) {
+        countedShown.add(announcement.id);
+        count(announcement, 'shown');
+    }
 }
 
 /**
@@ -238,8 +254,11 @@ function close(): void {
     current.value = null;
 }
 
-/** Closed with the ✕, Esc, the backdrop or its button: it counts as seen, and no other opens on this page */
-function onClose(): void {
+/**
+ * Closed with the ✕, Esc, the backdrop or its button: it counts as seen, and no other opens on
+ * this page. Pressing the button counts as a click, not as a closing.
+ */
+function onClose(reason: PopupCloseReason): void {
     const announcement = current.value;
 
     if (announcement === null) {
@@ -248,10 +267,12 @@ function onClose(): void {
 
     markDismissed(announcement.id);
     tellServer(announcement, 'dismissed');
+    count(announcement, reason === 'action' ? 'action_clicked' : 'dismissed');
     close();
 }
 
 function visitPage(): void {
+    countedShown.clear();
     pageViews = countPageView(pathname.value);
 
     const shown = current.value;
