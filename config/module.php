@@ -13,4 +13,7 @@ return [
     */
 
     'enabled' => true,
+
+    // Days the anonymous counters of the popup windows are kept (announcements#69)
+    'metrics_retention_days' => 400,
 ];

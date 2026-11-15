@@ -136,6 +136,15 @@ Reglas fijas:
 - Banners y ventanas se leen con una sola consulta por petición y se reparten entre las dos props.
 - Al cambiar el formato a `banner` se conservan los ajustes de la ventana. El ajuste «Mostrar banner» no afecta a las ventanas.
 
+### Métricas y vista previa de las ventanas
+
+Contadores anónimos (announcements#69): tabla `announcements_popup_metrics` (`id`, `announcement_id`, `day`, `metric`, `count`; única por anuncio, día y métrica; se borra con el anuncio). Sin cuenta, sesión, dirección ni agente de usuario: solo el número de veces. `metric` es `shown` (al abrirse), `dismissed` (✕, Esc o fondo) o `action_clicked` (el botón; no cuenta además como `dismissed`). El día es el de la zona de visualización (`TimezoneServiceInterface::today()`); el incremento es un único `upsert` atómico.
+
+- Ruta pública `POST /anuncios/ventanas/{id}/metrica/{metric}` (`announcements.popups.metric`; también para visitas sin sesión, grupo `web` con CSRF, `throttle:120,1`). Solo acepta el id de una ventana (formato `popup`) activa, vigente y visible para quien llama, y una de las tres métricas; lo demás da `404` y no cuenta. Responde `204`; durante una impersonación responde `204` sin contar, y el navegador tampoco llama.
+- `announcements:prune-metrics [--days=]` (diario en el planificador, `announcements.metrics_retention_days`, 400 por defecto) borra los días anteriores al límite.
+- El resumen de la ficha (`PopupMetricsWidget`, arriba en la página de edición de una ventana) suma los últimos 30 días de visualización, hoy incluido: mostrada, cerrada, clics en el botón y tasa de clic (clics por cada 100 mostradas; un guion hasta la primera vez). Solo con el formato `popup` y para quien puede editar el anuncio.
+- «Vista previa» (`PopupPreviewAction`, cabecera de crear y editar, solo con el formato `popup`): un modal del panel con la forma, la imagen, el título, el contenido (saneado con el mismo saneador que el guardado) y el botón (solo si el enlace es válido) del formulario tal cual está, guardado o no. Es un dibujo hecho por el panel, no el componente Vue del sitio: no ejecuta disparadores ni frecuencia, no cuenta ni guarda memoria.
+
 ### Avisos en la campana
 
 Cuando un anuncio empieza a salir en la web por primera vez, cada cuenta que puede verlo recibe un aviso en la campana del core: «Nuevo anuncio: <título>», con el texto del anuncio y un enlace a la portada, donde sale la banda. Nunca se manda por correo.
@@ -166,6 +175,8 @@ Por defecto el banner está activado, con rotación automática cada 5000 ms.
 |--------|------|-------------|
 | `GET` | `/anuncios` | Banners vigentes visibles para el usuario actual (JSON); las ventanas emergentes no se listan |
 | `GET` | `/anuncios/{id}` | Un banner (JSON); 404 si no está vigente, el usuario no puede verlo o es una ventana emergente |
+| `POST` | `/anuncios/ventanas/{id}/mostrada`, `/cerrada` | Memoria de la cuenta (con sesión) |
+| `POST` | `/anuncios/ventanas/{id}/metrica/{metric}` | Contador anónimo: `shown`, `dismissed` o `action_clicked` |
 
 ### Imagen de la ventana
 

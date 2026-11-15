@@ -17,16 +17,21 @@ use App\Modules\ModuleServiceProvider;
 use Filament\Pages\Page;
 use Filament\Resources\Resource as FilamentResource;
 use Filament\Schemas\Components\Component;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Event;
 use Inertia\Inertia;
 use Modules\Announcements\Application\Services\AnnouncementService;
 use Modules\Announcements\Application\Services\AnnouncementServiceInterface;
+use Modules\Announcements\Application\Services\PopupMetricService;
+use Modules\Announcements\Application\Services\PopupMetricServiceInterface;
 use Modules\Announcements\Application\Services\PopupViewService;
 use Modules\Announcements\Application\Services\PopupViewServiceInterface;
+use Modules\Announcements\Console\Commands\PrunePopupMetricsCommand;
 use Modules\Announcements\Domain\Enums\AnnouncementFormat;
 use Modules\Announcements\Domain\Enums\AnnouncementPosition;
 use Modules\Announcements\Domain\Repositories\AnnouncementRepositoryInterface;
+use Modules\Announcements\Domain\Repositories\PopupMetricRepositoryInterface;
 use Modules\Announcements\Domain\Repositories\PopupViewRepositoryInterface;
 use Modules\Announcements\Filament\Media\AnnouncementContentMediaSource;
 use Modules\Announcements\Filament\Media\AnnouncementPopupImageMediaSource;
@@ -38,6 +43,7 @@ use Modules\Announcements\Infrastructure\Notifications\AnnouncementNoticeObserve
 use Modules\Announcements\Infrastructure\Persistence\Eloquent\Listeners\ForgetPopupViewsOfAnonymizedAccount;
 use Modules\Announcements\Infrastructure\Persistence\Eloquent\Models\AnnouncementModel;
 use Modules\Announcements\Infrastructure\Persistence\Eloquent\Repositories\EloquentAnnouncementRepository;
+use Modules\Announcements\Infrastructure\Persistence\Eloquent\Repositories\EloquentPopupMetricRepository;
 use Modules\Announcements\Infrastructure\Persistence\Eloquent\Repositories\EloquentPopupViewRepository;
 use Modules\Announcements\Notifications\AnnouncementMailCategories;
 use Modules\Announcements\Policies\AnnouncementPolicy;
@@ -81,6 +87,17 @@ final class AnnouncementsServiceProvider extends ModuleServiceProvider
             PopupViewService::class
         );
 
+        // Anonymous counters of the windows (announcements#69)
+        $this->app->bind(
+            PopupMetricRepositoryInterface::class,
+            EloquentPopupMetricRepository::class
+        );
+
+        $this->app->bind(
+            PopupMetricServiceInterface::class,
+            PopupMetricService::class
+        );
+
         // Banners and windows of the page, read once per request
         $this->app->singleton(SharedAnnouncements::class);
     }
@@ -96,6 +113,17 @@ final class AnnouncementsServiceProvider extends ModuleServiceProvider
 
         // An anonymized account keeps no memory of the windows it saw (the rows hold only ids)
         Event::listen(UserAnonymized::class, ForgetPopupViewsOfAnonymizedAccount::class);
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([PrunePopupMetricsCommand::class]);
+        }
+
+        // Old counters only matter for a while
+        $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
+            $schedule->command('announcements:prune-metrics')
+                ->daily()
+                ->withoutOverlapping();
+        });
 
         // Banners and windows go to the page apart: the banners keep the prop they always had
         if (class_exists(Inertia::class)) {

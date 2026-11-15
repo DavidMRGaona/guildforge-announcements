@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
+use Modules\Announcements\Domain\Enums\PopupMetric;
 use Modules\Announcements\Http\Controllers\AnnouncementController;
+use Modules\Announcements\Http\Controllers\PopupMetricController;
 use Modules\Announcements\Http\Controllers\PopupViewController;
 
 /*
@@ -43,3 +45,13 @@ Route::prefix('anuncios/ventanas')
             ->name('dismissed')
             ->whereUuid('id');
     });
+
+/*
+ * Anonymous counters of what happens to a window (announcements#69): open to visitors without a
+ * session, CSRF-protected by the web group, and limited per address.
+ */
+Route::post('anuncios/ventanas/{id}/metrica/{metric}', [PopupMetricController::class, 'store'])
+    ->middleware('throttle:120,1,announcement-popup-metrics')
+    ->name('announcements.popups.metric')
+    ->whereUuid('id')
+    ->where('metric', PopupMetric::routePattern());
