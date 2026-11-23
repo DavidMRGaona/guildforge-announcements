@@ -25,6 +25,15 @@ enum AnnouncementVisibility: string
         };
     }
 
+    /**
+     * Whether anybody may read it, signing up or signing out if need be: every visibility but members only,
+     * which only the association's members see.
+     */
+    public function isOpenToAnybody(): bool
+    {
+        return $this !== self::Members;
+    }
+
     public function label(): string
     {
         return match ($this) {

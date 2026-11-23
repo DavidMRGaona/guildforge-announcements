@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Announcements\Filament\Media;
 
 use App\Application\Media\Contracts\ReleasesMediaThroughCoreInterface;
+use App\Application\Media\Contracts\ShowsMediaPreviews;
 use App\Infrastructure\Media\Sources\EloquentColumnMediaSource;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
@@ -15,9 +16,10 @@ use Modules\Announcements\Infrastructure\Persistence\Eloquent\Models\Announcemen
  * The image of a window (announcements#67), uploaded to "announcements/popups/<year>/<month>/" or
  * chosen from the media library. An announcement turned back into a banner keeps its window
  * settings, image included, so it still uses it. The model releases a replaced or deleted image
- * through the core, which keeps it while anyone else uses it.
+ * through the core, which keeps it while anyone else uses it. The library shows these images, except
+ * those of an announcement for members only (AnnouncementMediaPrivacy).
  */
-final class AnnouncementPopupImageMediaSource extends EloquentColumnMediaSource implements ReleasesMediaThroughCoreInterface
+final class AnnouncementPopupImageMediaSource extends EloquentColumnMediaSource implements ReleasesMediaThroughCoreInterface, ShowsMediaPreviews
 {
     /** Stored with each usage: never rename it */
     public const string TYPE = 'announcements.popup-image';
@@ -65,9 +67,14 @@ final class AnnouncementPopupImageMediaSource extends EloquentColumnMediaSource 
         return __('announcements::announcements.media.role_popup_image');
     }
 
+    protected function isHidden(Model $record): bool
+    {
+        return AnnouncementMediaPrivacy::hides($record);
+    }
+
     protected function titleOf(Model $record): string
     {
-        return (string) $record->getAttribute('title');
+        return AnnouncementMediaPrivacy::titleOf($record);
     }
 
     protected function editUrlOf(Model $record, object $user): ?string

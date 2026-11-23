@@ -134,6 +134,7 @@ return [
         'source' => 'Announcements',
         'role_in_text' => 'In the text',
         'role_popup_image' => 'Window image',
+        'members_only_title' => 'Members-only announcement',
     ],
 
     // Formats (announcements#67)
