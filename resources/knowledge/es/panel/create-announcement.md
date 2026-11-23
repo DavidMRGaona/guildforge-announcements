@@ -43,5 +43,6 @@ Cuando un banner empieza a salir en la web, quien puede verlo y tiene cuenta rec
 - **La fecha de fin no se acepta**: tiene que ser posterior a la **Fecha de inicio**.
 - **El anuncio no sale en la web**: comprueba que está **Activo**, que estás dentro de sus fechas y que tu cuenta entra en su **Visibilidad**. Si lo cerraste tú antes con la ✕, en tu navegador ya no sale. Comprueba también que **Mostrar banner** está activado en los ajustes del módulo.
 - **No lo ve alguien con «Solo socios»**: esa persona tiene que haber iniciado sesión y tener el rol {{association_role}}.
+- **Sus imágenes salen ocultas en la biblioteca de medios**: pasa con los anuncios **Solo socios**, para que quien revisa la biblioteca no lea por accidente lo que solo es para socios. El uso se llama «Anuncio solo para socios» y la imagen no se puede elegir para otra cosa. Si cambias la visibilidad a otra, vuelve a verse.
 
 [[action:filament.admin.resources.announcements.create|Crear un anuncio]]

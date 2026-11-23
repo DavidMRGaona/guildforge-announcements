@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Announcements\Filament\Media;
 
 use App\Application\Media\Contracts\MediaUsageSourceInterface;
+use App\Application\Media\Contracts\ShowsMediaPreviews;
 use App\Application\Media\DTOs\MediaUsageDTO;
 use App\Application\Media\Services\MediaUrlExtractorInterface;
 use App\Domain\Content\ValueObjects\EditorImageFolder;
@@ -18,9 +19,10 @@ use Modules\Announcements\Infrastructure\Persistence\Eloquent\Models\Announcemen
 /**
  * Files of this site whose delivery URL sits inside an announcement's text: the images uploaded from its
  * editor ("announcements/content/", the folder it claims) and any other URL of this site pasted in it.
- * Announcements have no trash, so a deleted one uses nothing.
+ * Announcements have no trash, so a deleted one uses nothing. The library shows these images, except
+ * those of an announcement for members only (AnnouncementMediaPrivacy).
  */
-final readonly class AnnouncementContentMediaSource implements MediaUsageSourceInterface
+final readonly class AnnouncementContentMediaSource implements MediaUsageSourceInterface, ShowsMediaPreviews
 {
     /** Stored with each usage: never rename it */
     public const string TYPE = 'announcements.content';
@@ -130,13 +132,16 @@ final readonly class AnnouncementContentMediaSource implements MediaUsageSourceI
     private function usagesOf(AnnouncementModel $announcement): array
     {
         $usages = [];
+        $hidden = AnnouncementMediaPrivacy::hides($announcement);
+        $title = AnnouncementMediaPrivacy::titleOf($announcement);
 
         foreach ($this->urls->fileIdsIn($announcement->getAttribute(self::COLUMN)) as $url) {
             $usages[] = new MediaUsageDTO(
                 storedPath: $url,
                 recordId: $announcement->id,
                 role: __('announcements::announcements.media.role_in_text'),
-                title: $announcement->title,
+                title: $title,
+                hidden: $hidden,
             );
         }
 

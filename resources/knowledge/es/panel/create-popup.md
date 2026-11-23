@@ -87,6 +87,8 @@ Nunca se abre en el panel, en las páginas de entrar y registrarse, en las pági
 
 Además de **Público**, **Usuarios autenticados** y **Solo socios** (quien tiene el rol {{association_role}}), puedes elegir **Solo visitas sin sesión**: la ventana sale solo a quien no ha iniciado sesión. Viene bien para invitar a registrarse o a hacerse socio sin molestar a quien ya lo es.
 
+La imagen de una ventana **Solo socios** sale oculta en la biblioteca de medios y no se ofrece en **Elegir de la biblioteca**, como las imágenes de su contenido.
+
 ## Ver cómo queda: la vista previa
 
 Pulsa **Vista previa** arriba, junto al título de la página, para ver la ventana con lo que hay ahora en el formulario, sin guardar. Enseña la forma, la imagen, el título, el contenido y el botón (que no es un enlace: debajo dice a dónde iría). Del bloque solo pone un marcador, «Aquí irá el bloque…», con su nombre: no lo ejecuta, así que no ves lo que dibujaría ni se envía nada. Es un dibujo de la ventana dentro del panel: no aplica los disparadores, las páginas ni la frecuencia, y no cuenta como una vista ni deja ningún recuerdo. El botón «Vista previa» solo sale con el formato **Ventana emergente**.

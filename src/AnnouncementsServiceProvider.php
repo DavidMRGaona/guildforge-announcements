@@ -153,7 +153,8 @@ final class AnnouncementsServiceProvider extends ModuleServiceProvider
 
     /**
      * Creating or deleting an announcement refreshes its usages in the media library. An update refreshes
-     * them only when the title or the text changed (a usage carries the title); dates or colours do not.
+     * them only when the title, the text or the visibility changed (a usage carries the title, and is hidden
+     * for members only); dates or colours do not.
      * The "updated" event is used, not "saved": wasRecentlyCreated stays true for the instance's whole life,
      * and a save with nothing dirty keeps the changes of the previous one.
      */
@@ -165,7 +166,7 @@ final class AnnouncementsServiceProvider extends ModuleServiceProvider
         );
         $whenShownChanges = new RefreshMediaUsagesObserver(
             AnnouncementContentMediaSource::TYPE,
-            static fn (Model $model): array => $model->wasChanged(['title', 'content']) ? [(string) $model->getKey()] : [],
+            static fn (Model $model): array => $model->wasChanged(['title', 'content', 'visibility']) ? [(string) $model->getKey()] : [],
         );
 
         AnnouncementModel::created($always->saved(...));
@@ -178,7 +179,7 @@ final class AnnouncementsServiceProvider extends ModuleServiceProvider
         );
         $whenImageChanges = new RefreshMediaUsagesObserver(
             AnnouncementPopupImageMediaSource::TYPE,
-            static fn (Model $model): array => $model->wasChanged(['title', 'popup_image_public_id']) ? [(string) $model->getKey()] : [],
+            static fn (Model $model): array => $model->wasChanged(['title', 'visibility', 'popup_image_public_id']) ? [(string) $model->getKey()] : [],
         );
 
         AnnouncementModel::created($image->saved(...));

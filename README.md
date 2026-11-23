@@ -19,7 +19,7 @@ Anuncios para la web pública de GuildForge. Se crean en el panel de administrac
 
 ## Requisitos
 
-- GuildForge core `^3.78` (contrato de consentimiento con `whenConsentDecided()`, ajustes en el clúster «Configuración», avisos en la campana, imágenes del editor, biblioteca de medios, base de conocimiento, rol de socio configurable, fechas en UTC)
+- GuildForge core `^3.90` (contrato de consentimiento con `whenConsentDecided()`, ajustes en el clúster «Configuración», avisos en la campana, imágenes del editor, biblioteca de medios con miniaturas que cada fuente declara y usos ocultos, base de conocimiento, rol de socio configurable, fechas en UTC)
 - PHP >= 8.5, Laravel >= 13, Filament 5
 
 El core rechaza el módulo si no se cumplen (`module.json` → `requires`).
@@ -188,7 +188,15 @@ La imagen de una ventana se sube a Cloudinary, a `announcements/popups/<año>/<m
 
 Las imágenes que se pegan o arrastran al texto de un anuncio se suben a Cloudinary, a `announcements/content/<año>/<mes>`, con un nombre UUID. Solo se aceptan JPEG, PNG, WebP y GIF de hasta 2 MB, como en los editores del core. El HTML guarda la URL completa de entrega.
 
-La biblioteca de medios del panel (**Contenido** → **Biblioteca de medios**) muestra esas imágenes con el origen «Anuncios», el rol «En el texto», el título del aviso y el enlace para editarlo, si quien mira puede hacerlo. La fuente (`announcements.content`) reclama la carpeta `announcements/content/` y cuenta como uso cualquier URL de entrega del sitio que aparezca en el texto, esté en la carpeta que esté. Crear un aviso, cambiar su título o su texto y borrarlo actualiza los usos al momento. Los avisos borrados no se pueden recuperar, así que dejan de contar.
+La biblioteca de medios del panel (**Contenido** → **Biblioteca de medios**) muestra esas imágenes con el origen «Anuncios», el rol «En el texto», el título del aviso y el enlace para editarlo, si quien mira puede hacerlo. La fuente (`announcements.content`) reclama la carpeta `announcements/content/` y cuenta como uso cualquier URL de entrega del sitio que aparezca en el texto, esté en la carpeta que esté. Crear un aviso, cambiar su título, su texto o su visibilidad y borrarlo actualiza los usos al momento. Los avisos borrados no se pueden recuperar, así que dejan de contar.
+
+### Miniaturas en la biblioteca
+
+Desde el core 3.90 la biblioteca solo enseña las imágenes de las fuentes que lo declaran. Las dos fuentes del módulo lo hacen (`ShowsMediaPreviews`), porque todos los anuncios los escribe el equipo en el panel: uno inactivo, programado o caducado es tan suyo como un evento sin publicar. Los públicos, los de usuarios registrados y los de solo visitantes los puede leer cualquiera.
+
+La excepción son los anuncios **Solo socios**, que no lee todo el mundo. Sus imágenes, de la ventana y del texto, salen con el marcador de imagen oculta, no se ofrecen en «Elegir de la biblioteca» y el uso se titula «Anuncio solo para socios», porque el título ya cuenta lo que se dijo a los socios. Siguen contando como usadas y el enlace para editar sigue el permiso de siempre. Una imagen que use a la vez un anuncio para socios y otra cosa sale oculta para todos. Al cambiar la visibilidad del anuncio, la biblioteca se actualiza al momento.
+
+Es una protección de vista, no un control de acceso: la imagen sigue siendo pública en Cloudinary. La primera sincronización de la biblioteca con esta versión (al actualizar el módulo, o con «Actualizar») es la que enseña las miniaturas.
 
 Las imágenes que se pegaron antes de la versión 2.7.0 están en el almacenamiento local. Las mueve a Cloudinary el comando del core, que lee los textos de los avisos como fuente `announcements.content`:
 

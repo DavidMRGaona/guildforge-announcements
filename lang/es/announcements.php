@@ -134,6 +134,7 @@ return [
         'source' => 'Anuncios',
         'role_in_text' => 'En el texto',
         'role_popup_image' => 'Imagen de la ventana',
+        'members_only_title' => 'Anuncio solo para socios',
     ],
 
     // Formats (announcements#67)

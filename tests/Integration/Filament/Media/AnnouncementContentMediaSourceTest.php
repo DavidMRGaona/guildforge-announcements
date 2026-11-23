@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Announcements\Tests\Integration\Filament\Media;
 
+use App\Application\Media\Contracts\ShowsMediaPreviews;
 use App\Application\Media\Services\MediaCatalogInterface;
 use App\Application\Media\Services\MediaDeletionServiceInterface;
 use App\Application\Media\Services\MediaFileIdResolverInterface;
@@ -20,6 +21,7 @@ use Mockery;
 use Modules\Announcements\Filament\Media\AnnouncementContentMediaSource;
 use Modules\Announcements\Filament\Resources\AnnouncementResource;
 use Modules\Announcements\Infrastructure\Persistence\Eloquent\Models\AnnouncementModel;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Support\Authorization\CreatesUsersWithPermissions;
 use Tests\Support\Media\InMemoryMediaCatalog;
 use Tests\Support\Modules\InteractsWithModulePanel;
@@ -66,6 +68,73 @@ final class AnnouncementContentMediaSourceTest extends ModuleTestCase
         $this->assertSame('announcements.content', $registry->claimingSource(new MediaFileId(self::FILE))?->type());
         $this->assertNull($registry->claimingSource(new MediaFileId('announcements-old/a')));
         $this->assertSame([], $registry->unresolved());
+    }
+
+    public function test_it_shows_its_previews(): void
+    {
+        $this->assertInstanceOf(ShowsMediaPreviews::class, app(MediaSourceRegistryInterface::class)->source('announcements.content'));
+    }
+
+    public function test_the_images_of_a_members_only_announcement_are_hidden_under_a_neutral_title(): void
+    {
+        $announcement = $this->announcement('Asamblea extraordinaria', $this->image(), ['visibility' => 'members']);
+
+        $usages = $this->source()->usagesFor($announcement->id);
+
+        $this->assertCount(1, $usages);
+        $this->assertTrue($usages[0]->hidden);
+        $this->assertSame('Anuncio solo para socios', $usages[0]->title);
+        // Still a use, and still edited by whoever may edit it
+        $this->assertTrue($this->source()->usesFile(new MediaFileId(self::FILE)));
+        $this->assertSame(
+            AnnouncementResource::getUrl('edit', ['record' => $announcement]),
+            $this->source()->editUrl($announcement->id, $this->editorWithPermissions(['announcements:announcements.view_any', 'announcements:announcements.update'])),
+        );
+    }
+
+    /**
+     * Every announcement is written by the team in the panel: one not shown yet, or no longer, is theirs
+     * as much as an unpublished event, and the others may be seen by anybody signing up or signing out.
+     *
+     * @return array<string, array{0: array<string, mixed>}>
+     */
+    public static function shownAnnouncements(): array
+    {
+        return [
+            'public' => [['visibility' => 'public']],
+            'signed-in users' => [['visibility' => 'authenticated']],
+            'guests only' => [['visibility' => 'guests']],
+            'inactive' => [['is_active' => false]],
+            'scheduled' => [['starts_at' => '2099-01-01 10:00:00']],
+            'expired' => [['ends_at' => '2020-01-01 10:00:00']],
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
+    #[DataProvider('shownAnnouncements')]
+    public function test_other_announcements_keep_their_images_in_sight(array $attributes): void
+    {
+        $announcement = $this->announcement('Torneo', $this->image(), $attributes);
+
+        $usages = $this->source()->usagesFor($announcement->id);
+
+        $this->assertCount(1, $usages);
+        $this->assertFalse($usages[0]->hidden);
+        $this->assertSame('Torneo', $usages[0]->title);
+    }
+
+    public function test_changing_the_visibility_refreshes_the_indexed_usages(): void
+    {
+        $announcement = $this->announcement('Asamblea', $this->image());
+        $this->assertSame([['Asamblea', false]], $this->indexedUsages($announcement));
+
+        $announcement->update(['visibility' => 'members']);
+        $this->assertSame([['Anuncio solo para socios', true]], $this->indexedUsages($announcement));
+
+        $announcement->update(['visibility' => 'guests']);
+        $this->assertSame([['Asamblea', false]], $this->indexedUsages($announcement));
     }
 
     public function test_an_image_in_the_text_counts(): void
@@ -197,7 +266,10 @@ final class AnnouncementContentMediaSourceTest extends ModuleTestCase
         return app(AnnouncementContentMediaSource::class);
     }
 
-    private function announcement(string $title, string $content): AnnouncementModel
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
+    private function announcement(string $title, string $content, array $attributes = []): AnnouncementModel
     {
         return AnnouncementModel::create([
             'title' => $title,
@@ -205,7 +277,29 @@ final class AnnouncementContentMediaSourceTest extends ModuleTestCase
             'visibility' => 'public',
             'priority' => 5,
             'is_active' => true,
+            ...$attributes,
         ]);
+    }
+
+    private function image(): string
+    {
+        return '<p><img src="'.self::BASE.'guildforge/'.self::FILE.'.jpg"></p>';
+    }
+
+    /**
+     * @return list<array{0: string, 1: bool}> title and whether it is hidden
+     */
+    private function indexedUsages(AnnouncementModel $announcement): array
+    {
+        /** @var list<array{0: string, 1: bool}> */
+        return MediaUsageModel::query()
+            ->where('source_type', 'announcements.content')
+            ->where('record_id', $announcement->id)
+            ->where('file_id', self::FILE)
+            ->get()
+            ->map(static fn (MediaUsageModel $usage): array => [(string) $usage->title, (bool) $usage->is_hidden])
+            ->values()
+            ->all();
     }
 
     /**

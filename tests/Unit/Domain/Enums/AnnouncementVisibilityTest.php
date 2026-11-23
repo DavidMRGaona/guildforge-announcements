@@ -77,4 +77,13 @@ final class AnnouncementVisibilityTest extends TestCase
         $this->assertFalse(AnnouncementVisibility::Guests->isVisibleTo(new stdClass));
         $this->assertFalse(AnnouncementVisibility::Guests->isVisibleTo(new stdClass, isMember: true));
     }
+
+    public function test_only_members_only_is_closed_to_anybody(): void
+    {
+        // Anybody may sign up or sign out to see the others; only members see a members-only one
+        $this->assertTrue(AnnouncementVisibility::Public->isOpenToAnybody());
+        $this->assertTrue(AnnouncementVisibility::Authenticated->isOpenToAnybody());
+        $this->assertTrue(AnnouncementVisibility::Guests->isOpenToAnybody());
+        $this->assertFalse(AnnouncementVisibility::Members->isOpenToAnybody());
+    }
 }
